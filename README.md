@@ -5,8 +5,8 @@
 
 ## install the dependencies
 
-### 1. node v0.4.11
-### 2. npm 1.0.27
+### 1. node v0.4.12
+### 2. npm 1.0.103
 ### 3. redis... just make sure it's running
 ### 4. global dependencies
 
@@ -26,7 +26,7 @@ npm install
 
 ## run the tests!
 
-our [Jakefile](https://github.com/gabrielfalcao/emerald/blob/master/Jakefile) is full of candy...
+our [Jakefile](https://github.com/Yipit/emerald/blob/master/Jakefile) is full of candy...
 
 ### unit tests
 ```
