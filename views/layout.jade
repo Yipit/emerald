@@ -1,0 +1,75 @@
+!!!
+html
+  head
+    title= title
+    link(href='http://fonts.googleapis.com/css?family=Ubuntu:500', rel='stylesheet', type='text/css')
+    link(rel='stylesheet', href='/stylesheets/bootstrap.css', type='text/css')
+    link(rel='stylesheet', href='/stylesheets/style.css', type='text/css')
+
+    script(type="text/javascript", src="/javascripts/jquery-1.6.2.min.js")
+    script(type="text/javascript", src="/javascripts/jquery-ui-1.8.16.custom.min.js")
+    script(type="text/javascript", src="/javascripts/batman.jquery.min.js")
+    script(type="text/javascript", src="/javascripts/raphael-min.js")
+    script(type="text/javascript", src="/socket.io/socket.io.js")
+    script(type="text/javascript", src="/javascripts/main.js")
+    script(type="text/javascript")
+      $(function(){$("#navigation").accordion()});
+
+  body
+    div#page.clearfix
+      header
+        article
+          section#logo
+            h1 Emerald
+          section#profile.logged
+            div.greetings Welcome, Gabriel Falcão
+      div.container-fluid
+        aside.sidebar
+          ul#navigation
+            li.option
+              a.title(href="/") Dashboard
+
+            li.option
+              a.title(href="#") Builds
+              ul.inner
+                li
+                  a(href="#") Yipit Functional Tests #1
+                li
+                  a(href="#") Yipit Unit Tests #3
+                li
+                  a(href="#") Yipit Unit Tests #2
+                li
+                  a(href="#") Yipit Unit Tests #1
+
+
+            li.option
+              a.title(href="#") Plugins
+              ul.inner
+                li
+                  a(href="#") SMS notification
+                li
+                  a(href="#") Yell the guilty
+                li
+                  a(href="#") IRC
+                li
+                  a(href="#") Growl
+
+            li.option
+              a.title(href="#") Game
+              ul.inner
+                li
+                  a(href="#") Neatest committer
+                li
+                  a(href="#") #1 Build breaker
+
+            li.option
+              a.title(href="#") Settings
+              ul.inner
+                li
+                  a(href="#") Users
+                li
+                  a(href="#") Github API
+                li
+                  a(href="#") SSH Keys
+
+        section.content!= body

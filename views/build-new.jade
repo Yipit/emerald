@@ -1,0 +1,17 @@
+#project
+
+  h1 Create a new project
+
+  div.form
+    form(method="post")
+      p
+        label(for="name") name
+        input#name(type="text", name="name")
+      p
+        label(for="repository") repository
+        input#repository(type="text", name="repository")
+      p
+        label(for="build_script") build_script
+        textarea#build_script(name="build_script")
+      p.left
+        input.info.btn#create(type="submit", name="create", value="create")
