@@ -246,11 +246,15 @@ code {
   }
   div.alert-actions {
     float: right;
+    margin: 0;
+    padding: 0;
     .btn {
       width: 70px;
       text-align: center;
+      margin: 30px 30px 0 0;
     }
     pre {
+      width: 100px;
       text-align: center;
       margin-top: 10px;
       .box-inset;
@@ -270,9 +274,32 @@ code {
     margin: 10px 0px;
     font-size: 22px;
   }
-  img.gravatar {
-    float: left;
-    margin: 0 10px 0 0;
+  div.build {
+    height: 120px;
+    padding: 0px;
+    margin-top: 20px;
+    div.picture {
+      height: 100px;
+      width: 100px;
+      float: left;
+      margin: 10px;
+    }
+    div.info {
+      float: left;
+      blockquote {
+        .author {
+          padding-left: 5px;
+          font-weight: bold;
+          font-size: 14px;
+        }
+      }
+    }
+    img.gravatar {
+      float: left;
+      .box-shadow(1px, 1px, 2px, 0.7);
+      .round-corners;
+      margin: 0 10px 0 0;
+    }
   }
 }
 
@@ -286,6 +313,7 @@ code {
     padding: 15px 0 20px 20px;
   }
   div.form {
+    width: 500px;
     p {
       padding: 5px 0;
       label {
