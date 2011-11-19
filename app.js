@@ -15,7 +15,7 @@
         app.use(express.compiler({ src: __dirname + '/public', enable: ['less'] }));
         app.use(function(request, response, next){
             response.show = function (name, context){
-                var c = _.extend(context, {
+                var c = _.extend(context || {}, {
                     title: 'Emerald - Continuous Integration'
                 });
                 response.render(name, c);
