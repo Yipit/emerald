@@ -161,6 +161,11 @@ section#profile {
   float: right;
   color: #EEE;
   margin: 0 30px 0 0;
+  .greetings {
+    a {
+      color: #FFF;
+    }
+  }
 }
 
 .container-fluid {
@@ -181,43 +186,18 @@ section#profile {
 }
 
 aside.sidebar {
-  ul#navigation {
-    display: block;
-    li.option {
-      display: block;
-      line-height: 18px;
-      margin: 0 0 6px;
-      a.title {
-        border: 1px solid #ACB3B7;
-        .round-corners;
-        .box-shadow(0, 1px, 2px);
-        border-radius: 3px 3px 3px 3px;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1), 0 1px 1px #FFFFFF inset;
-        color: #464951;
-        display: block;
-        font-size: 14px;
-        font-weight: bold;
-        padding: 6px 8px;
-        text-shadow: 0 1px 1px #FFFFFF;
-        display: block;
-      }
-      ul.inner {
-        background: none repeat scroll 0 0 rgba(59, 68, 88, 0.1);
-        border: 1px solid #CACACA;
-        border-bottom-left-radius: 3px;
-        border-bottom-right-radius: 3px;
-        box-shadow: 0 1px 1px #FFFFFF;
-        list-style: none outside none;
-        padding: 2px 0;
-        li {
-          font-size: 13px;
-          line-height: 1;
-          margin: 0;
-          padding: 6px 8px;
-        }
-      }
+  h2 {
+    margin: 10px 0 10px 0;
+    font-size: 20px;
+  }
+  p {
+    text-align: center;
+    margin-top: 5px;
+    a.btn {
+      width: 180px;
     }
   }
+
 }
 
 code {

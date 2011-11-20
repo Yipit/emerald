@@ -21,59 +21,24 @@ html
           section#logo
             h1 Emerald
           section#profile.logged
-            div.greetings Welcome, Gabriel Falcão
+            div.greetings Welcome, Gabriel Falcão.
+              a(href="#") Sair
+
       div.container-fluid
         aside.sidebar
-          ul#navigation
-            li.option
-              a.title(href="/") Create, edit and manage
-              ul.inner
-                li
-                  a(href="#") Users
-                li
-                  a(href="#") Build Instructions
+          p
+            a.btn.success(href="/") Dashboard
 
-            li.option
-              a.title(href="#") Builds
-              ul.inner
-                li
-                  a(href="#") Yipit Functional Tests #1
-                li
-                  a(href="#") Yipit Unit Tests #3
-                li
-                  a(href="#") Yipit Unit Tests #2
-                li
-                  a(href="#") Yipit Unit Tests #1
+          h2 Create, edit and manage
+          p
+            a.btn.success(href="/manage/users") Users
+          p
+            a.btn.success(href="/manage/instructions") Build Instructions
 
-
-            li.option
-              a.title(href="#") Plugins
-              ul.inner
-                li
-                  a(href="#") SMS notification
-                li
-                  a(href="#") Yell the guilty
-                li
-                  a(href="#") IRC
-                li
-                  a(href="#") Growl
-
-            li.option
-              a.title(href="#") Game
-              ul.inner
-                li
-                  a(href="#") Neatest committer
-                li
-                  a(href="#") #1 Build breaker
-
-            li.option
-              a.title(href="#") Settings
-              ul.inner
-                li
-                  a(href="#") Users
-                li
-                  a(href="#") Github API
-                li
-                  a(href="#") SSH Keys
+          h2 Server
+          p
+            a.btn.success(href="/settings") Settings
+          p
+            a.btn.success(href="/plugins") Plugins
 
         section.content!= body

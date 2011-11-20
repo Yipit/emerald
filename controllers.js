@@ -6,37 +6,16 @@ exports.setup = function(app, io){
     app.get('/', function(req, res){
         res.show('index');
     });
-    app.all('/instruction/new', function(req, res){
-        res.show('build-new');
+    app.get('/manage/instructions', function(req, res){
+        res.show('manage-instructions');
     });
-
-    io.sockets.on('connection', function (socket) {
-        socket.on('please:create:build', function (data) {
-            var filename = data.name.split(/\W+/).join("-") + '.sh';
-            fs.writeFile(filename, "#!/bin/bash\n" + data.commands, function (err) {
-                if (err) {throw err;}
-
-                fs.chmod(filename, '755', function(err){
-                    if (err) {throw err;}
-
-
-                    var cmd = child_process.spawn('bash', [filename]);
-                    cmd.stdout.on('data', function (data) {
-                        var out = data.toString().replace('\n', '<br />');
-                        socket.emit('stdout', out);
-                    });
-                    cmd.stderr.on('data', function (data) {
-                        var out = data.toString().replace('\n', '<br />');
-                        socket.emit('stderr', out);
-                    });
-                    cmd.on('exit', function (code) {
-                        socket.emit('finished', {
-                            'code':code + "",
-                            'pid': cmd.pid + ""
-                        });
-                    });
-                });
-            });
-        });
+    app.get('/manage/users', function(req, res){
+        res.show('manage-users');
+    });
+    app.get('/settings', function(req, res){
+        res.show('settings');
+    });
+    app.get('/plugins', function(req, res){
+        res.show('plugins');
     });
 }
