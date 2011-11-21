@@ -15,7 +15,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind){
     it.has.field("name", kind.string);
     it.has.field("description", kind.string);
     it.has.field("repository_address", kind.string);
-    it.has.field("build_command", kind.string);
+    it.has.field("build_script", kind.string);
 
     it.validates.uniquenessOf("name");
 

@@ -19,7 +19,7 @@ exports.start = function(app, io){
                     name: request.param('name'),
                     description: request.param('description'),
                     repository_address: request.param('repository_address'),
-                    build_command: request.param('build_command')
+                    build_script: request.param('build_script')
                 });
                 naive.save(function(err, key, instruction) {
                     response.redirect('/instruction/' + instruction.__id__)
