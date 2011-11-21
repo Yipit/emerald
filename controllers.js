@@ -32,7 +32,7 @@ exports.start = function(app, io){
     })
     app.get('/instruction/:id', function(request, response){
         var id = parseInt(request.param('id'));
-        entity.Instruction.find_by_id(id, function(err, instruction) {
+        entity.BuildInstruction.find_by_id(id, function(err, instruction) {
             response.show('instruction', {
                 instruction: instruction
             });
