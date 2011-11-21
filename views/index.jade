@@ -1,44 +1,83 @@
-#build
-
+#dashboard.layout-978
   h1 Builds
+  ul#builds
+    li
+      article.project
+        ul.data
+          li.avatar
+            img(src="/images/gravatar100x100.jpg", width="50")
+          li.title
+            h1 Yipti Unit Tests
+          li.commitmsg Fixing to_review and needs (...)
+          li.lastfailure last failure: #231 (31s)
+          li.lastsuccess last success: #230 (2s)
+        ul.menu
+          li.output
+            a(href="#") Show output
+          li.build
+            a(href="#") Build Now
+        ol.buildlog
+          li.success #229 &mdash; Another fix in blah
+          li.success #228 &mdash; Fixing a typo in the main model
+          li.failure #227 &mdash; Implementing the login feature
 
-  div.build.error.alert-message.block-message
-    div.alert-actions
-      a.btn.danger.stop-build Stop
-      pre.failed running...
-    p
-      div.picture
-        img.gravatar(src="/images/gravatar100x100.jpg", width="100", height="100")
-      div.info
-        h2 Yipit Unit Tests, build #23 [FAILED]
-        blockquote
-          p "Fixing to_review and needs_approval" - b545731f59a0a09ad629 - about an hour ago
-            span.author by Steve Pulec - spulec@gmail.com
+    li
+      article.project.failed
+        ul.data
+          li.avatar
+            img(src="/images/gravatar100x100.jpg", width="50")
+          li.title
+            h1 Yipti Unit Tests
+          li.commitmsg Fixing to_review and needs (...)
+          li.lastfailure last failure: #231 (31s)
+          li.lastsuccess last success: #230 (2s)
+        ul.menu
+          li.output
+            a(href="#") Show output
+          li.build
+            a(href="#") Build Now
+        ol.buildlog
+          li.success #229 &mdash; Another fix in blah
+          li.success #228 &mdash; Fixing a typo in the main model
+          li.failure #227 &mdash; Implementing the login feature
 
-  div.build.success.alert-message.block-message
-    div.alert-actions
-      a.btn.success Build Now
-      pre.success stopped
-    p
-      div.picture
-        img.gravatar(src="/images/gravatar100x100.jpg", width="100", height="100")
-      div.info
-        h2 Yipit Unit Tests, build #23 - SUCCESS, yay!
-        blockquote
-          p "Fixing to_review and needs_approval" - b545731f59a0a09ad629 - about an hour ago
-            span.author by Steve Pulec - spulec@gmail.com
+    li
+      article.project.success
+        ul.data
+          li.avatar
+            img(src="/images/gravatar100x100.jpg", width="50")
+          li.title
+            h1 Yipti Unit Tests
+          li.commitmsg Fixing to_review and needs (...)
+          li.lastfailure last failure: #231 (31s)
+          li.lastsuccess last success: #230 (2s)
+        ul.menu
+          li.output
+            a(href="#") Show output
+          li.build
+            a(href="#") Build Now
+        ol.buildlog
+          li.success #229 &mdash; Another fix in blah
+          li.success #228 &mdash; Fixing a typo in the main model
+          li.failure #227 &mdash; Implementing the login feature
 
-
-  div.build.warning.alert-message.block-message
-    div.alert-actions
-      a.btn Build Now
-      pre.warning build please
-    p
-      div.picture
-        img.gravatar(src="/images/gravatar100x100.jpg", width="100", height="100")
-      div.info
-        h2 Yipit Functional Tests, never built
-        blockquote
-          small why not build it now ?
-
-
+    li
+      article.project.running
+        ul.data
+          li.avatar
+            img(src="/images/gravatar100x100.jpg", width="50")
+          li.title
+            h1 Yipti Unit Tests
+          li.commitmsg Fixing to_review and needs (...)
+          li.lastfailure last failure: #231 (31s)
+          li.lastsuccess last success: #230 (2s)
+        ul.menu
+          li.output
+            a(href="#") Show output
+          li.stop
+            a(href="#") Stop running
+        ol.buildlog
+          li.success #229 &mdash; Another fix in blah
+          li.success #228 &mdash; Fixing a typo in the main model
+          li.failure #227 &mdash; Implementing the login feature
+    .row-end

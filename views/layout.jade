@@ -1,41 +1,40 @@
-!!!
+!!! 5
 html
   head
     title= title
-    link(rel='stylesheet', href='/stylesheets/bootstrap.css', type='text/css')
-    link(rel='stylesheet', href='/stylesheets/style.css', type='text/css')
+    link(rel='stylesheet', href='/stylesheets/978.css', type='text/css')
+    link(rel='stylesheet', href='/stylesheets/general.css', type='text/css')
 
     script(type="text/javascript", src="/javascripts/jquery-1.6.2.min.js")
     script(type="text/javascript", src="/socket.io/socket.io.js")
     script(type="text/javascript", src="/javascripts/main.js")
-    script(type="text/javascript")
-      $(function(){$("#navigation").accordion()});
 
   body
-    div#page.clearfix
-      header
-        article
-          section#logo
-            h1 Emerald
-          section#profile.logged
-            div.greetings Welcome, Gabriel Falcão.
-              a(href="#") Sair
-
-      div.container-fluid
-        aside.sidebar
-          p
-            a.btn.success(href="/") Dashboard
-
-          h2 Create, edit and manage
-          p
-            a.btn.success(href="/manage/users") Users
-          p
-            a.btn.success(href="/manage/instructions") Build Instructions
-
-          h2 Server
-          p
-            a.btn.success(href="/settings") Settings
-          p
-            a.btn.success(href="/plugins") Plugins
-
-        section.content!= body
+    header
+      .layout-978
+        .row
+          .col10
+            h1.title
+              a(href="#") Emerald
+          .col2
+            menu.user
+              li.avatar
+                img(src="/images/avatar.png", width="25", height="25")
+              li username
+              li.stuff
+                a(href="#") profile
+                span |
+                a(href="#") exit
+          .row-end
+        .row
+          .col8 &nbsp;
+          .col4
+            menu.main
+              li.dashboard
+                a(href="#") dashboard
+              li.projects
+                a(href="#") projects
+              li.users
+                a(href="#") users
+          .row-end
+    != body

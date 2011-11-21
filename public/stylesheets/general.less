@@ -1,0 +1,227 @@
+/* -- css reset -- */
+
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-weight: inherit;
+    font-style: inherit;
+    font-size: 100%;
+    line-height: 1;
+    font-family: inherit;
+    text-align: left;
+    vertical-align: baseline;
+}
+
+article, aside, details, figcaption, figure, footer,
+header, hgroup, menu, nav, section {
+    display: block;
+}
+
+ol, ul, menu {
+    list-style: none;
+}
+
+body {
+    font-size:10pt;
+    font-family:helvetica;
+}
+
+/* -- general -- */
+
+h1 {
+    font-size:16px;
+    font-weight:bold;
+}
+
+/* -- header -- */
+
+header {
+    background:url(../images/bg_header.png) repeat-x;
+}
+
+h1.title {
+    height:45px;
+    overflow:hidden;
+}
+
+h1.title a {
+    background:url(../images/emerald.png) no-repeat;
+    display:block;
+    width:175px;
+    padding-top:40px;
+    margin-top:10px;
+}
+
+menu.user {
+    margin-top:10px;
+}
+
+menu.user li.stuff * {
+    margin-right:5px;
+}
+
+menu.user li.avatar {
+    float:left;
+    margin-right:5px;
+}
+
+menu.user li.avatar img {
+    border:solid 1px #666;
+}
+
+
+menu.main li {
+    float:left;
+    padding:12px 0 15px 20px;
+    margin-left:23px;
+}
+
+menu.main li a {
+    color:#fff;
+    text-decoration:none;
+}
+
+menu.main li.dashboard {
+    background:url(../images/ico_dashboard.png) no-repeat 0 51%;
+}
+
+menu.main li.projects {
+    background:url(../images/ico_build.png) no-repeat 0 51%;
+}
+
+menu.main li.users {
+    background:url(../images/ico_users.png) no-repeat 0 51%;
+}
+
+/* -- dashboard -- */
+
+#dashboard > h1 {
+    margin:20px 0;
+    color:#04734c;
+}
+
+ul#builds {
+    width:1100px;
+
+    > li {
+        display:block;
+        float:left;
+        width:294px;
+        margin-right:30px;
+        margin-bottom:30px;
+    }
+}
+
+.project {
+    background:#eeeeec;
+    color:#333;
+    overflow:hidden;
+
+    .data {
+        background:#d3d7cf;
+        padding-bottom:10px;
+        box-shadow:0 0 10px #666;
+    }
+
+    .data li {
+        padding-left:72px;
+        color:#999;
+    }
+
+    .data .avatar {
+        float:left;
+        margin-right:20px;
+        padding-left:0px;
+        position:relative;
+        left:10px;
+        top:10px;
+        height:50px;
+        border:solid 1px #666;
+        border-radius:3px;
+    }
+
+    .data .title {
+        padding-left:0px;
+        padding-bottom:5px;
+        color:#fff;
+
+        h1 {
+            background:#888a85;
+            padding:10px 0 5px;
+        }
+    }
+
+    .data .commitmsg {
+        color:#444;
+        padding-bottom:4px;
+    }
+
+    .menu {
+        float:right;
+        margin-right:10px;
+        margin-top:-20px;
+        li {
+            display:block;
+            float:left;
+            overflow:hidden;
+            height:16px;
+            width:16px;
+            margin-left:5px;
+        }
+
+        li a {
+            display:block;
+            width:16px;
+            padding-top:16px;
+        }
+
+        li.output {
+            background:url(../images/ico_terminal.png) no-repeat;
+        }
+
+        li.build {
+            background:url(../images/ico_build.png) no-repeat;
+        }
+
+        li.stop {
+            background:url(../images/ico_stop.png) no-repeat;
+        }
+    }
+
+    .buildlog {
+        padding:10px;
+        li {
+            margin-bottom:5px;
+        }
+
+        .success {
+            color:#4e9a06;
+        }
+
+        .failure {
+            color:#ef2929;
+        }
+    }
+}
+
+.project.failed .data {
+    background:#e02130;
+    li {
+        color:#fff;
+    }
+}
+
+.project.success .data {
+    background:#429867;
+    li {
+        color:#fff;
+    }
+}
+
+.project.running .data {
+    background:#fab243;
+    li {
+        color:#fff;
+    }
+}
