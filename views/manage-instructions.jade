@@ -17,3 +17,13 @@
         small(style="float: right") the script above will be converted into a bash script
       p.left
         input.info.btn#create(type="submit", name="create", value="create")
+
+  - if (has_instructions)
+    hr
+    h1 Existing Instructions
+
+    - each instruction in instructions
+      p
+        a(href=instruction.permalink)= "Details of " + instruction.name
+        span -
+        a.clay.Instruction.delete(href="#", rel=instruction.__id__) (delete)

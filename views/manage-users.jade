@@ -8,12 +8,20 @@
         label(for="name") name
         input#name(type="text", name="name")
       p
-        label(for="repository") repository
-        input#repository(type="text", name="repository")
+        label(for="email") email
+        input#email(type="text", name="email")
       p
-        label(for="build_script") build_script
-        textarea#build_script(name="build_script")
-      p
-        small(style="float: right") the script above will be converted into a bash script
+        label(for="password") password
+        input#password(name="password", type="password")
       p.left
         input.info.btn#create(type="submit", name="create", value="create")
+
+  - if (has_users)
+    hr
+    h1 Existing Users
+
+    - each user in users
+      p
+        a(href=user.permalink)= "Details of " + user.name
+        span -
+        a.clay.User.delete(href="#", rel=user.__id__) (delete)
