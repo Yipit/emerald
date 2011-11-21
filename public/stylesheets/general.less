@@ -24,7 +24,7 @@ ol, ul, menu {
 
 body {
     font-size:10pt;
-    font-family:helvetica;
+    font-family:arial, sans-serif;
 }
 
 /* -- general -- */
@@ -37,7 +37,9 @@ h1 {
 /* -- header -- */
 
 header {
-    background:url(../images/bg_header.png) repeat-x;
+    background:url(../images/bg_header.png) repeat-x #444;
+    height:82px;
+    box-shadow:0 0 10px #333;
 }
 
 h1.title {
@@ -96,9 +98,11 @@ menu.main li.users {
 
 /* -- dashboard -- */
 
-#dashboard > h1 {
+.container > h1 {
+    font-size:24px;
     margin:20px 0;
-    color:#04734c;
+    color:#4e9a06;
+    text-shadow:1px 0px 1px #333;
 }
 
 ul#builds {
@@ -151,6 +155,7 @@ ul#builds {
 
         h1 {
             background:#888a85;
+            border-bottom:solid 1px #666;
             padding:10px 0 5px;
         }
     }
@@ -209,21 +214,21 @@ ul#builds {
 }
 
 .project.failed .data {
-    background:#e02130;
+    background:#cc0000;
     li {
         color:#fff;
     }
 }
 
 .project.success .data {
-    background:#429867;
+    background:#4e9a06;
     li {
         color:#fff;
     }
 }
 
 .project.running .data {
-    background:#fab243;
+    background:#fcaf3e;
     li {
         color:#fff;
     }
