@@ -1,25 +1,32 @@
 .container
   h1 Create a new build instruction
   .row
-    .span10
+    .span12
       div.form
         form(method="post")
-          p
-            label(for="name") Build name
-            input#name(type="text", name="name")
-          p
-            label(for="description") Description
-            input#description(type="text", name="description")
-          p
-            label(for="repository_address") Repository address
-            input#repository(type="text", name="repository_address")
-          p
-            label(for="build_script") Build script
-            textarea#build_script(name="build_script")
-            small.helptext The script above will be converted into a bash script
+          fieldset
+            .clearfix
+              label(for="name") Build name
+              .input
+                input.xlarge#name(type="text", name="name")
+            .clearfix
+              label(for="description") Description
+              .input
+                input#description(type="text", name="description")
+            .clearfix
+              label(for="repository_address") Repository address
+              .input
+                input#repository(type="text", name="repository_address", value="git://github.com/")
+            .clearfix
+              label(for="build_script") Build script
+              .input
+                textarea#build_script.xxlarge(rows="3", name="build_script")
+                  #!/bin/bash
+                  echo "Build Successful!"
+                span.help-block The script above will be converted into a bash script
 
-          p.button
-            input.info.btn#create(type="submit", name="create", value="create")
+            p.button
+               input.info.btn#create(type="submit", name="create", value="create")
   .row
     .span16
 
