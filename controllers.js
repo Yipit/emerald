@@ -48,10 +48,10 @@ exports.start = function(app, io){
 
     io.sockets.on('connection', function (socket) {
         socket.emit('connected');
-        socket.on('delete User', function (data) {
-            entity.User.find_by_id(parseInt(data.id), function(err, user){
-                user.delete(function(){
-                    socket.emit('User deleted', {id: user.__id__});
+        socket.on('delete BuildInstruction', function (data) {
+            entity.BuildInstruction.find_by_id(parseInt(data.id), function(err, instruction){
+                instruction.delete(function(){
+                    socket.emit('BuildInstruction deleted', {id: instruction.__id__});
                 });
             });
         });
