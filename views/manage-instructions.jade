@@ -1,25 +1,24 @@
 .container
+  h1 Create a new build instruction
   .row
     .span12
-      h1 Create a new build instruction
-
       div.form
         form(method="post")
           p
-            label(for="name") name
+            label(for="name") Build name
             input#name(type="text", name="name")
           p
-            label(for="description") description
+            label(for="description") Description
             input#description(type="text", name="description")
           p
-            label(for="repository_address") repository address
+            label(for="repository_address") Repository address
             input#repository(type="text", name="repository_address")
           p
-            label(for="build_script") build_script
+            label(for="build_script") Build script
             textarea#build_script(name="build_script")
-          p
-            small(style="float: right") the script above will be converted into a bash script
-          p.left
+            small.helptext The script above will be converted into a bash script
+
+          p.button
             input.info.btn#create(type="submit", name="create", value="create")
 
       - if (has_instructions)
