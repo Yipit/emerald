@@ -4,6 +4,8 @@
     express = require('express');
 
     var app = express.createServer();
+    var io = require('socket.io').listen(app);
+
     var jade = require('jade');
     app.configure(function(){
         app.set('views', __dirname + '/views');
@@ -34,7 +36,8 @@
         app.use(express.errorHandler());
     });
 
-    var io = require('socket.io').listen(app);
-    controllers.setup(app, io);
+
     app.listen(3000);
+
+    controllers.start(app, io);
 })();
