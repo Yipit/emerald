@@ -1,7 +1,7 @@
 .container
   h1 Create a new build instruction
   .row
-    .span12
+    .span10
       div.form
         form(method="post")
           p
@@ -20,13 +20,16 @@
 
           p.button
             input.info.btn#create(type="submit", name="create", value="create")
+  .row
+    .span16
 
       - if (has_instructions)
         hr
         h1 Existing Instructions
 
         - each instruction in instructions
-          p
-            a(href=instruction.permalink)= "Details of " + instruction.name
-            span -
-            a.clay.Instruction.delete(href="#", rel=instruction.__id__) (delete)
+          .warning.alert-message
+            a.close.clay.BuildInstruction.delete(href="#", rel=instruction.__id__) delete
+            p
+              a(href=instruction.permalink)
+                strong="Details of " + instruction.name
