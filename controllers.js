@@ -1,8 +1,6 @@
-var models = require('./models');
+var entity = require("./models");
 
 exports.start = function(app, io){
-    var entity = models.prepare(io, app);
-
     app.get('/', function(request, response){
         response.show('index');
     });
