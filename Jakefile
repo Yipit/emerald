@@ -1,9 +1,9 @@
 var redis = require('redis');
-var client = redis.createClient();
 var Table = require('cli-table');
 
 desc('cleanse the db and populate the database with test data');
 task('default', [], function () {
+    var client = redis.createClient();
     var table = new Table({
         head: ['Model', 'Name']
       , colWidths: [20, 30]
