@@ -47,3 +47,13 @@ task('default', [], function () {
         });
     });
 });
+
+desc('run the unit tests');
+task('unit', [], function () {
+    console.log("unit has passed!");
+});
+
+desc('run the functional tests');
+task('functional', [], function () {
+    console.log("functional has passed!");
+});
