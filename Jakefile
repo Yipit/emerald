@@ -1,43 +1,41 @@
-var redis = require('redis');
 var Table = require('cli-table');
 
 desc('cleanse the db and populate the database with test data');
 task('default', [], function () {
-    var client = redis.createClient();
     var table = new Table({
-        head: ['Model', 'Name']
-      , colWidths: [20, 30]
+        head: ['Model', 'Name', 'Error'],
+        colWidths: [20, 30, 50]
     });
 
     var entity = require('./models');
     console.log("Populating the database...".bold.white);
-    client.keys("clay*", function(err, keys){
-        client.del(keys, function(){
+    entity.redis.keys("clay*", function(err, keys){
+        entity.redis.del(keys, function(){
             entity.User.create({
                 name: "John Doe",
                 email: "john@doe.com",
                 password: '123',
-            }, function(err, john){
-                table.push(["User", john.name])
+            }, function(err, key, john){
+                table.push(["User", john.name, err || "none"])
                 entity.BuildInstruction.create({
                     name: "Emerald Unit Tests",
                     repository_address: "file://" + __dirname + "/.git",
                     build_script: 'jake unit',
                     author: john
-                }, function(err, instruction1){
-                    table.push(["BuildInstruction", instruction1.name])
+                }, function(err, key, instruction1){
+                    table.push(["BuildInstruction", instruction1.name, err || "none"])
                     entity.BuildInstruction.create({
                         name: "Emerald Functional Tests",
                         repository_address: "file://" + __dirname + "/.git",
                         build_script: 'jake functional',
                         author: john
-                    }, function(err, instruction2){
-                        table.push(["BuildInstruction", instruction2.name])
+                    }, function(err, key, instruction2){
+                        table.push(["BuildInstruction", instruction2.name, err || "none"])
                         entity.Pipeline.create({
                             name: "Emerald Tests",
                             instructions: [instruction1, instruction2]
-                        }, function(err, pipeline){
-                            table.push(["Pipeline", pipeline.name])
+                        }, function(err, key, pipeline){
+                            table.push(["Pipeline", pipeline.name, err || "none"])
                             console.log(table.toString());
                             process.exit(0);
                         });

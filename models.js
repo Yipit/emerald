@@ -66,5 +66,6 @@ module.exports = {
     User: User,
     BuildInstruction: BuildInstruction,
     Build: Build,
-    Pipeline: Pipeline
+    Pipeline: Pipeline,
+    redis: User._meta.storage.connection
 }
