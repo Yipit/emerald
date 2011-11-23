@@ -1,7 +1,9 @@
 (function(){
     var _ = require('underscore')._,
     controllers = require('./controllers'),
-    express = require('express');
+    express = require('express'),
+    RedisStore = require('connect-redis')(express),
+    entity = require('./models');
 
     var app = express.createServer();
     var io = require('socket.io').listen(app);
@@ -13,16 +15,23 @@
         app.use(express.bodyParser());
         app.use(express.methodOverride());
         app.use(express.cookieParser());
-        app.use(express.session({ secret: process.env['HOME'] + process.env['NODE_PATH'] }));
+        app.use(express.session({
+            secret: 'ac39aeb9ab288f96fe51ef594bfca20262fa184e',
+            store: new RedisStore()
+        }));
         app.use(express.compiler({ src: __dirname + '/public', enable: ['less'] }));
         app.use(function(request, response, next){
-            response.show = function (name, context){
-                var c = _.extend(context || {}, {
-                    title: 'Emerald - Continuous Integration'
-                });
-                response.render(name, c);
-            }
-            return next();
+            entity.User.find_by_id(request.session.user_id, function(err, user){
+                response.show = function (name, context){
+                    var c = _.extend(context || {}, {
+                        title: 'Emerald - Continuous Integration',
+                        request: request,
+                        user: user
+                    });
+                    response.render(name, c);
+                }
+                return next();
+            });
         });
         app.use(app.router);
         app.use(express.static(__dirname + '/public'));

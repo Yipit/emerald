@@ -14,6 +14,7 @@
     , "jade": ">= 0.17.0"
     , "less": ">= 1.1.5"
     , "underscore": ">= 1.2.2"
+    , "connect-redis": ">= 1.2.0"
   }
   , "devDependencies": {
       "vows": "0.5.12"

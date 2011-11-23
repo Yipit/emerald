@@ -1,5 +1,34 @@
 .container
-  h1= "Latest builds for " + instruction.name
+  h1= "Build instruction: " + instruction.name
   .row
-    .span16
+    .span4
+      .clearfix
+        h2 Latest builds
 
+        p #33 Failed
+        p #32 Succeeded
+
+    .span12
+      div.form
+        form(method="post")
+          fieldset
+            .clearfix
+              label(for="name") Build name
+              .input
+                input.xlarge#name(type="text", name="name", value=instruction.name)
+            .clearfix
+              label(for="description") Description
+              .input
+                input#description(type="text", name="description", value=instruction.description)
+            .clearfix
+              label(for="repository_address") Repository address
+              .input
+                input#repository(type="text", name="repository_address", value=instruction.repository_address)
+            .clearfix
+              label(for="build_script") Build script
+              .input
+                textarea#build_script.xxlarge(rows="3", name="build_script")= instruction.build_script
+                span.help-block The script above will be converted into a bash script
+
+            p.button
+               input.info.btn#update(type="submit", name="update", value="update")

@@ -37,6 +37,8 @@ task('default', [], function () {
                         }, function(err, key, pipeline){
                             table.push(["Pipeline", pipeline.name, err || "none"])
                             console.log(table.toString());
+
+                            console.log(john._meta.field.definitions["password"](null, john, "123"), john.password)
                             process.exit(0);
                         });
                     });

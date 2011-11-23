@@ -6,6 +6,7 @@ html
     link(rel='stylesheet', href='/stylesheets/general.css', type='text/css')
 
     script(type="text/javascript", src="/javascripts/jquery-1.6.2.min.js")
+    script(type="text/javascript", src="/javascripts/bootstrap-alerts.js")
     script(type="text/javascript", src="/socket.io/socket.io.js")
     script(type="text/javascript", src="/javascripts/main.js")
 
@@ -21,22 +22,31 @@ html
               a(href="/") Emerald
 
           .span3
-            menu.user
-              li.avatar
-                img(src="/images/avatar.png", width="25", height="25")
-              li username
-              li.stuff
-                a(href="#") profile
-                span |
-                a(href="#") exit
+            - if (user.email)
+              menu.user
+                li.avatar
+                  img(src=user.gravatar_of_size("25"), width="25", height="25")
+                li= user.name
+                li.stuff
+                  a(href="/profile") profile
+                  span |
+                  a(href="/logout") exit
+            - else
+              menu.user
+                li.login
+                  span please
+                  a(href="/login?next=" + request.url) login
+
         .row
-          .span10 &nbsp;
-          .span6
+          .span8 &nbsp;
+          .span8
             menu.main
               li.dashboard
                 a(href="/") dashboard
               li.projects
                 a(href="/instructions") projects
+              li.pipelines
+                a(href="/pipelines") pipelines
               li.users
                 a(href="/users") users
     != body

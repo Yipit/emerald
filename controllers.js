@@ -4,6 +4,25 @@ exports.start = function(app, io){
     app.get('/', function(request, response){
         response.show('index');
     });
+    app.get('/logout', function(request, response){
+        request.session.user_id = null;
+        response.redirect(request.param('next', '/'));
+    });
+    app.all('/login', function(request, response){
+        if (request.method === "POST") {
+            entity.User.authenticate(request.param('email'), request.param('password'), function(err, user) {
+                if (!err) {
+                    request.session.user_id = user.__id__;
+                    response.redirect(request.param('next', '/'));
+                } else {
+                    console.log(err)
+                    return response.show('login', {error: err});
+                }
+            });
+        } else {
+            return response.show('login', {error: null});
+        }
+    });
 
     app.all('/instructions', function(request, response){
         switch (request.method) {
