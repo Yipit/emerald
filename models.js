@@ -94,5 +94,14 @@ module.exports = {
     BuildInstruction: BuildInstruction,
     Build: Build,
     Pipeline: Pipeline,
-    redis: User._meta.storage.connection
+    connection: User._meta.storage.connection,
+    clear_keys: function(pattern, callback){
+        var self = this;
+        self.connection.keys("clay:*", function(err, keys){
+            if (err) {return callback(err);}
+            self.connection.del(keys, function(err){
+                return callback(err, keys);
+            });
+        });
+    }
 }
