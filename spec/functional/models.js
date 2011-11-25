@@ -36,8 +36,30 @@ vows.describe('A User').addBatch({
                 });
             },
             'Then the callback is called with the right message': function(e, error) {
-                error.message.should.be.equal('there are no users that match "let@me.in"')
+                error.message.should.be.equal('there are no users matching the email "let@me.in"');
+            }
+        },
+        '\n  When an authetication is attempted with a wrong password': {
+            topic: function(err, user1, user2) {
+                var topic = this;
+                entity.User.authenticate("john@doe.com", "123", function(err){
+                    topic.callback(null, err, user1, user2);
+                });
+            },
+            'Then the callback is called with the right message': function(e, error) {
+                error.message.should.be.equal('wrong password for the login "john@doe.com"');
+            }
+        },
+        '\n  When an authetication is attempted with right email and password': {
+            topic: function(err, user1, user2) {
+                entity.User.authenticate("john@doe.com", "island", this.callback);
+            },
+            'It should be authenticated': function(err, user) {
+                should.exist(user);
+                user.name.should.equal('John Doe');
+                user.email.should.equal('john@doe.com');
             }
         }
+
     }
 }).export(module);

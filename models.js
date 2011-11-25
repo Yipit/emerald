@@ -9,7 +9,8 @@ BUILD_STAGES = {
 var User = models.declare("User", function(it, kind){
     it.has.field("name", kind.string);
     it.has.field("email", kind.email);
-    it.has.field("password", kind.hashOf(["name", "email"]));
+    it.has.field("created_at", kind.auto);
+    it.has.field("password", kind.string);
 
     it.validates.uniquenessOf("name");
     it.validates.uniquenessOf("email");
@@ -23,13 +24,11 @@ var User = models.declare("User", function(it, kind){
         return 'http://www.gravatar.com/avatar/' + hash.digest('hex') + '?s=' + size;
     });
 
-    it.has.method('authenticate', function(password, callback){
-        var candidate = this._meta.field.definitions["password"](null, this, password);
-        var matched = candidate === this.password;
-        if (matched) {
+    it.has.method('authenticate', function(attempt, callback){
+        if (attempt === this.password) {
             return callback(null, this);
         } else {
-            return callback(new Error("password mismatch for " + this.email), null);
+            return callback(new Error('wrong password for the login "' + this.email + '"'), null);
         }
     });
 
@@ -38,10 +37,10 @@ User.authenticate = function(login, password, callback){
     if (!login) {
         return callback(new Error("Invalid email: " + login))
     }
-    User.find_by_email(new RegExp(login), function(err, items){
+    User.find_by_email(new RegExp(login.replace("@", "[@]")), function(err, items){
         var found = items.first;
         if (err) {
-            return callback(new Error("Invalid email: " + login))
+            return callback(new Error('there are no users matching the email "' + login + '"'));
         }
         return found.authenticate(password, callback);
     });
@@ -56,7 +55,7 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.field("author_name", kind.string);
     it.has.field("author_email", kind.string);
 
-    it.has.getter('permalink', function(){
+    it.has.getter('permalink', function() {
         return '/build/' + this.__id__;
     });
 });
@@ -73,7 +72,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
     it.has.index("repository_address");
     it.has.many("builds", Build, "instruction");
 
-    it.has.getter('permalink', function(){
+    it.has.getter('permalink', function() {
         return '/instruction/' + this.__id__;
     });
 });
@@ -95,7 +94,7 @@ module.exports = {
     Build: Build,
     Pipeline: Pipeline,
     connection: User._meta.storage.connection,
-    clear_keys: function(pattern, callback){
+    clear_keys: function(pattern, callback) {
         var self = this;
         self.connection.keys("clay:*", function(err, keys){
             if (err) {return callback(err);}

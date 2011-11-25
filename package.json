@@ -7,7 +7,7 @@
   , "bugs": "http://github.com/Yipit/emerald/issues"
   , "main": "./index.js"
   , "dependencies": {
-      "clay": ">= 1.1.4"
+      "clay": ">= 1.2.1"
     , "redis": ">= 0.7.1"
     , "express": ">= 2.5.0"
     , "socket.io": ">= 0.8.7"
