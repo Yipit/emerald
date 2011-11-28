@@ -24,6 +24,37 @@ exports.start = function(app, io){
         }
     });
 
+    app.all('/users', function(request, response){
+        switch (request.method) {
+            case "GET":
+                entity.User.all(function(err, users){
+                    response.show('manage-users', {users: users, has_users: users.length > 0});
+                });
+            break;
+            case "POST":
+                var naive = new entity.User({
+                    name: request.param('name'),
+                    email: request.param('email'),
+                    password: request.param('password')
+                });
+                naive.save(function(err, key, instruction) {
+                    response.redirect('/user/' + instruction.__id__)
+                });
+            break;
+            default:
+                response.send('method not allowed', 405);
+            break;
+        }
+    })
+    app.get('/user/:id', function(request, response){
+        var id = parseInt(request.param('id'));
+        entity.BuildInstruction.find_by_id(id, function(err, instruction) {
+            response.show('instruction', {
+                instruction: instruction
+            });
+        });
+    });
+
     app.all('/instructions', function(request, response){
         switch (request.method) {
             case "GET":
@@ -43,7 +74,7 @@ exports.start = function(app, io){
                 });
             break;
             default:
-                response.send('missing request.method', 500);
+                response.send('method not allowed', 405);
             break;
         }
     })
@@ -62,16 +93,27 @@ exports.start = function(app, io){
     app.get('/plugins', function(request, response){
         response.show('plugins');
     });
+    app.get('/profile', function(request, response){
+        response.show('profile');
+    });
 
     io.sockets.on('connection', function (socket) {
         socket.emit('connected');
         socket.on('delete BuildInstruction', function (data) {
             entity.BuildInstruction.find_by_id(parseInt(data.id), function(err, instruction){
                 instruction.delete(function(){
-                    socket.emit('BuildInstruction deleted', {id: instruction.__id__});
+                    socket.broadcast.emit('BuildInstruction deleted', {id: instruction.__id__});
                 });
             });
         });
+        socket.on('delete User', function (data) {
+            entity.User.find_by_id(parseInt(data.id), function(err, instruction){
+                instruction.delete(function(){
+                    socket.broadcast.emit('User deleted', {id: instruction.__id__});
+                });
+            });
+        });
+
     });
 
 }

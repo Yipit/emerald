@@ -55,12 +55,11 @@ menu.user li.stuff * {
 menu.user li.avatar {
     float:left;
     margin-right:5px;
-}
-
-menu.user li.avatar img {
+    background: url("../images/loading.gif") no-repeat 5px 7px;
+    width: 25px;
+    height: 25px;
     border:solid 1px #666;
 }
-
 
 menu.main {
     margin-top:5px;
@@ -261,5 +260,20 @@ form .button {
   width: 149px;
   span {
     display: none;
+  }
+}
+
+table {
+  tr {
+    td {
+      &.actions {
+        a.clay {
+          float: left;
+          width: 16px;
+          height: 16px;
+          width: 100px;
+        }
+      }
+    }
   }
 }

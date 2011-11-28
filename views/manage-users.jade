@@ -1,27 +1,53 @@
-#project
-
+.container
   h1 Create a new user
+  .row
+    .span12
+      div.form
+        form(method="post")
+          fieldset
+            .clearfix
+              label(for="name") name
+              .input
+                input#name(type="text", name="name")
 
-  div.form
-    form(method="post")
-      p
-        label(for="name") name
-        input#name(type="text", name="name")
-      p
-        label(for="email") email
-        input#email(type="text", name="email")
-      p
-        label(for="password") password
-        input#password(name="password", type="password")
-      p.left
-        input.info.btn#create(type="submit", name="create", value="create")
+            .clearfix
+              label(for="email") email
+              .input
+                input#email(type="text", email="email")
 
-  - if (has_users)
-    hr
-    h1 Existing Users
+            .clearfix
+              label(for="password") password
+              .input
+                input#password(type="password", password="password")
 
-    - each user in users
-      p
-        a(href=user.permalink)= "Details of " + user.name
-        span -
-        a.clay.User.delete(href="#", rel=user.__id__) (delete)
+            p.button
+               input.info.btn#create(type="submit", name="create", value="create")
+
+- if (has_users)
+.container
+  hr
+  h1 Existing Users
+
+  table.bordered-table.zebra-striped
+    thead
+      tr
+        th #id
+        th name
+        th email
+        th actions
+    tbody
+      - each user in users
+        tr
+          td= "#" + user.__id__
+          td= user.name
+          td= user.email
+          td.actions
+            - var alt_edit = "Edit user #" + user.__id__
+            - var alt_delete = "Delete user #" + user.__id__
+
+            a.clay.User.edit(href=user.permalink, rel=user.__id__)
+              img(src="/images/ico_edit.png", width=16, height=16, alt=alt_edit)
+              span Edit
+            a.clay.User.delete(href="#", rel=user.__id__)
+              img(src="/images/ico_stop.png", width=16, height=16, alt=alt_delete)
+              span Delete

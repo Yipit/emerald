@@ -33,8 +33,8 @@ task('data', [], function () {
     console.log("Populating the database...".bold.white);
     entity.clear_keys("clay*", function(err, keys){
         entity.User.create({
-            name: "John Doe",
-            email: "john@doe.com",
+            name: "Gabriel Falcão",
+            email: "gabriel@yipit.com",
             password: '123',
         }, function(err, key, john){
             table.push(["User", john.name, err || "none"])
