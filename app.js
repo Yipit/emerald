@@ -12,6 +12,7 @@
     app.configure(function(){
         app.set('views', __dirname + '/views');
         app.set('view engine', 'jade');
+
         app.use(express.bodyParser());
         app.use(express.methodOverride());
         app.use(express.cookieParser());
@@ -19,10 +20,11 @@
             secret: 'ac39aeb9ab288f96fe51ef594bfca20262fa184e',
             store: new RedisStore()
         }));
+
         app.use(express.compiler({ src: __dirname + '/public', enable: ['less'] }));
-        app.use(function(request, response, next){
-            entity.User.find_by_id(request.session.user_id, function(err, user){
-                response.show = function (name, context){
+        app.use(function(request, response, next) {
+            entity.User.find_by_id(request.session.user_id, function(err, user) {
+                response.show = function (name, context) {
                     var c = _.extend(context || {}, {
                         title: 'Emerald - Continuous Integration',
                         request: request,
@@ -33,6 +35,7 @@
                 return next();
             });
         });
+
         app.use(app.router);
         app.use(express.static(__dirname + '/public'));
     });
@@ -45,8 +48,6 @@
         app.use(express.errorHandler());
     });
 
-
     app.listen(3000);
-
     controllers.start(app, io);
 })();
