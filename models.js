@@ -31,13 +31,13 @@ var User = models.declare("User", function(it, kind){
             return callback(new Error('wrong password for the login "' + this.email + '"'), null);
         }
     });
-
 });
+
 User.authenticate = function(login, password, callback){
     if (!login) {
         return callback(new Error("Invalid email: " + login))
     }
-    User.find_by_email(new RegExp(login.replace("@", "[@]")), function(err, items){
+    User.find_by_email(new RegExp(login), function(err, items){
         var found = items.first;
         if (err) {
             return callback(new Error('there are no users matching the email "' + login + '"'));
@@ -45,6 +45,7 @@ User.authenticate = function(login, password, callback){
         return found.authenticate(password, callback);
     });
 }
+
 var Build = models.declare("Build", function(it, kind) {
     it.has.field("status", kind.numeric);
     it.has.field("error", kind.string);
@@ -94,6 +95,7 @@ module.exports = {
     Build: Build,
     Pipeline: Pipeline,
     connection: User._meta.storage.connection,
+    storage: User._meta.storage,
     clear_keys: function(pattern, callback) {
         var self = this;
         self.connection.keys("clay:*", function(err, keys){
