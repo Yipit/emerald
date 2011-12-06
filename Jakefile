@@ -35,6 +35,16 @@ task('data', [], function () {
                     email: "gabriel@yipit.com",
                     password: '123'
                 }),
+                new entity.User({
+                    name: "Gabriel Falcão",
+                    email: "gabriel@nacaolivre.org",
+                    password: '123'
+                }),
+                new entity.User({
+                    name: "Adam Nelson",
+                    email: "adam@yipit.com",
+                    password: '123'
+                }),
                 new entity.BuildInstruction({
                     name: "Emerald Unit Tests",
                     repository_address: "file://" + __dirname + "/.git",
