@@ -1,3 +1,50 @@
+//Tango Palette: http://tango.freedesktop.org/Tango_Icon_Theme_Guidelines#Color_Palette
+//Licensed as Public Domain
+//LESS'd by James Mason (james@bear454.com)
+
+//Butter
+@light_butter: #fce94f;
+@butter:       #edd400;
+@dark_butter:  #c4a000;
+
+//Orange
+@light_orange: #fcaf3e;
+@orange:       #f57900;
+@dark_orange:  #ce5c00;
+
+//Chocolate
+@light_chocolate: #e9b96e;
+@chocolate:       #c17d11;
+@dark_chocolate:  #8f5902;
+
+//Chameleon
+@light_chameleon: #8ae234;
+@chameleon:       #73d216;
+@dark_chameleon:  #4e9a06;
+
+//Sky Blue
+@light_sky_blue: #729fcf;
+@sky_blue:       #3465a4;
+@dark_sky_blue:  #204a87;
+
+//Plum
+@light_plum: #ad7fa8;
+@plum:       #75507b;
+@dark_plum:  #5c3566;
+
+//Scarlet Red
+@light_scarlet_red: #ef2929;
+@scarlet_red:       #cc0000;
+@dark_scarlet_red:  #a40000;
+
+//Aluminum
+@lightest_aluminum: #eeeeec;
+@lighter_aluminum:  #d3d7cf;
+@light_aluminum:    #babdb6;
+@dark_aluminum:     #888a85;
+@darker_aluminum:   #555753;
+@darkest_aluminum:  #2e3436;
+
 /* -- css reset -- */
 
 ol, ul, menu {
@@ -5,6 +52,10 @@ ol, ul, menu {
 }
 
 /* -- general -- */
+
+body {
+  position: relative;
+}
 
 li {
     line-height:14px;
@@ -61,35 +112,35 @@ menu.user li.avatar {
     border:solid 1px #666;
 }
 
-menu.main {
-    margin-top:5px;
+menu.main, menu.contextual {
+  margin-top:5px;
+  li {
+    float: left;
+    padding-left: 20px;
+    margin-left: 23px;
+    a {
+      color:#fff;
+      text-decoration:none;
+    }
+    &.dashboard {
+      background:url(../images/ico_dashboard.png) no-repeat 0 51%;
+    }
+    &.projects {
+      background:url(../images/ico_build.png) no-repeat 0 51%;
+    }
+    &.pipelines {
+      background:url(../images/ico_pipelines.png) no-repeat 0 51%;
+    }
+    &.users {
+      background:url(../images/ico_users.png) no-repeat 0 51%;
+    }
+    &.output {
+      background:url(../images/ico_terminal.png) no-repeat 0 51%;
+    }
+  }
 }
 
-menu.main li {
-    float:left;
-    padding-left:20px;
-    margin-left:23px;
-}
 
-menu.main li a {
-    color:#fff;
-    text-decoration:none;
-}
-
-menu.main li.dashboard {
-    background:url(../images/ico_dashboard.png) no-repeat 0 51%;
-}
-
-menu.main li.projects {
-    background:url(../images/ico_build.png) no-repeat 0 51%;
-}
-menu.main li.pipelines {
-    background:url(../images/ico_pipelines.png) no-repeat 0 51%;
-}
-
-menu.main li.users {
-    background:url(../images/ico_users.png) no-repeat 0 51%;
-}
 
 /* -- dashboard -- */
 
@@ -274,6 +325,40 @@ table {
           width: 100px;
         }
       }
+    }
+  }
+}
+
+#terminal-wrapper {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 0;
+  overflow: visible;
+  margin: 0px 10px 10px 10px;
+
+  pre#terminal {
+    background: @darkest_aluminum;
+    color: @lightest_aluminum;
+    display: none;
+    overflow: auto;
+    position: relative;
+    padding: 0px 17px 17px 17px;
+    clear: both;
+  }
+
+  .toggle-terminal {
+    float: left;
+    position: relative;
+    display: block;
+    background:url(../images/ico_terminal.png) no-repeat 0 51%;
+    padding: 0 0 0 20px;
+    color: @darkest_aluminum;
+    margin: 5px;
+    &:hover {
+      text-decoration: none;
+      color: @light_aluminum;
     }
   }
 }

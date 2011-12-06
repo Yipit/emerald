@@ -38,7 +38,7 @@ html
                   a(href="/login?next=" + request.url) login
 
         .row
-          .span8 &nbsp;
+          .span8: p
           .span8
             menu.main
               li.dashboard
@@ -49,4 +49,8 @@ html
                 a(href="/pipelines") pipelines
               li.users
                 a(href="/users") users
+
     != body
+    #terminal-wrapper
+      a.toggle-terminal(href="#") Show/Hide current build
+      pre#terminal.hidden!= terminal_example

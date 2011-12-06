@@ -29,4 +29,36 @@ $(function(){
             return false;
         });
     });
+
+    $(".toggle-terminal").live("click", function(e) {
+        var $term = $("#terminal");
+        var height = ($("body").height() - 100) + "px";
+
+        if ($term.hasClass("hidden")) {
+            $term.css("height", "0px");
+            $term.fadeIn("fast", function(){
+                $(this)
+                    .animate({
+                        "height": height,
+                        "padding-top": "17px"
+                    })
+                    .removeClass("hidden")
+                    .addClass("visible");
+            });
+        } else {
+            $term
+                .animate({
+                    "height": "0px",
+                }, function(){
+                    $(this)
+                        .fadeOut("fast", function(){
+                            $(this)
+                                .css("padding-top", "0px")
+                                .removeClass("visible")
+                                .addClass("hidden");
+                        });
+                });
+        }
+        e.preventDefault();
+    });
 });
