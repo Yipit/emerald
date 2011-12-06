@@ -1,0 +1,177 @@
+
+♢ [1mMonkey-patches/Additions to the native prototypes[22m
+
+    ✓ [32mString.slugify[39m
+    ✓ [32mString.methodify[39m
+    ✓ [32mString.render[39m
+    ✓ [32mArray.prototype.first always return the first element[39m
+    ✓ [32mArray.prototype.last always return the last element[39m
+    ✓ [32mArray.prototype.models return unique models[39m
+  Number.prototype.times takes a callback
+    ✓ [32mthe first argument is the last captured error[39m
+    ✓ [32mthe second argument is the index[39m
+    ✓ [32mthe third argument is the number of remaining executions[39m
+  Number.prototype.times takes a callback the fourth argument is an execution context
+    ✓ [32mand the first occurrence responds properly[39m
+ 
+♢ [1mModel fields[22m
+
+  have builtin kinds
+    ✓ [32mstring accepts anything[39m
+    ✓ [32m[1m"auto"[22m assigns the current [1mdate/time[22m[39m
+    ✓ [32m[1m"auto"[22m should ignore a valid date string[39m
+    ✓ [32mdate takes a string and returns a date object[39m
+    ✓ [32mslug accepts string[39m
+    ✓ [32malphanumeric accepts numbers[39m
+    ✓ [32malphanumeric accepts letters[39m
+    ✓ [32malphanumeric accepts letters and numbers[39m
+    ✓ [32malphanumeric does not accept symbols[39m
+    ✓ [32memail accepts a valid email[39m
+    ✓ [32memail complains on invalid email without "@"[39m
+    ✓ [32memail complains on invalid email without extension[39m
+    ✓ [32mnumeric accepts numbers[39m
+    ✓ [32mnumeric accepts [1mONLY[22m numbers[39m
+  have builtin kinds hashOf
+    ✓ [32mget the values from a given object for the given keys[39m
+ 
+♢ [1mModel Inheritance[22m
+
+  Given a model is declared and subclassed adding a new field
+    ✓ [32mthe indexes are place[39m
+    ✓ [32mthe declared field names are available[39m
+    ✓ [32mthe declared field specs are available too[39m
+    ✓ [32mclass methods[39m
+  Given a model is declared and subclassed adding a new field we can create instances that inherits from the parent class
+    ✓ [32mso that it inherits the base fields[39m
+    ✓ [32minstance methods[39m
+ 
+♢ [1mModel issues[22m
+
+    ✓ [32mit complains when declared fields have bad names[39m
+    ✓ [32mit complains when declared indexes have bad names[39m
+    ✓ [32mit complains when declared methods have bad names[39m
+    ✓ [32mit complains when declared class methods have bad names[39m
+    ✓ [32mit complains when declared one to many relationships have bad names[39m
+    ✓ [32mit complains when declared many to one relationships have bad names[39m
+  can be declared sequentially
+    ✓ [32mand keep their spec sandboxed[39m
+ 
+♢ [1mA Model[22m
+
+  after declared
+    ✓ [32mthe indexes are place[39m
+    ✓ [32mcan be created from[39m
+    ✓ [32mthe declared field names are available[39m
+    ✓ [32mobligatory fields are stored[39m
+    ✓ [32munique fields are stored[39m
+    ✓ [32mthe declared field specs are available too[39m
+    ✓ [32mcan be created from a JSON string[39m
+    ✓ [32mcan be created from a JSON buffer[39m
+    ✓ [32mcan be created from a JSON buffer/string seamlessly[39m
+  after declared after creating a functional instance of it
+    ✓ [32mthe model is available through instance.__model__[39m
+    ✓ [32mthe password is hashed[39m
+    ✓ [32mthe frickin hash really works, this tests set it to something else and works[39m
+    ✓ [32mresetting the password also works[39m
+    ✓ [32mthe getter works[39m
+    ✓ [32mthe setter also works[39m
+    ✓ [32minstance methods[39m
+    ✓ [32mclass methods[39m
+    ✓ [32mthe date was parsed properly[39m
+    ✓ [32mthe auto field worked[39m
+  after declared by creating an instance that doesn't fulfill a required field
+    ✓ [32mit should fail[39m
+ 
+♢ [1mRelationships[22m
+
+    ✓ [32mmetadata has a [1m"relationships"[22m attribute[39m
+    ✓ [32mmetadata.relationships is an object[39m
+    ✓ [32m_meta.relationships has [1mone to many[22m thru attribute [1m"has_many"[22m[39m
+    ✓ [32m_meta.relationships has [1mmany to one[22m thru attribute [1m"has_one"[22m[39m
+    ✓ [32m[1mone to many[22m is defined in the declared model[39m
+    ✓ [32m[1mone to many[22m is defined in the referred [1m(side efffected)[22mmodel[39m
+    ✓ [32m[1mmany to one[22m is defined in the declared model[39m
+    ✓ [32m[1mmany to one[22m is defined in the referred [1m(side efffected)[22mmodel[39m
+    ✓ [32m[1mhas many[22m creates a clever property that sets from an array of objects[39m
+    ✓ [32m[1mone-to-many[22m self-assignment to the affected instance[39m
+    ✓ [32m[1mone-to-many[22m fething by reverse name[39m
+    ✓ [32m[1mmany-to-one[22m self-assignment to the affected instance[39m
+    ✓ [32m[1mmany-to-one[22m fething by reverse name[39m
+  [1mhas one[22m creates a clever property that sets from an object to a model
+    ✓ [32mthe immediate relationship is converted to a model instance[39m
+ 
+♢ [1mModels [1m"talking"[22m to a store[22m
+
+    ✓ [32mwhen you declare a model, it is possible to specify its store[39m
+    ✓ [32mit is possible to set the default storage mechanism[39m
+    ✓ [32mit defaults to the redis storage mechanism[39m
+ 
+♢ [1mRedis Storage Mechanism[22m
+
+  by calling [1minstance.save(callback)[22m
+    ✓ [32mit increments the index[39m
+  by calling [1mstore.persist(instance, callback)[22m
+    ✓ [32mit increments the index[39m
+  store.persist([instance1, instance2], callback) stores an array of instances
+    ✓ [32mit is stored properly[39m
+  by calling [1minstance.save(callback)[22m changing an already saved instance just update the values
+    ✓ [32mso that it keeps the key[39m
+  by calling [1minstance.delete(callback)[22m
+    ✓ [32mit gets removed from its indexes[39m
+  by calling [1minstance.save(callback)[22m it is indexed
+    ✓ [32min a sorted set[39m
+  by calling [1mstore.persist(instance, callback)[22m
+    ✓ [32mit increments the index[39m
+  find by id through class method on model
+    ✓ [32minstance.__id__ is in place[39m
+    ✓ [32minstance.__model__ is in place[39m
+    ✓ [32minstance.__data__ is also in place[39m
+    ✓ [32mthe data is also working through the getter[39m
+  find by indexed field through storage mechanism [1mwith regex[22m
+    ✓ [32mfound 1 item[39m
+    ✓ [32mwhich is a model[39m
+  find by indexed field through storage mechanism [1mwith string[22m
+    ✓ [32mfound 1 item[39m
+    ✓ [32mwhich is a model[39m
+  find by indexed field, returning empty set
+    ✓ [32mfound 0 items[39m
+  find by non-indexed field, returning empty set
+    ✓ [32mfound 0 items[39m
+  find by indexed field through model
+    ✓ [32mfound 2 items[39m
+    ✓ [32mthey are models[39m
+  find by indexed field through model when does not exist
+    ✓ [32mit is empty[39m
+    ✓ [32mthe error says it was not found[39m
+  find by non-indexed field through model when does not exist
+    ✓ [32mit is empty[39m
+    ✓ [32mthe error says it was not found[39m
+  find by non-indexed field through storage mechanism
+    ✓ [32mfound 1 item[39m
+    ✓ [32mthey are models[39m
+  find by non-indexed field through storage mechanism
+    ✓ [32mfound 1 item[39m
+    ✓ [32mthey are models[39m
+  find by non-indexed field through model
+    ✓ [32mfound 1 items[39m
+    ✓ [32mthey are models[39m
+  Model.all returns all instances
+    ✓ [32mfound 2 items[39m
+    ✓ [32mthey are models[39m
+  saving models with one-to-many relationships
+    ✓ [32mit gets stored in redis as a simple key-value[39m
+  saving models with many-to-one relationships
+    ✓ [32mit gets stored in redis as a simple key-value[39m
+  storage.sync(instance, callback) fetches the immediate relationships
+    ✓ [32mmany to one[39m
+  incremental ids are incremental
+    ✓ [32mwhen all the fields are different[39m
+  incremental ids are incremental
+    ✓ [32meven when an indexed field is saved as the same in many fields[39m
+  incremental ids are incremental
+    ✓ [32meven when an indexed field is saved as the same in many fields[39m
+ 
+✓ [32m[1mOK[22m[39m » [1m112[22m honored[90m (0.099s)[39m
+
+
+
