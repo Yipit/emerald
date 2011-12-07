@@ -125,7 +125,7 @@ menu.main, menu.contextual {
     &.dashboard {
       background:url(../images/ico_dashboard.png) no-repeat 0 51%;
     }
-    &.projects {
+    &.instructions {
       background:url(../images/ico_build.png) no-repeat 0 51%;
     }
     &.pipelines {
@@ -168,7 +168,7 @@ ul#builds {
     }
 }
 
-.project {
+.instruction {
     background:#eeeeec;
     color:#333;
     overflow:hidden;
@@ -264,21 +264,21 @@ ul#builds {
     }
 }
 
-.project.failed .data {
+.instruction.failed .data {
     background:#cc0000;
     li {
         color:#fff;
     }
 }
 
-.project.success .data {
+.instruction.success .data {
     background:#4e9a06;
     li {
         color:#fff;
     }
 }
 
-.project.running .data {
+.instruction.running .data {
     background:#fcaf3e;
     li {
         color:#fff;
@@ -361,4 +361,8 @@ table {
       color: @light_aluminum;
     }
   }
+}
+
+.modal.hide {
+  display:none;
 }

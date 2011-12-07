@@ -1,0 +1,30 @@
+#new-build.modal.hide.fade
+  .modal-header
+    a.close(href="#") &times;
+    h3 Modal Heading
+  .modal-body
+    .form
+      form(method="post")
+        fieldset
+          .clearfix
+            label(for="name") Build name
+            .input
+              input.xlarge#name(type="text", name="name")
+          .clearfix
+            label(for="description") Description
+            .input
+              input#description(type="text", name="description")
+          .clearfix
+            label(for="repository_address") Repository address
+            .input
+              input#repository(type="text", name="repository_address", value="git://github.com/")
+          .clearfix
+            label(for="build_script") Build script
+            .input
+              textarea#build_script.xxlarge(rows="3", name="build_script")
+                #!/bin/bash
+                echo "Build Successful!"
+              span.help-block The script above will be converted into a bash script
+    .modal-footer
+      input.info.btn#create(type="submit", name="create", value="create")
+// example: <button data-controls-modal="new-build" data-backdrop="true" data-keyboard="true" class="btn success">New Project</button>
