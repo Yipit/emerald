@@ -78,6 +78,10 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
     it.has.getter('permalink', function() {
         return '/instruction/' + this.__id__;
     });
+    it.has.getter('total_builds', function() {
+        return this.builds.length;
+    });
+
     it.has.method('run', function(poller, current_build) {
         var self = this;
 
