@@ -4,14 +4,17 @@ html
     title= title
     link(rel='stylesheet', href='/stylesheets/bootstrap.css', type='text/css')
     link(rel='stylesheet', href='/stylesheets/general.css', type='text/css')
+    link(rel='stylesheet', href='/stylesheets/jquery.gritter.css', type='text/css')
 
     script(type="text/javascript", src="/javascripts/jquery-1.6.2.min.js")
+    script(type="text/javascript", src="/javascripts/jquery.gritter.min.js")
     script(type="text/javascript", src="/javascripts/bootstrap-alerts.js")
     script(type="text/javascript", src="/javascripts/bootstrap-modal.js")
     script(type="text/javascript", src="/javascripts/bootstrap-tipsy.js")
     script(type="text/javascript", src="/javascripts/bootstrap-popover.js")
     script(type="text/javascript", src="/socket.io/socket.io.js")
     script(type="text/javascript", src="/javascripts/main.js")
+    script(type="text/javascript")!= "(function(window){window.emerald = " + emerald_json + ";})(window)"
 
   body
     a#fork_me_on_github(target="_blank", href="https://github.com/Yipit/emerald")

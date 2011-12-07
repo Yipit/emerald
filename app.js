@@ -8,6 +8,7 @@
     child_process = require('child_process'),
     RedisStore = require('connect-redis')(express),
     redis = require("redis").createClient(),
+
     entity = require('./models');
 
     redis.debug_mode = true;
@@ -18,7 +19,13 @@
         _.each(arguments, function(item){parts.push(item);});
         return path.join.apply(path, parts);
     }
-    var jade = require('jade');
+
+    EMERALD_PORT = parseInt(process.env.EMERALD_PORT || 3000);
+    EMERALD_HOSTNAME = process.env.EMERALD_HOSTNAME || 'localhost';
+
+    var EMERALD_DOMAIN = ('http://' + EMERALD_HOSTNAME + (EMERALD_PORT == 80 ? "" : (":" + EMERALD_PORT))).trim("/");
+
+
     app.configure(function(){
         app.set('views', __dirname + '/views');
         app.set('view engine', 'jade');
@@ -35,10 +42,18 @@
             fs.readFile(LOCAL_FILE('.terminal_example.txt'), function(err, raw_terminal_example) {
                 entity.User.find_by_id(request.session.user_id, function(err, user) {
                     response.show = function (name, context) {
+                        var emerald_meta = {
+                            domain: EMERALD_DOMAIN,
+                            hostname: EMERALD_HOSTNAME,
+                            port: EMERALD_PORT
+                        };
+
                         var c = _.extend(context || {}, {
                             title: 'Emerald - Continuous Integration',
                             request: request,
                             user: user,
+                            emerald: emerald_meta,
+                            emerald_json: JSON.stringify(emerald_meta),
                             terminal_example: ansispan(raw_terminal_example.toString())
                         });
                         response.render(name, c);
