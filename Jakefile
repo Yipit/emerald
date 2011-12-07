@@ -54,12 +54,14 @@ task('data', [], function () {
             }),
             new entity.BuildInstruction({
                 name: "Emerald Unit Tests",
+                description: "Asserting that basic business rules\nare working perfectly in emerald",
                 repository_address: "file://" + __dirname + "/.git",
                 build_script: 'jake unit',
                 author: {__id__: 1}
             }),
             new entity.BuildInstruction({
                 name: "Emerald Functional Tests",
+                description: "Tests emerald against redis",
                 repository_address: "file://" + __dirname + "/.git",
                 build_script: 'jake functional',
                 author: {__id__: 1}
