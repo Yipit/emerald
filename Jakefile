@@ -25,52 +25,58 @@ task('default', [], function(){
 desc('cleanse the db and populate the database with test data');
 task('data', [], function () {
     var entity = require('./models');
+
     process.stdout.write("Populating the database... ".white.bold);
     console.time("Finished within");
-    entity.clear_keys("clay*", function(err, keys){
-        entity.clear_keys("sess*", function(err, keys){
-            var entities = [
-                new entity.User({
-                    name: "Gabriel Falcão",
-                    email: "gabriel@yipit.com",
-                    password: '123'
-                }),
-                new entity.User({
-                    name: "Gabriel Falcão",
-                    email: "gabriel@nacaolivre.org",
-                    password: '123'
-                }),
-                new entity.User({
-                    name: "Adam Nelson",
-                    email: "adam@yipit.com",
-                    password: '123'
-                }),
-                new entity.BuildInstruction({
-                    name: "Emerald Unit Tests",
-                    repository_address: "file://" + __dirname + "/.git",
-                    build_script: 'jake unit',
-                    author: {__id__: 1}
-                }),
-                new entity.BuildInstruction({
-                    name: "Emerald Functional Tests",
-                    repository_address: "file://" + __dirname + "/.git",
-                    build_script: 'jake functional',
-                    author: {__id__: 1}
-                }),
-                new entity.Pipeline({
-                    name: "Emerald Tests",
-                    instructions: [{__id__: 1}, {__id__: 2}]
-                })
-            ];
-            entity.storage.persist(entities, function(err, items){
-                if (err) {
-                    console.log("Failed".red.bold);
-                } else {
-                    console.log("OK".green.bold);
-                }
-                console.timeEnd("Finished within");
-                process.exit((err && 1) || 0);
-            });
+    entity.clear_keys(["emerald*","clay*","sess*"], function(err, keys){
+        if (err) {
+            console.log("Failed:".red.bold, err.toString().yellow.bold);
+            console.timeEnd("Finished within");
+            process.exit((err && 1) || 0);
+            return;
+        }
+
+        var entities = [
+            new entity.User({
+                name: "Gabriel Falcão",
+                email: "gabriel@yipit.com",
+                password: '123'
+            }),
+            new entity.User({
+                name: "Gabriel Falcão",
+                email: "gabriel@nacaolivre.org",
+                password: '123'
+            }),
+            new entity.User({
+                name: "Adam Nelson",
+                email: "adam@yipit.com",
+                password: '123'
+            }),
+            new entity.BuildInstruction({
+                name: "Emerald Unit Tests",
+                repository_address: "file://" + __dirname + "/.git",
+                build_script: 'jake unit',
+                author: {__id__: 1}
+            }),
+            new entity.BuildInstruction({
+                name: "Emerald Functional Tests",
+                repository_address: "file://" + __dirname + "/.git",
+                build_script: 'jake functional',
+                author: {__id__: 1}
+            }),
+            new entity.Pipeline({
+                name: "Emerald Tests",
+                instructions: [{__id__: 1}, {__id__: 2}]
+            })
+        ];
+        entity.storage.persist(entities, function(err, items){
+            if (err) {
+                console.log("Failed:".red.bold, err.toString().yellow.bold);
+            } else {
+                console.log("OK".green.bold);
+            }
+            console.timeEnd("Finished within");
+            process.exit((err && 1) || 0);
         });
     });
 });

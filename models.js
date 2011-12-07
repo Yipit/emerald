@@ -1,5 +1,6 @@
 var models = require('clay');
 var crypto = require('crypto');
+var child_process = require('child_process');
 
 BUILD_STAGES = {
     0: 'FETCHING',
@@ -55,6 +56,7 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.field("commit", kind.string);
     it.has.field("author_name", kind.string);
     it.has.field("author_email", kind.string);
+    it.has.field("started_at", kind.auto);
 
     it.has.getter('permalink', function() {
         return '/build/' + this.__id__;
@@ -75,6 +77,42 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
 
     it.has.getter('permalink', function() {
         return '/instruction/' + this.__id__;
+    });
+    it.has.method('run', function(poller, current_build) {
+        var self = this;
+
+        var start_time = new Date();
+
+        var clone_command = ["clone", "--porcelain", instruction.repository_address];
+        var git_clone = child_process.spawn("git", clone_command);
+        poller.redis.subscribe("emerald:GitPoller:stop", function(){
+            git_clone.exit()
+        });
+
+        current_build.save(function(err, build){
+            git_clone.stdout.on('data', function (data) {
+                build.output = build.output + data;
+                build.save(function(err, build){
+                    poller.redis.publish("emerald:Build:" + build.__id__ + ":stdout", data);
+                    poller.redis.publish("emerald:Build:stdout", build.__data__);
+                });
+            });
+            git_clone.stderr.on('data', function (data) {
+                build.save(function(err, build){
+                    poller.redis.publish("emerald:Build:" + build.__id__ + ":stderr", data);
+                    poller.redis.publish("emerald:Build:stderr", build.__data__);
+                });
+            });
+            git_clone.on('exit', function (_code) {
+                var code = parseInt(git_clone.pid);
+                build.pid = code;
+                if (code !== 0) {return;}
+                build.save(function(err, build){
+                    poller.redis.publish("emerald:BuildFinished", build.__data__)
+                });
+            });
+
+        });
     });
 });
 
@@ -98,10 +136,20 @@ module.exports = {
     storage: User._meta.storage,
     clear_keys: function(pattern, callback) {
         var self = this;
-        self.connection.keys("clay:*", function(err, keys){
-            if (err) {return callback(err);}
-            self.connection.del(keys, function(err){
-                return callback(err, keys);
+        var pattern_list = (pattern instanceof Array) ? pattern: [pattern];
+        var exception;
+        var key_list = [];
+
+        pattern_list.forEach(function(pattern){
+            self.connection.keys(pattern, function(err, keys){
+                if (err) {exception = err;return;}
+                keys.forEach(function(key) {key_list.push(key);});
+
+                if (pattern === pattern_list.last) {
+                    self.connection.del(key_list ,function(err) {
+                        return callback(exception, key_list);
+                    });
+                }
             });
         });
     }
