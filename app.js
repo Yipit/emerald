@@ -7,8 +7,10 @@
     ansispan = require('ansispan'),
     child_process = require('child_process'),
     RedisStore = require('connect-redis')(express),
+    redis = require("redis").createClient(),
     entity = require('./models');
 
+    redis.debug_mode = true;
     var app = express.createServer();
     var io = require('socket.io').listen(app);
     function LOCAL_FILE (){
@@ -20,13 +22,12 @@
     app.configure(function(){
         app.set('views', __dirname + '/views');
         app.set('view engine', 'jade');
-
         app.use(express.bodyParser());
         app.use(express.methodOverride());
         app.use(express.cookieParser());
         app.use(express.session({
             secret: 'ac39aeb9ab288f96fe51ef594bfca20262fa184e',
-            store: new RedisStore()
+            store: new RedisStore({ client: redis })
         }));
 
         app.use(express.compiler({ src: LOCAL_FILE('public'), enable: ['less'] }));
@@ -59,6 +60,16 @@
         app.use(express.errorHandler());
     });
 
+    io.configure('production', function(){
+        io.enable('browser client minification');
+        io.set('log level', 0);
+        io.set('transports', ['xhr-polling']);
+    });
+
+    io.configure('development', function(){
+        io.set('log level', 0);
+    });
+
     app.listen(3000);
-    controllers.start(app, io);
+    controllers.start(app, io, redis);
 })();
