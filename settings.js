@@ -1,9 +1,9 @@
 var _ = require('underscore')._;
 var path = require('path');
 
-EMERALD_PORT = parseInt(process.env.EMERALD_PORT || 3000),
-EMERALD_HOSTNAME = process.env.EMERALD_HOSTNAME || 'localhost',
-EMERALD_DOMAIN = ('http://' + EMERALD_HOSTNAME + (EMERALD_PORT == 80 ? "" : (":" + EMERALD_PORT))).trim("/"),
+var EMERALD_PORT = parseInt(process.env.EMERALD_PORT || 3000);
+var EMERALD_HOSTNAME = process.env.EMERALD_HOSTNAME || 'localhost';
+var EMERALD_DOMAIN = ('http://' + EMERALD_HOSTNAME + (EMERALD_PORT == 80 ? "" : (":" + EMERALD_PORT))).trim("/");
 
 module.exports = {
     LOG_LEVEL: 5,
