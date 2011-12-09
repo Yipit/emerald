@@ -82,14 +82,14 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
         return this.builds.length;
     });
 
-    it.has.method('run', function(poller, current_build) {
+    it.has.method('run', function(current_build) {
         var self = this;
 
         var start_time = new Date();
 
         var clone_command = ["clone", "--porcelain", instruction.repository_address];
         var git_clone = child_process.spawn("git", clone_command);
-        poller.redis.subscribe("emerald:GitPoller:stop", function(){
+        self._meta.storage.connection.subscribe("emerald:GitPoller:stop", function(){
             git_clone.exit()
         });
 
@@ -97,14 +97,14 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             git_clone.stdout.on('data', function (data) {
                 build.output = build.output + data;
                 build.save(function(err, build){
-                    poller.redis.publish("emerald:Build:" + build.__id__ + ":stdout", data);
-                    poller.redis.publish("emerald:Build:stdout", build.__data__);
+                    self._meta.storage.connection.publish("emerald:Build:" + build.__id__ + ":stdout", data);
+                    self._meta.storage.connection.publish("emerald:Build:stdout", build.__data__);
                 });
             });
             git_clone.stderr.on('data', function (data) {
                 build.save(function(err, build){
-                    poller.redis.publish("emerald:Build:" + build.__id__ + ":stderr", data);
-                    poller.redis.publish("emerald:Build:stderr", build.__data__);
+                    self._meta.storage.connection.publish("emerald:Build:" + build.__id__ + ":stderr", data);
+                    self._meta.storage.connection.publish("emerald:Build:stderr", build.__data__);
                 });
             });
             git_clone.on('exit', function (_code) {
@@ -112,7 +112,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 build.pid = code;
                 if (code !== 0) {return;}
                 build.save(function(err, build){
-                    poller.redis.publish("emerald:BuildFinished", build.__data__)
+                    self._meta.storage.connection.publish("emerald:BuildFinished", build.__data__)
                 });
             });
 
