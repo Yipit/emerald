@@ -60,19 +60,20 @@ GitPoller.prototype.start = function(){
                         return;
                     }
 
-                    var current_build = new entity.Build({instruction: instruction_to_run, output: "", error: ""});
+                    entity.Build.create({output: "", error: ""}, function(err, key, current_build) {
+                        logger.handleException("Build.create", err);
+                        self.redis.set(settings.REDIS_KEYS.current_build, current_build.__id__, function(err) {
+                            logger.handleException("redis.set", err);
+                            if (err) {
+                                logger.fail(['could not set the key', settings.REDIS_KEYS.current_build, 'to true (redis)', err.toString()]);
+                                return redis.del(settings.REDIS_KEYS.current_build);
+                            }
 
-                    self.redis.set(settings.REDIS_KEYS.current_build, current_build.__id__, function(err) {
-                        logger.handleException("redis.set", err);
-                        if (err) {
-                            logger.fail(['could not set the key', settings.REDIS_KEYS.current_build, 'to true (redis)', err.toString()]);
-                            return redis.del(settings.REDIS_KEYS.current_build);
-                        }
-
-                        /* no errors so far, let's remove it from the queue and build */
-                        self.redis.zrem(instruction_id_to_get, function(){
-                            logger.debug(["redis.zrem("+instruction_id_to_get+")", arguments]);
-                            instruction_to_run.run(current_build);
+                            /* no errors so far, let's remove it from the queue and build */
+                            self.redis.zrem(settings.REDIS_KEYS.build_queue, instruction_id_to_get, function(err){
+                                logger.handleException("redis.zrem", err);
+                                instruction_to_run.run(current_build);
+                            });
                         });
                     });
                 });
