@@ -1,7 +1,8 @@
 var models = require('clay');
 var crypto = require('crypto');
 var child_process = require('child_process');
-var logger = new (require('./logger').Logger)("[models]".cyan);
+
+var logger = new (require('./logger').Logger)("[models]".cyan.bold);
 
 BUILD_STAGES = {
     0: 'FETCHING',
@@ -52,8 +53,8 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.field("status", kind.numeric);
     it.has.field("error", kind.string);
     it.has.field("output", kind.string);
-    it.has.field("pid", kind.number);
-    it.has.field("stage", kind.number);
+    it.has.field("pid", kind.numeric);
+    it.has.field("stage", kind.numeric);
     it.has.field("commit", kind.string);
     it.has.field("author_name", kind.string);
     it.has.field("author_email", kind.string);
@@ -83,7 +84,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
         return this.builds.length;
     });
 
-    it.has.method('run', function(current_build) {
+    it.has.method('run', function(current_build, lock) {
         var self = this;
 
         var start_time = new Date();
@@ -92,6 +93,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
         var git_clone = child_process.spawn("git", clone_command);
 
         git_clone.stdout.on('data', function (data) {
+            logger.info();
             Build.find_by_id(current_build.__id__, function(err, build) {
                 build.output = build.output + data;
                 build.save(function(err, key, build){
@@ -111,16 +113,17 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
         });
         git_clone.on('exit', function (_code) {
             var code = parseInt(git_clone.pid);
-            Build.find_by_id(current_build.__id__, function(err, build){
-                logger.handleException("Build.find_by_id", err);
 
-                build.pid = code;
-                build.save(function(err, key, build){
-                    self._meta.storage.connection.publish("emerald:BuildFinished", build.__data__)
+            lock.release(function() {
+                Build.find_by_id(current_build.__id__, function(err, build){
+                    logger.handleException("Build.find_by_id", err);
+                    console.log("Build:", build, "code:", code);
+                    build.pid = code;
+                    build.save(function(err, key, build){
+                        self._meta.storage.connection.publish("emerald:BuildFinished", build.__data__)
+                    });
                 });
             });
-
-            if (code !== 0) {return;}
         });
     });
 });
