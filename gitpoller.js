@@ -1,16 +1,18 @@
 var logger = new (require('./logger').Logger)("[GIT POLLER]".green.bold);
 var settings = require('./settings');
+var entity = require('./models');
 
-function GitPoller(redis) {
+function GitPoller(redis, pubsub) {
     this.interval = settings.GIT_POLL_INTERVAL;
     this.redis = redis;
+    this.pubsub = pubsub;
     this.lock = new BuildLock({redis:redis});
     this.loop = null;
 }
 GitPoller.prototype.stop = function(){
     /* stopping the interval */
     this.loop && clearInterval(this.loop);
-    this.redis.publish("emerald:GitPoller:stop");
+    this.pubsub.publish("emerald:GitPoller:stop");
 }
 var loglevel = {
     DEBUG: 4,
@@ -31,9 +33,10 @@ GitPoller.prototype.start = function(){
     this.loop = setInterval(function(){
         /* see if there is a build runnning already */
         console.log("             --------------------------------------------------------------------------------".white.bold);
-        self.redis.get(settings.REDIS_KEYS.current_build, function(err, data){
+        self.redis.get(settings.REDIS_KEYS.current_build, function(err, current_build){
+            logger.handleException("redis.get", err);
             logger.debug(["redis.get('"+settings.REDIS_KEYS.current_build+"')", arguments]);
-            var current_build = JSON.parse(data);
+
             /* if not building, let's quit and wait for the next interval */
             if (current_build) {
                 logger.info("already building:", current_build);
@@ -42,6 +45,7 @@ GitPoller.prototype.start = function(){
             logger.info("no builds running, checking the queue");
             /* since it is not building anything, lets get the first build to be runned */
             self.redis.zrange(settings.REDIS_KEYS.build_queue, 0, 1, function(err, items) {
+                logger.handleException("redis.zrange", err);
                 logger.debug(["redis.zrange('"+settings.REDIS_KEYS.build_queue+"', 0, 1)", arguments]);
                 /* if there is nothing to run, let's quit and wait for the next interval */
                 if (items.length === 0) {
@@ -51,17 +55,18 @@ GitPoller.prototype.start = function(){
                 var instruction_id_to_get = items.first;
                 entity.BuildInstruction.find_by_id(instruction_id_to_get, function(err, instruction_to_run) {
                     if (err) {
+                        logger.handleException("BuildInstruction.find_by_id", err);
                         logger.fail(['could not find BuildInstruction with id', instruction_id_to_get, err.toString()]);
-                        return; /* release lock */
+                        return;
                     }
 
                     var current_build = new entity.Build({instruction: instruction_to_run, output: "", error: ""});
 
-                    self.redis.set(settings.REDIS_KEYS.current_build, current_build.__data__, function(err) {
-                        logger.debug(["redis.set('"+settings.REDIS_KEYS.current_build+"', "+JSON.stringify(current_build.__data__)+")", arguments]);
+                    self.redis.set(settings.REDIS_KEYS.current_build, current_build.__id__, function(err) {
+                        logger.handleException("redis.set", err);
                         if (err) {
                             logger.fail(['could not set the key', settings.REDIS_KEYS.current_build, 'to true (redis)', err.toString()]);
-                            return; /* release lock */
+                            return redis.del(settings.REDIS_KEYS.current_build);
                         }
 
                         /* no errors so far, let's remove it from the queue and build */

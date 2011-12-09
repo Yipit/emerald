@@ -2,8 +2,6 @@
     var _ = require('underscore')._,
     settings = require('./settings'),
 
-    pubsub = require('./pubsub'),
-
     gitpoller = require('./gitpoller'),
     websockets = require('./websockets'),
     controllers = require('./controllers'),
@@ -12,7 +10,7 @@
 
 
     RedisStore = require('connect-redis')(express),
-    Redis = require("redis"),
+    Redis = require('redis'),
     redis = Redis.createClient(),
     middleware = require('./middleware');
 
@@ -47,7 +45,6 @@
 
     app.listen(3000);
 
-    pubsub.use(Redis.createClient(), io);
     gitpoller.use(redis);
 
     websockets.work_on(redis, io);

@@ -12,6 +12,7 @@ $(function(){
                 text: "The build instruction #" + data.id + " has been added to the queue",
                 image: window.emerald.domain + "/images/control_double_down.png"
             });
+            $(".btn[emerald-action='run'][emerald-entity='BuildInstruction'][rel='"+data.id+"']").button('reset');
         });
 
         $(".clay.BuildInstruction.delete").live("click", function(e) {
@@ -34,14 +35,12 @@ $(function(){
 
             switch (entity_name) {
                 case 'BuildInstruction':
-                    var msg = {
-                        title: 'Build Scheduled!',
-                        text: 'The instruction #' + id + ' has been scheduled!',
-                        image: window.emerald.domain + "/images/control_double_up.png"
-                    };
+                    $self
+                        .attr('data-loading-text', '')
+                        .button('loading');
                     break;
             }
-            $.gritter.add(msg);
+
             return e.preventDefault();
         });
     });

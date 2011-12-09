@@ -1,4 +1,5 @@
 require('colors');
+var _ = require("underscore")._;
 var settings = require('./settings');
 var loglevel = {
     DEBUG: 4,
@@ -12,29 +13,40 @@ function Logger (prefix) {
     level = settings.LOG_LEVEL || loglevel.SUCCESS;
 
     this.prefix = "   [EMERALD] ".green + prefix;
+    this.log = function(prefix, parts){
+        var msg = [this.prefix, prefix];
+        if (parts instanceof Array) {
+            _.each(parts, function(x) {msg.push(x);});
+        } else {
+            msg.push(parts);
+        }
+        msg.push("@".green + this.timestamp());
+        console.log.apply(console, msg);
+    }
 
     this.info = function(parts) {
         if (level < 2) return;
-        var msg = (parts instanceof Array) && JSON.stringify(parts) || parts;
-        console.log(this.prefix, "INFO:".cyan.bold, msg, "@", this.timestamp());
+        this.log("INFO:".cyan.bold, parts);
     };
     this.debug =  function(parts) {
         if (level < 4) return;
-        var msg = (parts instanceof Array) && JSON.stringify(parts) || parts;
-        console.log(this.prefix, "DEBUG:".yellow.bold, msg, "@", this.timestamp());
+        this.log("DEBUG:".yellow.bold, parts);
     };
     this.success =  function(parts) {
         if (level < 3) return;
-        var msg = (parts instanceof Array) && JSON.stringify(parts) || parts;
-        console.log(this.prefix, msg.green.bold, "@", this.timestamp());
+        this.log("SUCCESS:".green.bold, parts);
     };
     this.fail = function(parts) {
         if (level < 1) return;
-        var msg = (parts instanceof Array) && JSON.stringify(parts) || parts;
-        console.log(this.prefix, msg.red.bold, "@", this.timestamp());
+        this.log("FAILURE:".red, parts);
     };
+    this.handleException = function(where, exc){
+        if (exc) {
+            this.fail(["@", where, exc]);
+        }
+    }
     this.timestamp = function(){
-        return (new Date()).toTimeString().yellow.bold;
+        return (new Date()).toTimeString().green.bold;
     };
 }
 Logger.levels = loglevel;

@@ -87,10 +87,10 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
 
         var start_time = new Date();
 
-        var clone_command = ["clone", "--porcelain", instruction.repository_address];
+        var clone_command = ["clone", "--porcelain", self.repository_address];
         var git_clone = child_process.spawn("git", clone_command);
         self._meta.storage.connection.subscribe("emerald:GitPoller:stop", function(){
-            git_clone.exit()
+            git_clone.kill()
         });
 
         current_build.save(function(err, build){

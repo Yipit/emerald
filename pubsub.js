@@ -1,9 +1,26 @@
-var logger = new (require('./logger').Logger)("[Redis Pub/Sub]".yellow);
+var logger = new (require('./logger').Logger)("[ PUB/SUB ] ".red.bold);
 
-module.exports.use = function(redis, io) {
-    redis.subscribe("BuildInstruction enqueued", function(data){
-        io.sockets.on('connection', function (socket) {
-            socket.emit("BuildInstruction enqueued", JSON.parse(data));
-        });
+module.exports.use = function(redis, socket) {
+    logger.info("I'm awake");
+    const subscribe = require('redis').createClient();
+    subscribe.subscribe("BuildInstruction enqueued")
+
+    subscribe.on("message", function(channel, message) {
+        var parsed;
+        try {
+            parsed = JSON.parse(message);
+        } catch (e) {
+            parsed = message;
+        }
+        socket.emit(channel, parsed);
+        switch (channel) {
+            case "BuildInstruction enqueued":
+            logger.success("A the BuildInstruction #"+parsed.id+"was successfully enqueued");
+                break;
+        }
+    });
+
+    socket.on('disconnect', function() {
+        subscribe.quit();
     });
 }
