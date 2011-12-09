@@ -1,6 +1,7 @@
 var models = require('clay');
 var crypto = require('crypto');
 var child_process = require('child_process');
+var logger = new (require('./logger').Logger)("[models]".cyan);
 
 BUILD_STAGES = {
     0: 'FETCHING',
@@ -89,33 +90,37 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
 
         var clone_command = ["clone", "--porcelain", self.repository_address];
         var git_clone = child_process.spawn("git", clone_command);
-        self._meta.storage.connection.subscribe("emerald:GitPoller:stop", function(){
-            git_clone.kill()
-        });
 
-        current_build.save(function(err, build){
-            git_clone.stdout.on('data', function (data) {
+        git_clone.stdout.on('data', function (data) {
+            Build.find_by_id(current_build.__id__, function(err, build) {
                 build.output = build.output + data;
-                build.save(function(err, build){
+                build.save(function(err, key, build){
                     self._meta.storage.connection.publish("emerald:Build:" + build.__id__ + ":stdout", data);
                     self._meta.storage.connection.publish("emerald:Build:stdout", build.__data__);
                 });
             });
-            git_clone.stderr.on('data', function (data) {
-                build.save(function(err, build){
+        });
+        git_clone.stderr.on('data', function (data) {
+            Build.find_by_id(current_build.__id__, function(err, build) {
+                build.error = build.error + data;
+                build.save(function(err, key, build){
                     self._meta.storage.connection.publish("emerald:Build:" + build.__id__ + ":stderr", data);
                     self._meta.storage.connection.publish("emerald:Build:stderr", build.__data__);
                 });
             });
-            git_clone.on('exit', function (_code) {
-                var code = parseInt(git_clone.pid);
+        });
+        git_clone.on('exit', function (_code) {
+            var code = parseInt(git_clone.pid);
+            Build.find_by_id(current_build.__id__, function(err, build){
+                logger.handleException("Build.find_by_id", err);
+
                 build.pid = code;
-                if (code !== 0) {return;}
-                build.save(function(err, build){
+                build.save(function(err, key, build){
                     self._meta.storage.connection.publish("emerald:BuildFinished", build.__data__)
                 });
             });
 
+            if (code !== 0) {return;}
         });
     });
 });
