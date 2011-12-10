@@ -32,6 +32,7 @@
     thead
       tr
         th #id
+        th gravatar
         th name
         th email
         th actions
@@ -39,15 +40,15 @@
       - each user in users
         tr
           td= "#" + user.__id__
+          td: img(src=user.gravatar_of_size(35))
           td= user.name
           td= user.email
-          td.actions
+          td
             - var alt_edit = "Edit user #" + user.__id__
             - var alt_delete = "Delete user #" + user.__id__
 
-            a.clay.User.edit(href=user.permalink, rel=user.__id__)
+            a.btn.info.edit.clay.User.edit(href=user.permalink, rel=user.__id__) Edit
               img(src="/images/ico_edit.png", width=16, height=16, alt=alt_edit)
-              span Edit
-            a.clay.User.delete(href="#", rel=user.__id__)
+
+            a.btn.danger.clay.User.delete(href="#", rel=user.__id__) Delete
               img(src="/images/ico_stop.png", width=16, height=16, alt=alt_delete)
-              span Delete
