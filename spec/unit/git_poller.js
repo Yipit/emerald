@@ -124,7 +124,16 @@ vows.describe('A *Lock* for GitPoller'.cyan).addBatch({
         '*.release()* is also available from the *handle*': function(lock, redis){
             lock.acquire(function(handle){
                 should.exist(handle.release);
-                handle.release.should.be.equal(lock.release);
+                var called = false;
+                lock.release = function(a, b, c){
+                    a.should.equal("foo");
+                    b.should.equal(2);
+                    c.should.equal("BAR");
+                    called = true;
+                }
+                called.should.be.false;
+                handle.release("foo", 2, "BAR")
+                called.should.be.true;
             });
         },
 

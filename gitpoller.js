@@ -8,7 +8,7 @@ function GitPoller(redis) {
     this.loop = null;
     this.lock = new PollerLock(settings.REDIS_KEYS.current_build, redis);
 
-    this.lifecycle = new Lifecycle(this.lock);
+    this.lifecycle = new Lifecycle(settings.REDIS_KEYS.build_queue, this.lock);
 }
 GitPoller.prototype.stop = function(){
     /* stopping the interval */
@@ -29,44 +29,31 @@ GitPoller.prototype.start = function(){
     self.loop = setInterval(function(){
         /* see if there is a build runnning already */
         console.log("             --------------------------------------------------------------------------------".white.bold);
-        self.lock.acquire(function(handle){
-            logger.info("no builds running, checking the queue");
-            /* since it is not building anything, lets get the first build to be runned */
-            self.redis.zrange(settings.REDIS_KEYS.build_queue, 0, 1, function(err, items) {
-                logger.handleException("redis.zrange", err);
-                logger.debug(["redis.zrange('"+settings.REDIS_KEYS.build_queue+"', 0, 1)", arguments]);
-                /* if there is nothing to run, let's quit and wait for the next interval */
-                if (items.length === 0) {
-                    logger.info("nothing to build so far");
-                    return self.lock.release();
+        self.lifecycle.consume_build_queue(function(instruction_id_to_get, handle) {
+            entity.BuildInstruction.find_by_id(instruction_id_to_get, function(err, instruction_to_run) {
+                if (err) {
+                    logger.handleException("BuildInstruction.find_by_id", err);
+                    logger.fail(['could not find BuildInstruction with id', instruction_id_to_get, err.toString()]);
+                    return handle.release();
                 }
-                var instruction_id_to_get = items.first;
-                entity.BuildInstruction.find_by_id(instruction_id_to_get, function(err, instruction_to_run) {
-                    if (err) {
-                        logger.handleException("BuildInstruction.find_by_id", err);
-                        logger.fail(['could not find BuildInstruction with id', instruction_id_to_get, err.toString()]);
-                        return self.lock.release();
-                    }
 
-                    entity.Build.create({output: "", error: ""}, function(err, key, current_build) {
-                        logger.handleException("Build.create", err);
-                        handle.lock(current_build.__id__, function(err) {
-                            logger.handleException("redis.set", err);
-                            if (err) {
-                                logger.fail(['could not set the key', settings.REDIS_KEYS.current_build, 'to true (redis)', err.toString()]);
-                                return self.lock.release();
-                            }
+                entity.Build.create({output: "", error: ""}, function(err, key, current_build) {
+                    logger.handleException("Build.create", err);
+                    handle.lock(current_build.__id__, function(err) {
+                        logger.handleException("redis.set", err);
+                        if (err) {
+                            logger.fail(['could not set the key', settings.REDIS_KEYS.current_build, 'to true (redis)', err.toString()]);
+                            return handle.release();
+                        }
 
-                            /* no errors so far, let's remove it from the queue and build */
-                            self.redis.zrem(settings.REDIS_KEYS.build_queue, instruction_id_to_get, function(err){
-                                logger.handleException("redis.zrem", err);
-                                instruction_to_run.run(current_build, self.lock);
-                            });
+                        /* no errors so far, let's remove it from the queue and build */
+                        self.redis.zrem(settings.REDIS_KEYS.build_queue, instruction_id_to_get, function(err){
+                            logger.handleException("redis.zrem", err);
+                            instruction_to_run.run(current_build, self.lock);
                         });
                     });
                 });
             });
-
         });
     }, self.interval);
 }
@@ -94,16 +81,18 @@ PollerLock.prototype.acquire = function(callback){
 }
 
 PollerLock.prototype.release = function(callback){
+    var self = this;
     this.redis.del(this.key, function(err, num){
+        logger.handleException("redis.del(" + self.key + ")", err);
         if (err || (parseInt(num) < 1)) {return;}
-
-        logger.handleException("redis.del(" + settings.REDIS_KEYS.current_build + ")", err);
         callback && callback(new Date());
     });
 }
 function LockHandle (lock) {
     this.__lock__ = lock;
-    this.release = lock.release;
+    this.release = function(){
+        lock.release.apply(lock, arguments);
+    }
 }
 LockHandle.prototype.lock = function(value, callback){
     var self = this;
@@ -117,6 +106,7 @@ function Lifecycle (key_for_build_queue, lock) {
     this.lock = lock;
     this.key_for_build_queue = key_for_build_queue;
 }
+
 Lifecycle.prototype.consume_build_queue = function(callback){
     var self = this;
 
