@@ -120,7 +120,14 @@ vows.describe('A *Lock* for GitPoller'.cyan).addBatch({
             });
 
             called.should.be.true;
-        }
+        },
+        '*.release()* is also available from the *handle*': function(lock, redis){
+            lock.acquire(function(handle){
+                should.exist(handle.release);
+                handle.release.should.be.equal(lock.release);
+            });
+        },
+
     },
     '*lock.acquire* behavior when *redis.set* got an error': {
         topic: function(){
@@ -164,6 +171,119 @@ vows.describe('A *Lock* for GitPoller'.cyan).addBatch({
             released.should.be.true;
         }
 
+    }
+}).export(module);
+
+vows.describe("A Poller's *Lifecycle*".cyan).addBatch({
+    'Takes a redis instance as first parameter, then:': {
+        topic: function(){
+            var redis_mock = {};
+
+            var lock_mock = {
+                redis: redis_mock,
+                acquire: function(){}
+            };
+            var lifecycle = new lib.Lifecycle("the_build#queue-key", lock_mock);
+
+            this.callback(lifecycle, lock_mock, redis_mock);
+        },
+        '*lifecycle.key_for_build_queue* should be the same object passed as 1st argument': function(lifecycle, lock_mock) {
+            lifecycle.key_for_build_queue.should.equal("the_build#queue-key");
+        },
+        '*lifecycle.lock* should be the same object passed as 2nd argument': function(lifecycle, lock_mock) {
+            lifecycle.lock.should.equal(lock_mock);
+        },
+        '*lifecycle.consume_build_queue* should do nothing when the lock was not acquired': function(lifecycle, lock_mock){
+            var called = false;
+
+            lifecycle.consume_build_queue(function(){
+                called = true;
+            });
+            called.should.be.false;
+        }
+    },
+    '*lifecycle.consume_build_queue* should do nothing when there is an error getting the list from redis': function(){
+        var called = false;
+        var redis_zrange_called = false;
+        var lock_was_released = false;
+
+        var handle_mock = {
+            release: function(cb){
+                lock_was_released = true;
+            }
+        }
+        var lock_mock = {
+            redis: {
+              zrange: function(key, start, end, callback){
+                  redis_zrange_called = true;
+                  start.should.equal(0);
+                  end.should.equal(1);
+                  callback(new Error('ooops'), [1]);
+                }
+            },
+            acquire: function(callback){callback(handle_mock);}
+        };
+
+        var lifecycle = new lib.Lifecycle("the_build#queue-key", lock_mock);
+
+        lifecycle.consume_build_queue(function(){
+            called = true;
+        });
+        called.should.be.false;
+        lock_was_released.should.be.true;
+        redis_zrange_called.should.be.true;
+    },
+    '*lifecycle.consume_build_queue* should do nothing when there are no builds queued': function(){
+        var called = false;
+        var redis_zrange_called = false;
+        var lock_was_released = false;
+
+        var handle_mock = {
+            release: function(cb){
+                lock_was_released = true;
+            }
+        }
+        var lock_mock = {
+            redis: {
+              zrange: function(key, start, end, callback){
+                  redis_zrange_called = true;
+                  start.should.equal(0);
+                  end.should.equal(1);
+                  callback(null, []);
+                }
+            },
+            acquire: function(callback){callback(handle_mock);}
+        };
+
+        var lifecycle = new lib.Lifecycle("the_build#queue-key", lock_mock);
+
+        lifecycle.consume_build_queue(function(){
+            called = true;
+        });
+        called.should.be.false;
+        lock_was_released.should.be.true;
+        redis_zrange_called.should.be.true;
+    },
+    '*lifecycle.consume_build_queue* calls its callback with the next item to be consumed and the lock handle': function(){
+        var called = false;
+
+        var dummy_handle = {}
+        var lock_mock = {
+            redis: {
+              zrange: function(key, start, end, callback){
+                  callback(null, ["1st#instruction2run"]);
+              }
+            },
+            acquire: function(callback){callback(dummy_handle);}
+        };
+
+        var lifecycle = new lib.Lifecycle("the_build#queue-key", lock_mock);
+
+        lifecycle.consume_build_queue(function(){
+            called = true;
+        });
+
+        called.should.be.true;
     }
 }).export(module);
 

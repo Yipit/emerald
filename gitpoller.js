@@ -7,6 +7,8 @@ function GitPoller(redis) {
     this.redis = redis;
     this.loop = null;
     this.lock = new PollerLock(settings.REDIS_KEYS.current_build, redis);
+
+    this.lifecycle = new Lifecycle(this.lock);
 }
 GitPoller.prototype.stop = function(){
     /* stopping the interval */
@@ -101,6 +103,7 @@ PollerLock.prototype.release = function(callback){
 }
 function LockHandle (lock) {
     this.__lock__ = lock;
+    this.release = lock.release;
 }
 LockHandle.prototype.lock = function(value, callback){
     var self = this;
@@ -110,10 +113,26 @@ LockHandle.prototype.lock = function(value, callback){
     });
 }
 
+function Lifecycle (key_for_build_queue, lock) {
+    this.lock = lock;
+    this.key_for_build_queue = key_for_build_queue;
+}
+Lifecycle.prototype.consume_build_queue = function(callback){
+    var self = this;
+
+    self.lock.acquire(function(handle){
+        self.lock.redis.zrange(self.key_for_build_queue, 0, 1, function(err, items) {
+            if (err || items.length < 1) {return handle.release();}
+            return callback(items, handle);
+        });
+    });
+}
+
 exports.logger = logger;
 exports.GitPoller = GitPoller;
 exports.LockHandle = LockHandle;
 exports.PollerLock = PollerLock;
+exports.Lifecycle = Lifecycle;
 exports.use = function (redis) {
     return new exports.GitPoller(redis).start();
 }
