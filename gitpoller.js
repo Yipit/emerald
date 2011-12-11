@@ -1,28 +1,19 @@
-var logger = new (require('./logger').Logger)("[GIT POLLER]".green.bold);
+var logger = new (require('./logger').Logger)("[GITPOLLER]".green.bold);
 var settings = require('./settings');
 var entity = require('./models');
 
-function GitPoller(redis, pubsub) {
+function GitPoller(redis) {
     this.interval = settings.GIT_POLL_INTERVAL;
     this.redis = redis;
-    this.pubsub = pubsub;
-    this.lock = new BuildLock({redis:redis});
     this.loop = null;
-    this.lock = new BuildLock(redis);
+    this.lock = new PollerLock(settings.REDIS_KEYS.current_build, redis);
 }
 GitPoller.prototype.stop = function(){
     /* stopping the interval */
     this.loop && clearInterval(this.loop);
     this.lock.release(function(){
-        this.pubsub.publish("emerald:GitPoller:stop");
+        this.redis.publish("emerald:GitPoller:stop");
     });
-}
-var loglevel = {
-    DEBUG: 4,
-    SUCCESS: 3,
-    INFO: 2,
-    FAIL: 1,
-    CRITICAL: 0
 }
 
 GitPoller.prototype.start = function(){
@@ -36,7 +27,7 @@ GitPoller.prototype.start = function(){
     self.loop = setInterval(function(){
         /* see if there is a build runnning already */
         console.log("             --------------------------------------------------------------------------------".white.bold);
-        self.lock.acquire(function(current_build){
+        self.lock.acquire(function(handle){
             logger.info("no builds running, checking the queue");
             /* since it is not building anything, lets get the first build to be runned */
             self.redis.zrange(settings.REDIS_KEYS.build_queue, 0, 1, function(err, items) {
@@ -57,7 +48,7 @@ GitPoller.prototype.start = function(){
 
                     entity.Build.create({output: "", error: ""}, function(err, key, current_build) {
                         logger.handleException("Build.create", err);
-                        self.redis.set(settings.REDIS_KEYS.current_build, current_build.__id__, function(err) {
+                        handle.lock(current_build.__id__, function(err) {
                             logger.handleException("redis.set", err);
                             if (err) {
                                 logger.fail(['could not set the key', settings.REDIS_KEYS.current_build, 'to true (redis)', err.toString()]);
@@ -78,12 +69,16 @@ GitPoller.prototype.start = function(){
     }, self.interval);
 }
 
-function BuildLock(redis){
-    this.locked = false;
+function PollerLock(key, redis){
+    this.key = key;
     this.redis = redis;
+    this.locked = false;
+    this.handle = new LockHandle(this);
 }
-BuildLock.prototype.acquire = function(callback){
-    this.redis.get(settings.REDIS_KEYS.current_build, function(err, current_build){
+
+PollerLock.prototype.acquire = function(callback){
+    var self = this;
+    this.redis.get(this.key, function(err, current_build){
         logger.handleException("redis.get", err);
         logger.debug(["redis.get('"+settings.REDIS_KEYS.current_build+"')", arguments]);
 
@@ -92,17 +87,34 @@ BuildLock.prototype.acquire = function(callback){
             logger.info("already building:", current_build);
             return;
         }
-        return callback(current_build);
+        return callback(self.handle);
     });
 }
 
-BuildLock.prototype.release = function(callback){
-    this.redis.del(settings.REDIS_KEYS.current_build, function(err){
+PollerLock.prototype.release = function(callback){
+    this.redis.del(this.key, function(err, num){
+        if (err || (parseInt(num) < 1)) {return;}
+
         logger.handleException("redis.del(" + settings.REDIS_KEYS.current_build + ")", err);
         callback && callback(new Date());
     });
 }
-
-exports.use = function (redis) {
-    return new GitPoller(redis).start();
+function LockHandle (lock) {
+    this.__lock__ = lock;
 }
+LockHandle.prototype.lock = function(value, callback){
+    var self = this;
+    this.__lock__.redis.set(this.__lock__.key, value, function(err){
+        if (err) {return self.__lock__.release();}
+        callback();
+    });
+}
+
+exports.logger = logger;
+exports.GitPoller = GitPoller;
+exports.LockHandle = LockHandle;
+exports.PollerLock = PollerLock;
+exports.use = function (redis) {
+    return new exports.GitPoller(redis).start();
+}
+

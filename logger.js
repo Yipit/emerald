@@ -10,7 +10,9 @@ var loglevel = {
 }
 
 function Logger (prefix) {
-    level = settings.LOG_LEVEL || loglevel.SUCCESS;
+    var self = this;
+
+    this.level = settings.LOG_LEVEL || loglevel.SUCCESS;
 
     this.prefix = "   [EMERALD] ".green + prefix;
     this.log = function(prefix, parts){
@@ -25,19 +27,19 @@ function Logger (prefix) {
     }
 
     this.info = function(parts) {
-        if (level < 2) return;
+        if (self.level < 2) return;
         this.log("INFO:".cyan.bold, parts);
     };
     this.debug =  function(parts) {
-        if (level < 4) return;
+        if (self.level < 4) return;
         this.log("DEBUG:".yellow.bold, parts);
     };
     this.success =  function(parts) {
-        if (level < 3) return;
+        if (self.level < 3) return;
         this.log("SUCCESS:".green.bold, parts);
     };
     this.fail = function(parts) {
-        if (level < 1) return;
+        if (self.level < 1) return;
         this.log("FAILURE:".red, parts);
     };
     this.handleException = function(where, exc){
