@@ -135,8 +135,7 @@ vows.describe('A *Lock* for GitPoller'.cyan).addBatch({
                 handle.release("foo", 2, "BAR")
                 called.should.be.true;
             });
-        },
-
+        }
     },
     '*lock.acquire* behavior when *redis.set* got an error': {
         topic: function(){
@@ -153,7 +152,6 @@ vows.describe('A *Lock* for GitPoller'.cyan).addBatch({
                 del: function(){}
             }
             var lock = new lib.PollerLock("other#key", redis_mock);
-
             this.callback(lock, redis_mock);
         },
         'Then calling *handle.lock* will not call the callback': function(lock, redis){
@@ -179,7 +177,6 @@ vows.describe('A *Lock* for GitPoller'.cyan).addBatch({
             });
             released.should.be.true;
         }
-
     }
 }).export(module);
 
