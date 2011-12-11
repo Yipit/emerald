@@ -109,10 +109,14 @@ function Lifecycle (key_for_build_queue, lock) {
 
 Lifecycle.prototype.consume_build_queue = function(callback){
     var self = this;
-
     self.lock.acquire(function(handle){
         self.lock.redis.zrange(self.key_for_build_queue, 0, 1, function(err, items) {
-            if (err || items.length < 1) {return handle.release();}
+            if (err || items.length < 1) {
+                logger.info("there are no builds queued");
+                return handle.release();
+            }
+
+            logger.info("consuming the build queue");
             return callback(items, handle);
         });
     });
