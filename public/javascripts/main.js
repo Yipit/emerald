@@ -2,8 +2,25 @@ $(function(){
     var socket = io.connect();
     socket.on('connected', function (data) {
 
-        socket.on('BuildInstruction deleted', function(data){
-            $(".clay.BuildInstruction.delete[rel=" + data.id + "]").parent().remove();
+        $("#new-build").modal();
+        $.each(["BuildInstruction", "User"], function(index, ModelName){
+            socket.on(ModelName + ' deleted', function(data){
+                var selector = ".clay."+ModelName+".delete[rel=" + data.id + "]";
+                console.log(selector);
+                var $button = $(selector);
+                $button.button('reset');
+                $button.parents("tr").animate({opacity: 0}, function(){
+                    $(this).remove();
+                })
+            });
+            socket.on(ModelName + ' created', function(data){
+                $.gritter.add({
+                    title: ModelName + " created",
+                    text: "#" + data.id,
+                    image: window.emerald.domain + "/images/control_double_down.png"
+                });
+                $(".btn[emerald-action='run'][emerald-entity='BuildInstruction'][rel='"+data.id+"']").button('reset');
+            });
         });
 
         socket.on('BuildInstruction enqueued', function(data){
@@ -16,11 +33,10 @@ $(function(){
         });
 
         $(".clay.BuildInstruction.delete").live("click", function(e) {
-            var id = $(this).attr("rel");
+            var $self = $(this);
+            var id = $self.attr("rel");
+            $self.button('loading');
             socket.emit('delete BuildInstruction', {id: id});
-            $(this).parent().animate({
-                'opacity': 0.2,
-            })
             return e.preventDefault();
         });
         $(".btn[emerald-action='run']").die('click').live('click', function(e){
@@ -43,9 +59,6 @@ $(function(){
 
             return e.preventDefault();
         });
-    });
-    socket.on('User deleted', function(data){
-        $(".clay.User.delete[rel=" + data.id + "]").parent().remove();
     });
 
     socket.on('connected', function (data) {

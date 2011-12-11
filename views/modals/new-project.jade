@@ -1,7 +1,8 @@
-#new-build.modal.hide.fade
+#new-build.modal.fade
   .modal-header
     a.close(href="#") &times;
-    h3 Modal Heading
+    h3 Creating a new build instruction
+
   .modal-body
     .form
       form(method="post")
@@ -21,10 +22,10 @@
           .clearfix
             label(for="build_script") Build script
             .input
-              textarea#build_script.xxlarge(rows="3", name="build_script")
+              textarea#build_script.xlarge(rows="3", name="build_script")
                 #!/bin/bash
                 echo "Build Successful!"
               span.help-block The script above will be converted into a bash script
+
     .modal-footer
       input.info.btn#create(type="submit", name="create", value="create")
-// example: <button data-controls-modal="new-build" data-backdrop="true" data-keyboard="true" class="btn success">New Project</button>

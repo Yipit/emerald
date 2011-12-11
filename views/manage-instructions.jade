@@ -27,3 +27,5 @@ include modals/new-project.jade
                   p Never built :(
                 - else
                   p: strong= "Was built " + instruction.total_builds + " times"
+
+  button.btn.success.large.clay.BuildInstruction.create(data-controls-modal="new-build") Create an instruction
