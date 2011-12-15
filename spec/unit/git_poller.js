@@ -38,7 +38,7 @@ vows.describe('A *Lock* for GitPoller'.cyan).addBatch({
         lock.release(function(){
             called = true;
         });
-        called.should.be.false;
+        called.should.not.be.true;
     },
     '*lock.release* takes a callback that is *not* called if an error was produced': function() {
         var redis_mock = {
@@ -52,7 +52,7 @@ vows.describe('A *Lock* for GitPoller'.cyan).addBatch({
         lock.release(function(){
             called = true;
         });
-        called.should.be.false;
+        called.should.not.be.true;
     },
     '*lock.release* takes a callback that *is called* if there are no errors and at least 1 item was affected': function() {
         var redis_mock = {
@@ -131,7 +131,7 @@ vows.describe('A *Lock* for GitPoller'.cyan).addBatch({
                     c.should.equal("BAR");
                     called = true;
                 }
-                called.should.be.false;
+                called.should.not.be.true;
                 handle.release("foo", 2, "BAR")
                 called.should.be.true;
             });
@@ -162,7 +162,7 @@ vows.describe('A *Lock* for GitPoller'.cyan).addBatch({
                 });
             });
 
-            called.should.be.false;
+            called.should.not.be.true;
         },
         'And calling *handle.lock* will cause the lock to be released': function(lock, redis){
             var released = false;
@@ -205,7 +205,7 @@ vows.describe("A Poller's *Lifecycle*".cyan).addBatch({
             lifecycle.consume_build_queue(function(){
                 called = true;
             });
-            called.should.be.false;
+            called.should.not.be.true;
         }
     },
     '*lifecycle.consume_build_queue* should do nothing when there is an error getting the list from redis': function(){
@@ -235,7 +235,7 @@ vows.describe("A Poller's *Lifecycle*".cyan).addBatch({
         lifecycle.consume_build_queue(function(){
             called = true;
         });
-        called.should.be.false;
+        called.should.not.be.true;
         lock_was_released.should.be.true;
         redis_zrange_called.should.be.true;
     },
@@ -266,7 +266,7 @@ vows.describe("A Poller's *Lifecycle*".cyan).addBatch({
         lifecycle.consume_build_queue(function(){
             called = true;
         });
-        called.should.be.false;
+        called.should.not.be.true;
         lock_was_released.should.be.true;
         redis_zrange_called.should.be.true;
     },
@@ -290,6 +290,128 @@ vows.describe("A Poller's *Lifecycle*".cyan).addBatch({
         });
 
         called.should.be.true;
+    },
+    '*lifecycle.create_build_from_instruction* should release the lock if there is an error when calling *BuildInstruction.find_by_id*': function(){
+        var called = false;
+        var lock_was_released = false;
+        var find_by_id_was_called = false;
+
+        lib.entities.BuildInstruction.find_by_id = function(id, callback){
+            id.should.equal('some-id');
+            find_by_id_was_called = true;
+            callback(new Error('just a simple error that was synthesized'));
+        }
+
+        var handle_mock = {
+            release: function(cb){
+                lock_was_released = true;
+            }
+        }
+
+        var lock_mock = {
+            acquire: function(callback){callback(handle_mock);}
+        };
+
+        var lifecycle = new lib.Lifecycle("cbfi-key", lock_mock);
+
+        lifecycle.create_build_from_instruction('some-id', handle_mock, function(){
+            called = true;
+        });
+        called.should.not.be.true;
+        lock_was_released.should.be.true;
+        find_by_id_was_called.should.be.true;
+    },
+    '*lifecycle.create_build_from_instruction* should release the lock if there is an error when calling *Build.create*': function(){
+        var called = false;
+        var lock_was_released = false;
+        var find_by_id_was_called = false;
+        var Build_create_was_called = false;
+
+        lib.entities.BuildInstruction.find_by_id = function(id, callback){
+            id.should.equal('some-id');
+            find_by_id_was_called = true;
+            callback(null, "key", "this is supposed so be a BuildInstruction");
+        }
+
+        lib.entities.Build.create = function(data, callback){
+            Build_create_was_called = true;
+
+            should.exist(data.error);
+            data.error.should.be.a('string')
+            data.output.should.be.a('string')
+
+            callback(new Error('just a simple error that was synthesized'));
+        }
+
+        var handle_mock = {
+            release: function(cb){
+                lock_was_released = true;
+            }
+        }
+
+        var lock_mock = {
+            acquire: function(callback){callback(handle_mock);}
+        };
+
+        var lifecycle = new lib.Lifecycle("cbfi-key", lock_mock);
+
+        lifecycle.create_build_from_instruction('some-id', handle_mock, function(){
+            called = true;
+        });
+
+        called.should.not.be.true;
+
+        lock_was_released.should.be.true;
+        find_by_id_was_called.should.be.true;
+        Build_create_was_called.should.be.true;
+    },
+    '*lifecycle.create_build_from_instruction* should issue the lock if there are no errors after *Build.create*': function(){
+        var called = false;
+        var find_by_id_was_called = false;
+        var Build_create_was_called = false;
+        var handle_lock_was_issued = false;
+
+        lib.entities.BuildInstruction.find_by_id = function(id, callback){
+            id.should.equal('some-id');
+            find_by_id_was_called = true;
+            callback(null, "key", "this is supposed so be a BuildInstruction");
+        }
+
+        lib.entities.Build.create = function(data, callback){
+            Build_create_was_called = true;
+
+            should.exist(data.error);
+            data.error.should.be.a('string')
+            data.output.should.be.a('string')
+
+            callback(null, 'build_key', {__id__: 'current-build:id'});
+        }
+
+        var handle_mock = {
+            release: function(cb){
+                lock_was_released = true;
+            },
+            lock: function(key, cb){
+                key.should.equal('current-build:id');
+                handle_lock_was_issued = true;
+                cb();
+            }
+        }
+
+        var lock_mock = {
+            acquire: function(callback){callback(handle_mock);}
+        };
+
+        var lifecycle = new lib.Lifecycle("cbfi-key", lock_mock);
+
+        lifecycle.create_build_from_instruction('some-id', handle_mock, function(){
+            called = true;
+        });
+
+        called.should.be.true;
+        find_by_id_was_called.should.be.true;
+        Build_create_was_called.should.be.true;
+        handle_lock_was_issued.should.be.true;
     }
 }).export(module);
 

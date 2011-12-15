@@ -1,13 +1,13 @@
 var logger = new (require('./logger').Logger)("[GITPOLLER]".green.bold);
 var settings = require('./settings');
-var entity = require('./models');
+
+exports.entities = require('./models');
 
 function GitPoller(redis) {
     this.interval = settings.GIT_POLL_INTERVAL;
     this.redis = redis;
     this.loop = null;
     this.lock = new PollerLock(settings.REDIS_KEYS.current_build, redis);
-
     this.lifecycle = new Lifecycle(settings.REDIS_KEYS.build_queue, this.lock);
 }
 GitPoller.prototype.stop = function(){
@@ -30,14 +30,14 @@ GitPoller.prototype.start = function(){
         /* see if there is a build runnning already */
         console.log("             --------------------------------------------------------------------------------".white.bold);
         self.lifecycle.consume_build_queue(function(instruction_id_to_get, handle) {
-            entity.BuildInstruction.find_by_id(instruction_id_to_get, function(err, instruction_to_run) {
+            exports.entities.BuildInstruction.find_by_id(instruction_id_to_get, function(err, instruction_to_run) {
                 if (err) {
                     logger.handleException("BuildInstruction.find_by_id", err);
                     logger.fail(['could not find BuildInstruction with id', instruction_id_to_get, err.toString()]);
                     return handle.release();
                 }
 
-                entity.Build.create({output: "", error: ""}, function(err, key, current_build) {
+                exports.entities.Build.create({output: "", error: ""}, function(err, key, current_build) {
                     logger.handleException("Build.create", err);
                     handle.lock(current_build.__id__, function(err) {
                         logger.handleException("redis.set", err);
@@ -117,7 +117,19 @@ Lifecycle.prototype.consume_build_queue = function(callback){
             }
 
             logger.info("consuming the build queue");
-            return callback(items, handle);
+            return callback(items.first, handle);
+        });
+    });
+}
+Lifecycle.prototype.create_build_from_instruction = function(instruction_id_to_get, handle, callback) {
+    var self = this;
+    exports.entities.BuildInstruction.find_by_id(instruction_id_to_get, function(err, instruction_key, instruction) {
+        if (err) {return handle.release();}
+        exports.entities.Build.create({error: "", output: ""}, function(err, current_build_key, current_build) {
+            if (err) {return handle.release();}
+            handle.lock(current_build.__id__, function() {
+                callback(handle)
+            });
         });
     });
 }
