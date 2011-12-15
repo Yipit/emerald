@@ -422,6 +422,90 @@ vows.describe("A Poller's *Lifecycle*".cyan).addBatch({
         find_by_id_was_called.should.be.true;
         Build_create_was_called.should.be.true;
         handle_lock_was_issued.should.be.true;
+    },
+    '*lifecycle.run_a_instruction* should release the lock if could not remove the instruction from the queue': function() {
+        var called = false;
+        var zrem_was_called = false;
+        var lock_was_released = false;
+        var instruction_was_ran = false;
+        var handle_mock = {
+            release: function(cb){
+                lock_was_released = true;
+            }
+        }
+        var lock_mock = {
+            acquire: function(callback){callback(handle_mock);},
+            redis: {
+                zrem: function(id, cb){
+                    id.should.equal('should be an id');
+                    zrem_was_called = true;
+                    cb(new Error('some error'))
+                }
+            }
+        };
+        var instruction_to_run = {
+            __id__: 'should be an id',
+            run: function(){
+                instruction_was_ran = true;
+            }
+        }
+        var current_build = {__id__: 'current-build:id'};
+        var lifecycle = new lib.Lifecycle("ri-key", lock_mock);
+
+        lifecycle.run_a_instruction(instruction_to_run, current_build, handle_mock, function() {
+            called = true;
+            instruction.should.equal(instruction_to_run);
+            build.should.equal(current_build);
+            handle.should.equal(handle_mock);
+        });
+
+        called.should.not.be.true;
+        zrem_was_called.should.be.true;
+        lock_was_released.should.be.true;
+        instruction_was_ran.should.not.be.true;
+    },
+    '*lifecycle.run_a_instruction* should call *instrunction.run* with the current build and the lock handle': function() {
+        var called = false;
+        var zrem_was_called = false;
+        var lock_was_released = false;
+        var instruction_was_ran = false;
+        var handle_mock = {
+            release: function(cb){
+                lock_was_released = true;
+            }
+        }
+        var lock_mock = {
+            acquire: function(callback){callback(handle_mock);},
+            redis: {
+                zrem: function(id, cb){
+                    id.should.equal('should be an id');
+                    zrem_was_called = true;
+                    cb(null);
+                }
+            }
+        };
+        var instruction_to_run = {
+            __id__: 'should be an id',
+            run: function(a_build, a_handle){
+                instruction_was_ran = true;
+                a_build.should.equal(current_build);
+                a_handle.should.equal(handle_mock);
+            }
+        }
+        var current_build = {__id__: 'current-build:id'};
+        var lifecycle = new lib.Lifecycle("ri-key", lock_mock);
+
+        lifecycle.run_a_instruction(instruction_to_run, current_build, handle_mock, function() {
+            called = true;
+            instruction.should.equal(instruction_to_run);
+            build.should.equal(current_build);
+            handle.should.equal(handle_mock);
+        });
+
+        called.should.not.be.true;
+        zrem_was_called.should.be.true;
+        lock_was_released.should.be.false;
+        instruction_was_ran.should.be.true;
     }
 }).export(module);
 

@@ -116,6 +116,13 @@ Lifecycle.prototype.create_build_from_instruction = function(instruction_id_to_g
         });
     });
 }
+Lifecycle.prototype.run_a_instruction = function(instruction, build, handle, callback) {
+    var self = this;
+    self.lock.redis.zrem(instruction.__id__, function(err){
+        if (err) {return handle.release();}
+        instruction.run(build, handle);
+    });
+}
 
 exports.logger = logger;
 exports.GitPoller = GitPoller;
