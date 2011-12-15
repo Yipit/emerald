@@ -285,7 +285,9 @@ vows.describe("A Poller's *Lifecycle*".cyan).addBatch({
 
         var lifecycle = new lib.Lifecycle("the_build#queue-key", lock_mock);
 
-        lifecycle.consume_build_queue(function(){
+        lifecycle.consume_build_queue(function(item, handle){
+            item.should.equal('1st#instruction2run');
+            handle.should.equal(dummy_handle);
             called = true;
         });
 
