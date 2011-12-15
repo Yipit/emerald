@@ -373,10 +373,15 @@ vows.describe("A Poller's *Lifecycle*".cyan).addBatch({
         var Build_create_was_called = false;
         var handle_lock_was_issued = false;
 
+        var instruction_to_run = {
+            run: function(){}
+        }
+        var current_build = {__id__: 'current-build:id'};
+
         lib.entities.BuildInstruction.find_by_id = function(id, callback){
             id.should.equal('some-id');
             find_by_id_was_called = true;
-            callback(null, "key", "this is supposed so be a BuildInstruction");
+            callback(null, instruction_to_run);
         }
 
         lib.entities.Build.create = function(data, callback){
@@ -386,7 +391,7 @@ vows.describe("A Poller's *Lifecycle*".cyan).addBatch({
             data.error.should.be.a('string')
             data.output.should.be.a('string')
 
-            callback(null, 'build_key', {__id__: 'current-build:id'});
+            callback(null, 'build_key', current_build);
         }
 
         var handle_mock = {
@@ -406,8 +411,11 @@ vows.describe("A Poller's *Lifecycle*".cyan).addBatch({
 
         var lifecycle = new lib.Lifecycle("cbfi-key", lock_mock);
 
-        lifecycle.create_build_from_instruction('some-id', handle_mock, function(){
+        lifecycle.create_build_from_instruction('some-id', handle_mock, function(instruction, build, handle){
             called = true;
+            instruction.should.equal(instruction_to_run);
+            build.should.equal(current_build);
+            handle.should.equal(handle_mock);
         });
 
         called.should.be.true;

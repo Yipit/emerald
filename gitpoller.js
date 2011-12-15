@@ -30,28 +30,11 @@ GitPoller.prototype.start = function(){
         /* see if there is a build runnning already */
         console.log("             --------------------------------------------------------------------------------".white.bold);
         self.lifecycle.consume_build_queue(function(instruction_id_to_get, handle) {
-            exports.entities.BuildInstruction.find_by_id(instruction_id_to_get, function(err, instruction_to_run) {
-                if (err) {
-                    logger.handleException("BuildInstruction.find_by_id", err);
-                    logger.fail(['could not find BuildInstruction with id', instruction_id_to_get, err.toString()]);
-                    return handle.release();
-                }
-
-                exports.entities.Build.create({output: "", error: ""}, function(err, key, current_build) {
-                    logger.handleException("Build.create", err);
-                    handle.lock(current_build.__id__, function(err) {
-                        logger.handleException("redis.set", err);
-                        if (err) {
-                            logger.fail(['could not set the key', settings.REDIS_KEYS.current_build, 'to true (redis)', err.toString()]);
-                            return handle.release();
-                        }
-
-                        /* no errors so far, let's remove it from the queue and build */
-                        self.redis.zrem(settings.REDIS_KEYS.build_queue, instruction_id_to_get, function(err){
-                            logger.handleException("redis.zrem", err);
-                            instruction_to_run.run(current_build, self.lock);
-                        });
-                    });
+            self.lifecycle.create_build_from_instruction(instruction_id_to_get, handle, function(instruction_to_run, current_build, handle){
+                /* no errors so far, let's remove it from the queue and build */
+                self.redis.zrem(settings.REDIS_KEYS.build_queue, instruction_id_to_get, function(err){
+                    logger.handleException("redis.zrem", err);
+                    instruction_to_run.run(current_build, self.lock);
                 });
             });
         });
@@ -123,12 +106,12 @@ Lifecycle.prototype.consume_build_queue = function(callback){
 }
 Lifecycle.prototype.create_build_from_instruction = function(instruction_id_to_get, handle, callback) {
     var self = this;
-    exports.entities.BuildInstruction.find_by_id(instruction_id_to_get, function(err, instruction_key, instruction) {
+    exports.entities.BuildInstruction.find_by_id(instruction_id_to_get, function(err, instruction) {
         if (err) {return handle.release();}
         exports.entities.Build.create({error: "", output: ""}, function(err, current_build_key, current_build) {
             if (err) {return handle.release();}
             handle.lock(current_build.__id__, function() {
-                callback(handle)
+                callback(instruction, current_build, handle);
             });
         });
     });
