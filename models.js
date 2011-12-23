@@ -89,7 +89,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
 
         var start_time = new Date();
 
-        var clone_command = ["clone", "--porcelain", self.repository_address];
+        var clone_command = ["clone", "--progress", self.repository_address];
         var git_clone = child_process.spawn("git", clone_command);
 
         git_clone.stdout.on('data', function (data) {

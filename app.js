@@ -2,12 +2,13 @@
     var _ = require('underscore')._,
     settings = require('./settings'),
 
-    gitpoller = require('./gitpoller'),
-    websockets = require('./websockets'),
-    controllers = require('./controllers'),
+    boot = require('./boot'),
 
     express = require('express'),
 
+    gitpoller = require('./gitpoller'),
+    websockets = require('./websockets'),
+    controllers = require('./controllers');
 
     RedisStore = require('connect-redis')(express),
     Redis = require('redis'),
@@ -43,10 +44,10 @@
         app.use(express.errorHandler());
     });
 
-    app.listen(3000);
-
-    gitpoller.use(redis);
-
-    websockets.work_on(redis, io);
-    controllers.map(app, redis);
+    boot.now(app, io, redis, settings, function(cwd){
+        app.listen(parseInt(process.env.PORT || 3000));
+        gitpoller.use(redis);
+        websockets.work_on(redis, io);
+        controllers.map(app, redis);
+    });
 })();

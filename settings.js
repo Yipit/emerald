@@ -4,6 +4,13 @@ var path = require('path');
 var EMERALD_PORT = parseInt(process.env.EMERALD_PORT || 3000);
 var EMERALD_HOSTNAME = process.env.EMERALD_HOSTNAME || 'localhost';
 var EMERALD_DOMAIN = ('http://' + EMERALD_HOSTNAME + (EMERALD_PORT == 80 ? "" : (":" + EMERALD_PORT))).trim("/");
+var EMERALD_PATH = process.env.EMERALD_PATH || path.join(process.env.HOME, '.emerald');
+
+function LOCAL_FILE(){
+    var parts = [__dirname];
+    _.each(arguments, function(item){parts.push(item);});
+    return path.join.apply(path, parts);
+}
 
 module.exports = {
     LOG_LEVEL: 5,
@@ -15,9 +22,7 @@ module.exports = {
         current_build: "emerald:current-build",
         build_queue: "emerald:build-queue"
     },
-    LOCAL_FILE: function(){
-        var parts = [__dirname];
-        _.each(arguments, function(item){parts.push(item);});
-        return path.join.apply(path, parts);
-    }
+    EMERALD_PATH: EMERALD_PATH,
+    SANDBOX_PATH: process.env.EMERALD_SANDBOX_PATH || path.join(EMERALD_PATH, "builds"),
+    LOCAL_FILE: LOCAL_FILE
 }
