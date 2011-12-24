@@ -19,8 +19,8 @@ var run_tests = function(kind, pattern) {
 }
 
 desc('');
-task('default', [], function(){
-  jake.Task['functional'].invoke();
+task('default', [], function(pattern){
+    run_tests('{unit,functional}', pattern);
 });
 desc('cleanse the db and populate the database with test data');
 task('data', [], function () {
