@@ -4,10 +4,10 @@ var vows = require('vows')
 , _ = require('underscore')._;
 require('colors');
 
-var lib = require('../../gitpoller');
+var lib = require('../../queueconsumer');
 lib.logger.level = 0;
 
-vows.describe('A *Lock* for GitPoller'.cyan).addBatch({
+vows.describe('A *Lock* for QueueConsumer'.cyan).addBatch({
     'Takes a key string as 1st parameter redis instance as *2nd*, then:': {
         topic: function(){
             var redis_mock = {};
@@ -513,7 +513,7 @@ vows.describe('*The* Git Poller'.cyan).addBatch({
     'Takes a redis instance as first parameter, then:': {
         topic: function(){
             var redis_mock = {};
-            var poller = new lib.GitPoller(redis_mock);
+            var poller = new lib.QueueConsumer(redis_mock);
 
             this.callback(poller, redis_mock);
         },

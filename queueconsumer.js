@@ -1,24 +1,24 @@
-var logger = new (require('./logger').Logger)("[GITPOLLER]".green.bold);
+var logger = new (require('./logger').Logger)("[QUEUE CONSUMER]".green.bold);
 var settings = require('./settings');
 
 exports.entities = require('./models');
 
-function GitPoller(redis) {
+function QueueConsumer(redis) {
     this.interval = settings.GIT_POLL_INTERVAL;
     this.redis = redis;
     this.loop = null;
     this.lock = new PollerLock(settings.REDIS_KEYS.current_build, redis);
     this.lifecycle = new Lifecycle(settings.REDIS_KEYS.build_queue, this.lock);
 }
-GitPoller.prototype.stop = function(){
+QueueConsumer.prototype.stop = function(){
     /* stopping the interval */
     this.loop && clearInterval(this.loop);
     this.lock.release(function(){
-        this.redis.publish("emerald:GitPoller:stop");
+        this.redis.publish("emerald:QueueConsumer:stop");
     });
 }
 
-GitPoller.prototype.start = function(){
+QueueConsumer.prototype.start = function(){
     var self = this;
 
     var seconds = (parseFloat(settings.GIT_POLL_INTERVAL) / 1000);
@@ -125,11 +125,11 @@ Lifecycle.prototype.run_a_instruction = function(instruction, build, handle, cal
 }
 
 exports.logger = logger;
-exports.GitPoller = GitPoller;
+exports.QueueConsumer = QueueConsumer;
 exports.LockHandle = LockHandle;
 exports.PollerLock = PollerLock;
 exports.Lifecycle = Lifecycle;
 exports.use = function (redis) {
-    return new exports.GitPoller(redis).start();
+    return new exports.QueueConsumer(redis).start();
 }
 

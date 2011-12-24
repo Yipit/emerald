@@ -6,7 +6,7 @@
 
     express = require('express'),
 
-    gitpoller = require('./gitpoller'),
+    queueconsumer = require('./queueconsumer'),
     websockets = require('./websockets'),
     controllers = require('./controllers');
 
@@ -46,7 +46,7 @@
 
     boot.now(app, io, redis, settings, function(cwd){
         app.listen(parseInt(process.env.PORT || 3000));
-        gitpoller.use(redis);
+        queueconsumer.use(redis);
         websockets.work_on(redis, io);
         controllers.map(app, redis);
     });

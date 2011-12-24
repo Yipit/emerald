@@ -6,7 +6,7 @@ var entity = require('../../models');
 
 vows.describe('A User').addBatch({
     'has a static method for authentication': function(){
-        entity.User.should.respondTo('authenticate');
+        entity.User.should.be.a('function');
     },
     'Given there are two users in the database': {
         topic: function() {

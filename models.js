@@ -34,20 +34,22 @@ var User = models.declare("User", function(it, kind){
             return callback(new Error('wrong password for the login "' + this.email + '"'), null);
         }
     });
-});
 
-User.authenticate = function(login, password, callback){
-    if (!login) {
-        return callback(new Error("Invalid email: " + login))
-    }
-    User.find_by_email(new RegExp(login), function(err, items){
-        var found = items.first;
-        if (err) {
-            return callback(new Error('there are no users matching the email "' + login + '"'));
+    it.has.class_method('authenticate', function(login, password, callback){
+        if (!login) {
+            return callback(new Error("Invalid email: " + login))
         }
-        return found.authenticate(password, callback);
+        this.find_by_email(new RegExp(login), function(err, items){
+            var found = items.first;
+            if (err) {
+                return callback(new Error('there are no users matching the email "' + login + '"'));
+            }
+            return found.authenticate(password, callback);
+        });
+
     });
-}
+
+});
 
 var Build = models.declare("Build", function(it, kind) {
     it.has.field("status", kind.numeric);
