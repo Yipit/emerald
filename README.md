@@ -48,3 +48,7 @@ jake test
 ```
 nodemon app.js
 ```
+
+# sketch of how this should work:
+
+![diagram](https://github.com/Yipit/emerald/raw/master/design/emerald.png)
