@@ -7,7 +7,7 @@ exports.work_on = function(redis, io) {
     io.sockets.on('connection', function (socket) {
         socket.emit('connected');
 
-        require('./pubsub').use(redis, socket);
+        require('./orchestrator').use(redis, socket);
 
         ['BuildInstruction', 'User'].forEach(function(ModelName){
             socket.on('delete ' + ModelName, function (data) {

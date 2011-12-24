@@ -1,4 +1,4 @@
-var logger = new (require('./logger').Logger)("[ PUB/SUB ] ".red.bold);
+var logger = new (require('./logger').Logger)("[ ORCHESTRATOR ] ".red.bold);
 
 module.exports.use = function(redis, socket) {
     logger.info("I'm awake");
