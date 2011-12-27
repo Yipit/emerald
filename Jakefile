@@ -61,11 +61,11 @@ task('data', [], function () {
                 author: {__id__: 1}
             }),
             new entity.BuildInstruction({
-                name: "Emerald Functional Tests",
+                name: "Yipit Unit Tests",
                 description: "Tests emerald against redis",
-                repository_address: "git@github.com:Yipit/emerald.git",
+                repository_address: "git@github.com:Yipit/yipit.git",
                 branch: "master",
-                build_script: 'jake functional',
+                build_script: './run-build-for unit',
                 author: {__id__: 1}
             }),
             new entity.Pipeline({
