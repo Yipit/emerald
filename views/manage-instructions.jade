@@ -9,7 +9,7 @@ append body
     h1 Build Instructions
 
     - each instruction in instructions
-      .row
+      .row(data-instruction-id=instruction.__id__)
         .span16
           .alert-message.block-message.info
             .row
@@ -19,13 +19,13 @@ append body
                   p= paragraph
 
                 .alert-actions
-                  a.btn.small.danger(href="#", emerald-action="run", emerald-entity="BuildInstruction", rel=instruction.__id__) Build Now
+                  a.btn.small.danger(href="#", emerald-action="run", emerald-entity="BuildInstruction", rel=instruction.__id__) Schedule build
               .span9
                 p: strong Repository Address
                 p= instruction.repository_address
 
                 - if (instruction.total_builds == 0)
-                  p Never built :(
+                  p.last-build Never built :(
                 - else
                   p: strong= "Was built " + instruction.total_builds + " times"
 

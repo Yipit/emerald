@@ -6,6 +6,9 @@ module.exports.use = function(redis, socket) {
     subscribe.subscribe("BuildInstruction enqueued");
     subscribe.subscribe("Repository being fetched");
     subscribe.subscribe("Repository finished fetching");
+    subscribe.subscribe("Build started");
+    subscribe.subscribe("Build finished");
+
     subscribe.on("message", function(channel, message) {
         var parsed;
         try {

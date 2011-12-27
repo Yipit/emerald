@@ -99,7 +99,10 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
         var repository_folder_name = (self.repository_address + self.name).replace(/\W+/g, '');
         var repository_full_path = path.join(settings.SANDBOX_PATH, repository_folder_name);
         var branch_to_build = self.branch || "master";
-
+        redis.publish("Build started", JSON.stringify({
+            build: current_build.__data__,
+            instruction: self.__data__
+        }));
         async.waterfall([
             function(callback){
                 logger.info('preparing to fetch data from "'+self.name+'" through "'+self.repository_address+'@'+branch_to_build+'" at ' + repository_full_path);
