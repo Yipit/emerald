@@ -26,7 +26,7 @@ var User = models.declare("User", function(it, kind){
     });
     it.has.method('gravatar_of_size', function(size){
         var hash = crypto.createHash('md5');
-        hash.update(this.email);
+        hash.update(this.email || '');
         return 'http://www.gravatar.com/avatar/' + hash.digest('hex') + '?s=' + size;
     });
 
@@ -132,7 +132,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         build.output = build.output + data;
                         build.save(function(err, key, build){
                             redis.publish("emerald:Build:" + build.__id__ + ":stdout", data.toString());
-                            redis.publish("emerald:Build:stdout", JSON.stringify(build.__data__));
+                            redis.publish("Build output", {meta: build.__data__, output: build.output});
                         });
                     });
                 });
@@ -156,7 +156,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         build.error = build.error + data;
                         build.save(function(err, key, build){
                             redis.publish("emerald:Build:" + build.__id__ + ":stderr", data.toString());
-                            redis.publish("emerald:Build:stderr", JSON.stringify(build.__data__));
+                            redis.publish("Build output", {meta: build.__data__, output: build.error});
                         });
                     });
                 });
