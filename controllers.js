@@ -40,8 +40,8 @@ exports.map = function(app, redis){
                     email: request.param('email'),
                     password: request.param('password')
                 });
-                naive.save(function(err, key, instruction) {
-                    response.redirect('/user/' + instruction.__id__)
+                naive.save(function(err, key, user) {
+                    response.redirect('/user/' + user.__id__)
                 });
             break;
             default:
@@ -51,9 +51,9 @@ exports.map = function(app, redis){
     })
     app.get('/user/:id', function(request, response){
         var id = parseInt(request.param('id'));
-        entity.BuildInstruction.find_by_id(id, function(err, instruction) {
-            response.show('instruction', {
-                instruction: instruction
+        entity.User.find_by_id(id, function(err, user) {
+            response.show('user', {
+                user: user
             });
         });
     });
