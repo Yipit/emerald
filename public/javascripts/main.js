@@ -1,12 +1,11 @@
 $(function(){
     var socket = io.connect();
-    socket.on('connected', function (data) {
+    $("#new-build").modal({show: false, keyboard: false});
 
-        $("#new-build").modal();
+    socket.on('connected', function (data) {
         $.each(["BuildInstruction", "User"], function(index, ModelName){
             socket.on(ModelName + ' deleted', function(data){
                 var selector = ".clay."+ModelName+".delete[rel=" + data.id + "]";
-                console.log(selector);
                 var $button = $(selector);
                 $button.button('reset');
                 $button.parents("tr").animate({opacity: 0}, function(){
@@ -30,6 +29,22 @@ $(function(){
                 image: window.emerald.domain + "/images/control_double_down.png"
             });
             $(".btn[emerald-action='run'][emerald-entity='BuildInstruction'][rel='"+data.id+"']").button('reset');
+        });
+        socket.on('Repository being fetched', function(data){
+            var $pb = $("#progress-bar");
+            $pb.fadeIn();
+            $pb.find(".gif").show();
+            $pb.find(".label").text(data.percentage);
+            $pb.find(".bar").css("width", data.percentage);
+            $pb.find(".status").text(data.instruction.name+": "+data.phase);
+        });
+        socket.on('Repository finished fetching', function(data){
+            var $pb = $("#progress-bar");
+            $pb.fadeOut();
+            $pb.find(".gif").hide();
+            $pb.find(".label").text("0%");
+            $pb.find(".bar").css("width", '0%');
+            $pb.find(".status").text("Finished");
         });
 
         $(".clay.BuildInstruction.delete").live("click", function(e) {

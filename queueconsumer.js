@@ -56,7 +56,7 @@ PollerLock.prototype.acquire = function(callback){
 
         /* if not building, let's quit and wait for the next interval */
         if (current_build) {
-            logger.info("already building:", current_build);
+            logger.info("already building:", JSON.stringify(current_build));
             return;
         }
         return callback(self.handle);

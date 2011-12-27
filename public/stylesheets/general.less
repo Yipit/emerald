@@ -1,3 +1,16 @@
+.box-shadow (@x: 0, @y: 0, @blur: 1px, @alpha) {
+  @val: @x @y @blur rgba(255, 255, 255, @alpha);
+
+  box-shadow:         @val;
+  -webkit-box-shadow: @val;
+  -moz-box-shadow:    @val;
+}
+.rounded-corners (@radius: 3px) {
+  border-radius: @radius;
+  -webkit-border-radius: @radius;
+  -moz-border-radius: @radius;
+}
+
 //Tango Palette: http://tango.freedesktop.org/Tango_Icon_Theme_Guidelines#Color_Palette
 //Licensed as Public Domain
 //LESS'd by James Mason (james@bear454.com)
@@ -361,6 +374,50 @@ table {
   }
 }
 
-.modal.hide {
+.modal {
   display:none;
+}
+
+#progress-bar {
+  position: fixed;
+  .rounded-corners(5px 5px 0 0);
+  border: 2px solid @lightest_aluminum;
+  bottom: 0px;
+  display: none;
+  right: 200px;
+  width: 400px;
+  height: 63px;
+  background: @darkest_aluminum;
+  .inset {
+    float: left;
+    margin: 5px;
+    height: 35px;
+    width: 385px;
+    border: 1px solid black;
+    background: @dark_aluminum;
+    position: relative;
+    .label {
+      position:absolute;
+      width: 100%;
+      margin: 10px 0 0 0;
+      text-align: center;
+      font-family: Monaco, Monospace;
+      font-size: 16px;
+      color: @darkest_aluminum;
+    }
+    .bar {
+      width: 0%;
+      height: 35px;
+      background: @dark_chameleon;
+    }
+  }
+  .status {
+    font-family: Monaco, Monospace;
+     color: @light_chameleon;
+  }
+  img.gif {
+    float: right;
+    margin: 3px 3px 0 0;
+    display: none;
+   }
 }

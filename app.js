@@ -1,5 +1,8 @@
 (function(){
+    var logger = new (require('./logger').Logger)("[MAIN]".white.bold);
+
     var _ = require('underscore')._,
+    async = require('async'),
     settings = require('./settings'),
 
     boot = require('./boot'),
@@ -50,4 +53,33 @@
         websockets.work_on(redis, io);
         controllers.map(app, redis);
     });
+
+    function cleanser (){
+            process.stdout.write("\r")
+            logger.info("cleansing database...".yellow);
+            logger.success("see you later, my master!".cyan.bold);
+            async.waterfall([
+                function(callback){
+                    redis.keys("emerald:*", callback);
+                },
+                function(keys, callback){
+                    redis.del(keys, callback);
+                }
+            ], function(err){
+                process.reallyExit(err && 1 || 0);
+            });
+        }
+    ['exit', 'SIGINT', 'SIGKILL', 'SIGABRT', 'SIGHUP', 'SIGSEGV', 'SIGTERM', 'SIGTRAP'].forEach(function(signal){
+        process.on(signal, cleanser);
+    });
+    process.on('uncaughtException', function (err) {
+        logger.fail('Caught exception: ' + err);
+        try {
+            cleanser();
+        } catch (e){
+            console.log(e.toString());
+            process.reallyExit(1);
+        }
+    });
+
 })();

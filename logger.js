@@ -42,6 +42,10 @@ function Logger (prefix) {
         if (self.level < 1) return;
         this.log("FAILURE:".red, parts);
     };
+    this.warning = function(parts) {
+        if (self.level < 1) return;
+        this.log("WARNING:".red.bold, parts);
+    };
     this.handleException = function(where, exc){
         if (exc) {
             this.fail(["@", where, exc]);

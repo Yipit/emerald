@@ -18,6 +18,14 @@ html
     script(type="text/javascript")!= "(function(window){window.emerald = " + emerald_json + ";})(window)"
 
   body
+    block body
+      #progress-bar
+        .inset
+          .label 0%
+          .bar
+          span.status
+          img.gif(src="/images/progress-bar-loader.gif")
+
     a#fork_me_on_github(target="_blank", href="https://github.com/Yipit/emerald")
       span Fork me on GitHub!
 

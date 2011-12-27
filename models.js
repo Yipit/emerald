@@ -1,7 +1,10 @@
 var models = require('clay');
 var crypto = require('crypto');
+var async = require('async');
+var path = require('path');
+var fs = require('fs');
 var child_process = require('child_process');
-
+var settings = require('./settings');
 var logger = new (require('./logger').Logger)("[models]".cyan.bold);
 
 BUILD_STAGES = {
@@ -71,6 +74,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
     it.has.field("name", kind.string);
     it.has.field("description", kind.string);
     it.has.field("repository_address", kind.string);
+    it.has.field("branch", kind.string);
     it.has.field("build_script", kind.string);
     it.has.one("author", User, "created_instructions");
 
@@ -90,43 +94,87 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
         var self = this;
 
         var start_time = new Date();
+        var redis = self._meta.storage.connection;
+        /* TODO: extract the repo name and check if already exists e*/
+        var repository_folder_name = (self.repository_address + self.name).replace(/\W+/g, '');
+        var repository_full_path = path.join(settings.SANDBOX_PATH, repository_folder_name);
+        var branch_to_build = self.branch || "master";
 
-        var clone_command = ["clone", "--progress", self.repository_address];
-        var git_clone = child_process.spawn("git", clone_command);
-
-        git_clone.stdout.on('data', function (data) {
-            logger.info();
-            Build.find_by_id(current_build.__id__, function(err, build) {
-                build.output = build.output + data;
-                build.save(function(err, key, build){
-                    self._meta.storage.connection.publish("emerald:Build:" + build.__id__ + ":stdout", data);
-                    self._meta.storage.connection.publish("emerald:Build:stdout", build.__data__);
-                });
-            });
-        });
-        git_clone.stderr.on('data', function (data) {
-            Build.find_by_id(current_build.__id__, function(err, build) {
-                build.error = build.error + data;
-                build.save(function(err, key, build){
-                    self._meta.storage.connection.publish("emerald:Build:" + build.__id__ + ":stderr", data);
-                    self._meta.storage.connection.publish("emerald:Build:stderr", build.__data__);
-                });
-            });
-        });
-        git_clone.on('exit', function (_code) {
-            var code = parseInt(git_clone.pid);
-
-            lock.release(function() {
-                Build.find_by_id(current_build.__id__, function(err, build){
-                    logger.handleException("Build.find_by_id", err);
-                    console.log("Build:", build, "code:", code);
-                    build.pid = code;
-                    build.save(function(err, key, build){
-                        self._meta.storage.connection.publish("emerald:BuildFinished", build.__data__)
+        async.waterfall([
+            function(callback){
+                logger.info('preparing to fetch data from "'+self.name+'" through "'+self.repository_address+'@'+branch_to_build+'" at ' + repository_full_path);
+                require('path').exists(repository_full_path, function(exists){callback(null, exists)})
+            },
+            function(exists, callback) {
+                var args, options = {};
+                if (exists) {
+                    args = ["pull", "origin", branch_to_build || "master"];
+                    options.cwd = repository_full_path;
+                    logger.info('found an existing folder at "'+repository_full_path+'", gonna use git-pull');
+                } else {
+                    args = ["clone", "--progress", self.repository_address, repository_folder_name];
+                    logger.info('local copy does not exist, will clone at "'+repository_full_path+'"');
+                    options.cwd = settings.SANDBOX_PATH;
+                }
+                callback(null, args, options);
+            },
+            function spawn_the_command(command_args, command_options, callback){
+                logger.info('spawning "git '+command_args.join(' ')+'"');
+                var command = child_process.spawn("git", command_args, command_options);
+                callback(null, command);
+            },
+            function listen_to_stdout(command, callback){
+                command.stdout.on('data', function (data) {
+                    Build.find_by_id(current_build.__id__, function(err, build) {
+                        build.output = build.output + data;
+                        build.save(function(err, key, build){
+                            redis.publish("emerald:Build:" + build.__id__ + ":stdout", data.toString());
+                            redis.publish("emerald:Build:stdout", JSON.stringify(build.__data__));
+                        });
                     });
                 });
-            });
-        });
+                callback(null, command);
+            },
+            function listen_to_stderr(command, callback){
+                command.stderr.on('data', function (data) {
+                    var regex = /([a-zA-Z0-9 ]+)[:]\s*(\d+[%])/g;
+                    var raw_string = data.toString();
+                    var found = regex.exec(raw_string);
+
+                    if (found) {
+                        redis.publish('Repository being fetched', JSON.stringify({
+                            instruction: self.__data__,
+                            phase: found[1].toLowerCase(),
+                            percentage: found[2]
+                        }));
+                    }
+                    var parsed = found && found[0] || raw_string;
+                    Build.find_by_id(current_build.__id__, function(err, build) {
+                        build.error = build.error + data;
+                        build.save(function(err, key, build){
+                            redis.publish("emerald:Build:" + build.__id__ + ":stderr", data.toString());
+                            redis.publish("emerald:Build:stderr", JSON.stringify(build.__data__));
+                        });
+                    });
+                });
+                callback(null, command);
+            },
+            function handle_on_exit(command, callback) {
+                command.on('exit', function (_code) {
+                    var code = parseInt(command.pid);
+                    lock.release(function() {
+                        Build.find_by_id(current_build.__id__, function(err, build){
+                            logger.handleException("Build.find_by_id", err);
+                            build.pid = code;
+                            build.save(function(err, key, build){
+                                redis.publish("Repository finished fetching", JSON.stringify(self.__data__))
+                                callback(null);
+                            });
+                        });
+                    });
+                });
+            }
+        ]);
     });
 });
 
