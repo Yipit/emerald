@@ -68,6 +68,7 @@ var User = models.declare("User", function(it, kind){
 
 var Build = models.declare("Build", function(it, kind) {
     it.has.field("status", kind.numeric);
+    it.has.field("signal", kind.numeric);
     it.has.field("error", kind.string);
     it.has.field("output", kind.string);
     it.has.field("pid", kind.numeric);
@@ -75,10 +76,18 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.field("commit", kind.string);
     it.has.field("author_name", kind.string);
     it.has.field("author_email", kind.string);
-    it.has.field("started_at", kind.auto);
-    it.has.field("finished_at", kind.datetime);
+    it.has.field("build_started_at", kind.auto);
+    it.has.field("build_finished_at", kind.datetime);
     it.has.field("fetching_started_at", kind.auto);
     it.has.field("fetching_finished_at", kind.datetime);
+
+    it.has.getter('started_at', function() {
+        return this.build_started_at || this.fetching_started_at;
+    });
+
+    it.has.getter('finished_at', function() {
+        return this.build_finished_at || this.fetching_finished_at;
+    });
 
     it.has.getter('permalink', function() {
         return '/build/' + this.__id__;
@@ -172,7 +181,10 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
 
         var redis = self._meta.storage.connection;
         /* TODO: extract the repo name and check if already exists e*/
-        var repository_folder_name = (self.repository_address + self.name).replace(/\W+/g, '');
+        var repository_folder_name = (self.repository_address + self.name)
+            .replace(/\W+/g, '-')
+            .toLowerCase()
+            .replace(/[-]?\bgit\b[-]?/g, '');
         var repository_full_path = path.join(settings.SANDBOX_PATH, repository_folder_name);
         var repository_bare_path = path.join(repository_full_path, '.git');
 
@@ -214,6 +226,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 callback(null, self, command, command_args);
             },
             function capture_git_stdout(self, command, args, callback){
+                logger.debug('capturing the git command stdout');
                 command.stdout.on('data', function (data) {
                     Build.find_by_id(current_build.__id__, function(err, build) {
                         logger.handleException("Build.find_by_id", err);
@@ -226,6 +239,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 callback(null, self, command, args);
             },
             function capture_git_stderr(self, command, args, callback){
+                logger.debug('capturing the git command stderr');
                 command.stderr.on('data', function (data) {
                     var regex = /([a-zA-Z0-9 ]+)[:]\s*(\d+[%])/g;
                     var raw_string = data.toString();
@@ -238,6 +252,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         });
                     });
                     if (found) {
+                        logger.debug('publishing signal')
                         redis.publish('Repository being fetched', JSON.stringify({
                             instruction: self.non_circular_data,
                             phase: found[1].toLowerCase(),
@@ -248,8 +263,10 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 callback(null, self, command, args);
             },
             function handle_the_exit_of_git(self, command, args, callback) {
-                command.on('exit', function (_code) {
+                logger.debug('capturing the exit of the git command');
+                command.on('exit', function (_code, signal) {
                     var code = parseInt(_code || 0);
+                    logger.debug(['git has exited |', 'exit code:', _code, code, " SIGNAL:", signal]);
                     Build.find_by_id(current_build.__id__, function(err, build) {
                         logger.handleException("Build.find_by_id", err);
                         var now = new Date();
