@@ -24,7 +24,7 @@
     , "mkdirp": ">= 0.2.1"
   }
   , "devDependencies": {
-    , "vows": "0.5.13"
+      "vows": "0.5.13"
     , "should": ">= 0.3.2"
   }
   , "maintainers": [
