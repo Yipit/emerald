@@ -172,12 +172,14 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 });
             },
             function write_build_script(callback){
+                var now = new Date();
                 logger.debug('writting build script at ' + script_path);
                 var parts = ["#!/bin/bash"];
                 self.build_script.split(/[\n\r\t\s]*$/gm).forEach(function(line){
                     parts.push(line.trim() + '; [ $? != 0 ] && exit $?;');
                 });
-                parts.push("exit $?;");
+                parts.push("this build was ran by emerald at " + now.toUTCString());
+                parts.push("exit 0");
                 var content = parts.join("\n");
                 fs.writeFile(script_path, content, function(err){
                     callback(err);
