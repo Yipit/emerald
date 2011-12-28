@@ -156,18 +156,12 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             function handle_the_exit_of_git(command, args, callback) {
                 command.on('exit', function (_code) {
                     var code = parseInt(_code || 0);
-                    var err = code === 0 ? null : new Error('the build script "git ' + args.join(' ') + '" exited with status ' + _code);
-                    return callback(err, command, args, code);
-                });
-            },
-            function update_build_exit_code(command, args, code, callback){
-                Build.find_by_id(current_build.__id__, function(err, build){
-                    logger.handleException("Build.find_by_id", err);
-                    if (err) {return callback(err);}
-                    build.status = code;
-                    build.save(function(err, key, build){
-                        redis.publish("Repository finished fetching", JSON.stringify({instruction: self.__data__, build: build.__data__}))
-                        callback(null);
+                    Build.find_by_id(current_build.__id__, function(err, build) {
+                        logger.handleException("Build.find_by_id", err);
+                        build.status = code;
+                        build.save(function(){
+                            callback(null);
+                        });
                     });
                 });
             },
@@ -204,9 +198,10 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         var b = filter_output(data.toString());
                         var already_there = (build.output.indexOf(b) > 0);
                         build.output = already_there ? (build.output + b) : b;
+                        redis.publish("Build output", JSON.stringify({meta: build.__data__, output: build.output, instruction: self.__data__}));
 
                         build.save(function(err, key, build) {
-                            redis.publish("Build output", JSON.stringify({meta: build.__data__, output: build.output, instruction: self.__data__}));
+                            logger.info('persisting "'+b+'" to Build#'=build.__id__+'\'s "output" field');
                         });
                     });
                 });
@@ -215,13 +210,13 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             function capture_build_stderr (command, args, callback){
                 logger.debug('capturing build script stderr');
                 command.stderr.on('data', function (data) {
-                    console.log(data.toString());
+                    var b = filter_output(data.toString());
                     Build.find_by_id(current_build.__id__, function(err, build) {
-                        build.error = filter_output(build.error + data.toString())
-
+                        var already_there = (build.error.indexOf(b) > 0);
+                        build.error = already_there ? (build.error + b) : b;
+                        redis.publish("Build output", JSON.stringify({meta: build.__data__, output: b, instruction: self.__data__}));
                         build.save(function(err, key, build) {
-                            redis.publish("emerald:Build:" + build.__id__ + ":stderr", data.toString());
-
+                            logger.info('persisting "'+b+'" to Build#'+build.__id__+'\'s "error" field');
                         });
                     });
                 });
@@ -233,9 +228,13 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 command.on('exit', function (_code) {
                     var code = parseInt(_code || 0);
                     logger.info('finished running the build script, code: ' + _code);
-                    var err = code === 0 ? null : new Error('the build script "bash ' + args.join(' ') + '" exited with status ' + _code);
-                    lock.release(function(){
-                        callback(err);
+                    Build.find_by_id(current_build.__id__, function(err, build) {
+                        build.status = code;
+                        build.save(function(){
+                            lock.release(function(){
+                                callback(null);
+                            });
+                        });
                     });
                 });
             }
