@@ -111,7 +111,10 @@ Lifecycle.prototype.create_build_from_instruction = function(instruction_id_to_g
         var now = new Date();
         exports.entities.Build.create({
             error: "",
-            output: "This build was started by emerald at " + now.toUTCString()
+            output: "This build was started by emerald at " + now.toUTCString() + "\n\n",
+            stage: exports.entities.STAGES_BY_NAME.BEGINNING,
+            started_at: new Date(),
+            instruction: instruction
         }, function(err, current_build_key, current_build) {
             if (err) {return handle.release();}
             handle.lock(current_build.__id__, function() {
