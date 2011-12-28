@@ -57,7 +57,7 @@ task('data', [], function () {
                 description: "Asserting that basic business rules\nare working perfectly in emerald",
                 repository_address: "git@github.com:Yipit/emerald.git",
                 branch: "master",
-                build_script: 'jake unit',
+                build_script: 'npm install\njake unit',
                 author: {__id__: 1}
             }),
             new entity.BuildInstruction({
