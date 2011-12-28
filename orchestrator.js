@@ -8,6 +8,7 @@ module.exports.use = function(redis, socket) {
     subscribe.subscribe("Repository finished fetching");
     subscribe.subscribe("Build started");
     subscribe.subscribe("Build finished");
+    subscribe.subscribe("Build output");
 
     subscribe.on("message", function(channel, message) {
         var parsed;
@@ -19,7 +20,7 @@ module.exports.use = function(redis, socket) {
         socket.emit(channel, parsed);
         switch (channel) {
             case "BuildInstruction enqueued":
-            logger.success("The BuildInstruction #"+parsed.id+"was successfully enqueued");
+            logger.success("The BuildInstruction #"+parsed.id+" was successfully enqueued");
                 break;
         }
     });
