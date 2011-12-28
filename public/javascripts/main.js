@@ -32,6 +32,12 @@ $(function(){
     socket.on('Build started', function(data){
         var $instruction = $("[data-instruction-id="+data.instruction.__id__+"]");
         $instruction.find(".last-build").html("<strong>Last build:</strong>" + data.build.started_at);
+        $("#terminal").html("");
+    });
+    socket.on('Build output', function(data){
+        var $terminal = $("#terminal-wrapper");
+        $terminal.fadeIn();
+        $terminal.find("#terminal").html($terminal.find("#terminal").html() + data.output);
     });
 
     socket.on('Repository being fetched', function(data){

@@ -200,7 +200,8 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 command.stdout.on('data', function (data) {
                     Build.find_by_id(current_build.__id__, function(err, build) {
                         var b = filter_output(data.toString());
-                        build.output = (build.output.indexOf(b) > 0) ? b : (build.output + b);
+                        var already_there = (build.output.indexOf(b) > 0);
+                        build.output = already_there ? (build.output + b) : b;
 
                         build.save(function(err, key, build) {
                             redis.publish("Build output", JSON.stringify({meta: build.__data__, output: build.output, instruction: self.__data__}));
