@@ -97,8 +97,8 @@ connection in our models
 
 ## express / socket.io / connect-redis
 
-The web layer, [express](http://github.com/visionmedia/express) is the
-webserver, [socket.io](http://socket.io), in turn, is for real-time pushes to the clients. connect-redis is a redis-backed session storage for express.
+The web layer: [express](http://github.com/visionmedia/express) is the
+webserver, [socket.io](http://socket.io), in turn, is for real-time pushes to the clients. [Connect-redis](https://github.com/visionmedia/connect-redis) is a redis-backed session storage for express.
 
 ## jade / less
 
