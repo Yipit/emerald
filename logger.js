@@ -22,7 +22,7 @@ function Logger (prefix) {
         } else {
             msg.push(parts);
         }
-        msg.push("@".green + this.timestamp());
+        msg.push(this.timestamp());
         console.log.apply(console, msg);
     }
 
@@ -52,7 +52,7 @@ function Logger (prefix) {
         }
     }
     this.timestamp = function(){
-        return (new Date()).toTimeString().green.bold;
+        return ("@"+(new Date()).toTimeString()).white.bold;
     };
 }
 Logger.levels = loglevel;
