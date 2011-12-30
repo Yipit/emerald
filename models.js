@@ -220,8 +220,14 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             function spawn_git(self, command_args, command_options, callback){
                 logger.info('spawning "git '+command_args.join(' ')+'"');
                 var command = child_process.spawn("git", command_args, command_options);
+                var now = new Date();
                 Build.find_by_id(current_build.__id__, function(err, build) {
-                    build.fetching_started_at = new Date();
+                    build.fetching_started_at = now;
+                    redis.publish('Repository started fetching', JSON.stringify({
+                        at: now,
+                        build:build.non_circular_data,
+                        instruction: self.non_circular_data
+                    }));
                     build.save(function(err){
                         callback(err, self, command, command_args);
                     });
@@ -257,6 +263,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         logger.debug('publishing signal')
                         redis.publish('Repository being fetched', JSON.stringify({
                             instruction: self.non_circular_data,
+                            build: build.non_circular_data,
                             phase: found[1].toLowerCase(),
                             percentage: found[2]
                         }));
@@ -276,7 +283,11 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         build.fetching_finished_at = now;
                         build.stage = STAGES_BY_NAME.PREPARING_ENVIRONMENT;
 
-                        redis.publish("Repository finished fetching", JSON.stringify({at: now, build:build.__data__, instruction: self.__data__}));
+                        redis.publish("Repository finished fetching", JSON.stringify({
+                            at: now,
+                            build:build.non_circular_data,
+                            instruction: self.non_circular_data
+                        }));
                         build.save(function(err){
                             logger.handleException("build(#"+build.__id__+").save", err);
                             callback(null, self);
@@ -289,11 +300,10 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 logger.debug('writting build script at ' + script_path);
                 var parts = ["#!/bin/bash"];
                 self.build_script.split(/[\n\r\t\s]*$/gm).forEach(function(line){
-                    parts.push(line.trim() + '; [ $? != 0 ] && exit $? || print "\n";');
+                    parts.push(line.trim() + '; [ $? != 0 ] && exit $? || printf "\\n\\n\\n";');
                 });
-                parts.push("\necho 'this build was ran by emerald at " + now.toUTCString() + "';\n");
-                parts.push("exit 0");
-                var content = parts.join("\n");
+                parts.push("exit 0;");
+                var content = parts.join("\n\n###############################################################################\n\n");
                 fs.writeFile(script_path, content, function(err){
                     callback(err, self);
                 });
@@ -324,7 +334,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         if (already_there){return;}
                         build.output = build.output + b;
                         build.stage = STAGES_BY_NAME.RUNNING;
-                        redis.publish("Build output", JSON.stringify({meta: build.__data__, output: build.output, instruction: self.non_circular_data}));
+                        redis.publish("Build output", JSON.stringify({meta: build.non_circular_data, output: build.output, instruction: self.non_circular_data}));
 
                         build.save(function(err, key, build) {
                             logger.debug('persisting "'+b+'" to Build#'+build.__id__+'\'s "output" field');
@@ -344,7 +354,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         build.error = build.error + b;
                         build.stage = STAGES_BY_NAME.RUNNING;
 
-                        redis.publish("Build output", JSON.stringify({meta: build.__data__, output: build.error, instruction: self.non_circular_data}));
+                        redis.publish("Build output", JSON.stringify({meta: build.non_circular_data, output: build.error, instruction: self.non_circular_data}));
                         build.save(function(err, key, build) {
                             logger.debug('persisting "'+b+'" to Build#'+build.__id__+'\'s "error" field');
                         });
@@ -364,11 +374,13 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         build.build_finished_at = now;
                         build.stage = STAGES_BY_NAME.FINISHED;
 
-                        var instruction_without_builds = self.non_circular_data;
-                        delete instruction_without_builds.builds;
-                        redis.publish("Build finished", JSON.stringify({meta: build.__data__, at: now, instruction: instruction_without_builds}));
                         build.save(function(){
                             lock.release(function(){
+                                redis.publish("Build finished", JSON.stringify({
+                                    at: now,
+                                    build: build.non_circular_data,
+                                    instruction: self.non_circular_data
+                                }));
                                 callback(null, self);
                             });
                         });
