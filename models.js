@@ -291,7 +291,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 self.build_script.split(/[\n\r\t\s]*$/gm).forEach(function(line){
                     parts.push(line.trim() + '; [ $? != 0 ] && exit $?;');
                 });
-                parts.push("\nthis build was ran by emerald at " + now.toUTCString() + "\n");
+                parts.push("\necho 'this build was ran by emerald at " + now.toUTCString() + "';\n");
                 parts.push("exit 0");
                 var content = parts.join("\n");
                 fs.writeFile(script_path, content, function(err){
