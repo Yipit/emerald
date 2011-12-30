@@ -31,13 +31,21 @@ $(function(){
     });
     socket.on('Build started', function(data){
         var $instruction = $("[data-instruction-id="+data.instruction.__id__+"]");
+        var $bg = $instruction.find(".build-status");
+        $bg.removeClass("warning").addClass("info");
         $instruction.find(".last-build").html("<strong>Building now</strong>");
         $("#terminal").html("");
     });
     socket.on('Build finished', function(data){
         var $instruction = $("[data-instruction-id="+data.instruction.__id__+"]");
-        $instruction.find(".last-build").html("<strong>Finished at: "+data.build.build_finished_at+"</strong>");
-        $("#terminal").html("");
+        var $bg = $instruction.find(".build-status");
+
+        if ((parseInt(data.build.status || "0") == 0) && ((data.build.signal + "") == "null")) {
+            $bg.removeClass("info").addClass("success");
+        } else {
+            $bg.removeClass("info").addClass("error");
+        }
+        $instruction.find(".last-build").html("<strong>Finished just now</strong>");
     });
 
     socket.on('Build output', function(data){
