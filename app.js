@@ -54,32 +54,47 @@
         controllers.map(app, redis);
     });
 
-    function cleanser (){
-            process.stdout.write("\r")
-            logger.info("cleansing database...".yellow);
-            logger.success("see you later, my master!".cyan.bold);
-            async.waterfall([
-                function(callback){
-                    redis.keys("emerald:*", callback);
-                },
-                function(keys, callback){
-                    redis.del(keys, callback);
+
+    process.on("SIGINT", function(signal){
+        /* handling control-C */
+        process.stdout.write('\r');
+        logger.info('Killed by Control-C'.yellow.bold);
+        var line = '======================================='.red.bold;
+        logger.info(line);
+        logger.info([String.fromCharCode(0x2764).red, 'Thanks for the headlong kill, sir!', String.fromCharCode(0x2764).red].join(' ').green.bold);
+        logger.info(line);
+        process.reallyExit(1);
+    });
+
+    process.on('uncaughtException', function (err) {
+        logger.fail("EMERALD has quit due an internal crash".red.bold);
+        logger.fail("it's now executing some procedures in order to clean up the build environment".red.bold);
+        logger.fail("I'm gonna show you the traceback in a second.".red.bold);
+
+        var original_exception = err;
+        async.waterfall([
+            function looking_for_emerald_stuff_in_redis(callback){
+                /* matching keys */
+                redis.keys("emerald:*", callback);
+            },
+            function clean_whatever_requires_to (keys, callback){
+                /* cleaning up queue, cache, etc. */
+                logger.info("cleansing out redis stuff...".white.bold);
+                async.forEach(keys, function(key, callback){
+                    redis.del(key, callback);
+                }, callback);
+            }], function(err) {
+                if (err) {
+                    logger.warning(['There was also a failure while cleaning up redis...', err.toString() + ''].join('"').yellow.bold);
+                    logger.warning((err.stack + "").yellow.bold)
+                } else {
+                    logger.info("redis cleansed successfully".white.bold);
                 }
-            ], function(err){
+
+                logger.fail(['Original exception: ', original_exception.toString(), ''].join('"').red.bold);
+                console.log((original_exception.stack + "").yellow.bold);
                 process.reallyExit(err && 1 || 0);
             });
-        }
-    ['exit', 'SIGINT', 'SIGKILL', 'SIGABRT', 'SIGHUP', 'SIGSEGV', 'SIGTERM', 'SIGTRAP'].forEach(function(signal){
-        process.on(signal, cleanser);
-    });
-    process.on('uncaughtException', function (err) {
-        logger.fail('Caught exception: ' + err);
-        try {
-            cleanser();
-        } catch (e){
-            console.log(e.toString());
-            process.reallyExit(1);
-        }
     });
 
 })();
