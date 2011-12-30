@@ -56,13 +56,17 @@
 
 
     process.on("SIGINT", function(signal){
+        var unicode_heart = String.fromCharCode(0x2764).red.bold;
+        var unicode_scissor = String.fromCharCode(0x272D).yellow.bold;
+        var unicode_emerald = String.fromCharCode(0x25C8).green;
         /* handling control-C */
         process.stdout.write('\r');
-        logger.info('Killed by Control-C'.yellow.bold);
-        var line = '======================================='.red.bold;
-        logger.info(line);
-        logger.info([String.fromCharCode(0x2764).red, 'Thanks for the headlong kill, sir!', String.fromCharCode(0x2764).red].join(' ').green.bold);
-        logger.info(line);
+        var line = '=========================================='.black.bold;
+        console.log(line);
+        console.log([unicode_emerald, "               Emerald               ", unicode_emerald].join(unicode_emerald));
+        console.log(['    ', unicode_scissor, '      Killed by Control-C      '.yellow.bold, unicode_scissor, '   '].join(''));
+        console.log([unicode_heart, 'Thanks for the merciful killing, sir!', unicode_heart].join(' ').green.bold);
+        console.log(line);
         process.reallyExit(1);
     });
 
