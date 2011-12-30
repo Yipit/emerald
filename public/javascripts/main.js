@@ -31,9 +31,15 @@ $(function(){
     });
     socket.on('Build started', function(data){
         var $instruction = $("[data-instruction-id="+data.instruction.__id__+"]");
-        $instruction.find(".last-build").html("<strong>Last build:</strong>" + data.build.started_at);
+        $instruction.find(".last-build").html("<strong>Building now</strong>");
         $("#terminal").html("");
     });
+    socket.on('Build finished', function(data){
+        var $instruction = $("[data-instruction-id="+data.instruction.__id__+"]");
+        $instruction.find(".last-build").html("<strong>Finished at: "+data.build.build_finished_at+"</strong>");
+        $("#terminal").html("");
+    });
+
     socket.on('Build output', function(data){
         var $terminal = $("#terminal-wrapper");
         $terminal.fadeIn();
