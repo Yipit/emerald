@@ -289,7 +289,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 logger.debug('writting build script at ' + script_path);
                 var parts = ["#!/bin/bash"];
                 self.build_script.split(/[\n\r\t\s]*$/gm).forEach(function(line){
-                    parts.push(line.trim() + '; [ $? != 0 ] && exit $?;');
+                    parts.push(line.trim() + '; [ $? != 0 ] && exit $? || print "\n";');
                 });
                 parts.push("\necho 'this build was ran by emerald at " + now.toUTCString() + "';\n");
                 parts.push("exit 0");
