@@ -67,8 +67,8 @@ var User = models.declare("User", function(it, kind){
 });
 
 var Build = models.declare("Build", function(it, kind) {
-    it.has.field("status", kind.numeric);
-    it.has.field("signal", kind.numeric);
+    it.has.field("status", kind.string);
+    it.has.field("signal", kind.string);
     it.has.field("error", kind.string);
     it.has.field("output", kind.string);
     it.has.field("pid", kind.numeric);
@@ -93,7 +93,6 @@ var Build = models.declare("Build", function(it, kind) {
         return '/build/' + this.__id__;
     });
     it.has.getter('non_circular_data', function() {
-        return {}
         var self = this;
         var data = _.clone(self.__data__);
         delete data.instruction;
@@ -121,7 +120,6 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
         return this.builds.length;
     });
     it.has.getter('non_circular_data', function() {
-        return {}
         var self = this;
         var data = _.clone(this.__data__);
         var clean_builds = _.filter(_.map(data.builds, function fetch_non_circular_data_from_each_build (_build){
@@ -222,8 +220,12 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             function spawn_git(self, command_args, command_options, callback){
                 logger.info('spawning "git '+command_args.join(' ')+'"');
                 var command = child_process.spawn("git", command_args, command_options);
-
-                callback(null, self, command, command_args);
+                Build.find_by_id(current_build.__id__, function(err, build) {
+                    build.fetching_started_at = new Date();
+                    build.save(function(err){
+                        callback(err, self, command, command_args);
+                    });
+                });
             },
             function capture_git_stdout(self, command, args, callback){
                 logger.debug('capturing the git command stdout');
@@ -264,15 +266,14 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             },
             function handle_the_exit_of_git(self, command, args, callback) {
                 logger.debug('capturing the exit of the git command');
-                command.on('exit', function (_code, signal) {
-                    var code = parseInt(_code || 0);
-                    logger.debug(['git has exited |', 'exit code:', _code, code, " SIGNAL:", signal]);
+                command.on('exit', function (code, signal) {
+                    logger.debug(['git has exited |', 'exit code:', code, " SIGNAL:", signal]);
                     Build.find_by_id(current_build.__id__, function(err, build) {
                         logger.handleException("Build.find_by_id", err);
                         var now = new Date();
 
                         build.status = code;
-                        build.finished_at = now;
+                        build.fetching_finished_at = now;
                         build.stage = STAGES_BY_NAME.PREPARING_ENVIRONMENT;
 
                         redis.publish("Repository finished fetching", JSON.stringify({at: now, build:build.__data__, instruction: self.__data__}));
@@ -307,7 +308,12 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 logger.info('spawning build script');
                 var args = [script_path];
                 var command = child_process.spawn("bash", args, {cwd: repository_full_path});
-                callback(null, self, command, args);
+                Build.find_by_id(current_build.__id__, function(err, build) {
+                    build.build_started_at = new Date();
+                    build.save(function(err){
+                        callback(err, self, command, args);
+                    });
+                });
             },
             function capture_build_stdout (self, command, args, callback){
                 logger.debug('capturing build script stdout');
@@ -321,7 +327,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         redis.publish("Build output", JSON.stringify({meta: build.__data__, output: build.output, instruction: self.non_circular_data}));
 
                         build.save(function(err, key, build) {
-                            logger.info('persisting "'+b+'" to Build#'=build.__id__+'\'s "output" field');
+                            logger.debug('persisting "'+b+'" to Build#'+build.__id__+'\'s "output" field');
                         });
                     });
                 });
@@ -340,7 +346,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
 
                         redis.publish("Build output", JSON.stringify({meta: build.__data__, output: build.error, instruction: self.non_circular_data}));
                         build.save(function(err, key, build) {
-                            logger.info('persisting "'+b+'" to Build#'+build.__id__+'\'s "error" field');
+                            logger.debug('persisting "'+b+'" to Build#'+build.__id__+'\'s "error" field');
                         });
                     });
                 });
@@ -350,14 +356,15 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 var now = new Date();
                 logger.debug('handling the exit of the command');
 
-                command.on('exit', function (_code) {
-                    var code = parseInt(_code || 0);
-                    logger.info('finished running the build script, code: ' + _code);
+                command.on('exit', function (code, signal) {
+                    logger.debug('finished running the build script, code: ' + code + ', signal: ' + signal);
                     Build.find_by_id(current_build.__id__, function(err, build) {
                         build.status = code;
-                        build.finished_at = now;
+                        build.signal = signal;
+                        build.build_finished_at = now;
                         build.stage = STAGES_BY_NAME.FINISHED;
-                        var instruction_without_builds = self.__data__;
+
+                        var instruction_without_builds = self.non_circular_data;
                         delete instruction_without_builds.builds;
                         redis.publish("Build finished", JSON.stringify({meta: build.__data__, at: now, instruction: instruction_without_builds}));
                         build.save(function(){
