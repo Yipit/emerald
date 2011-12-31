@@ -273,21 +273,12 @@ a, a:hover{
             background:url(../images/ico_stop.png) no-repeat;
         }
     }
+    .success, .success * {
+        color:#4e9a06;
+    }
 
-    .buildlog {
-        margin:0;
-        padding:10px;
-        li {
-            margin-bottom:5px;
-        }
-
-        .success, .success * {
-            color:#4e9a06;
-        }
-
-        .failure, .failure * {
-            color:#ef2929;
-        }
+    .failure, .failure * {
+        color:#ef2929;
     }
 }
 
@@ -354,6 +345,19 @@ table {
   }
 }
 
+.terminal {
+  background: @darkest_aluminum;
+  color: @lightest_aluminum;
+  overflow: auto;
+  position: relative;
+  padding: 0px 17px 17px 17px;
+  clear: both;
+  font-family: Monaco, Monospace;
+  &pre {
+    font-family: Monaco, Monospace;
+  }
+}
+
 #terminal-wrapper {
   position: fixed;
   left: 0;
@@ -364,13 +368,8 @@ table {
   margin: 0px 10px 10px 10px;
 
   pre#terminal {
-    background: @darkest_aluminum;
-    color: @lightest_aluminum;
+    .terminal;
     display: none;
-    overflow: auto;
-    position: relative;
-    padding: 0px 17px 17px 17px;
-    clear: both;
   }
 
   .toggle-terminal {
