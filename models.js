@@ -249,7 +249,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 callback(null, self, command, args);
             },
             function handle_the_exit_of_git(self, command, args, callback) {
-                logger.debug('capturing the exit of the git command');
+                logger.debug('emerald will handle the exit of the git command');
                 command.on('exit', function (code, signal) {
                     logger.debug(['git has exited |', 'exit code:', code, " SIGNAL:", signal]);
                     Build.find_by_id(current_build.__id__, function(err, build) {
@@ -307,11 +307,11 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 command.stdout.on('data', function (data) {
                     Build.find_by_id(current_build.__id__, function(err, build) {
                         var b = filter_output(data.toString());
-                        var already_there = (build.output.indexOf(b) > 0);
+                        var already_there = (build.output.indexOf(b.trim()) > 0);
                         if (already_there){return;}
-                        build.output = build.output + b;
+                        build.output += b;
                         build.stage = STAGES_BY_NAME.RUNNING;
-                        redis.publish("Build output", JSON.stringify({meta: build.__data__, output: build.output, instruction: self.__data__}));
+                        redis.publish("Build output", JSON.stringify({meta: build.__data__, output: b, instruction: self.__data__}));
 
                         build.save(function(err, key, build) {
                             logger.debug('persisting "'+b+'" to Build#'+build.__id__+'\'s "output" field');
@@ -341,7 +341,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             },
             function handle_the_exit_of_build(self, command, args, callback) {
                 var now = new Date();
-                logger.debug('handling the exit of the command');
+                logger.debug('emerald will handle the exit of the command');
 
                 command.on('exit', function (code, signal) {
                     logger.debug('finished running the build script, code: ' + code + ', signal: ' + signal);
