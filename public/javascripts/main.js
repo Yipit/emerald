@@ -40,7 +40,7 @@ $(function(){
     socket.on('Build finished', function(data){
         var $instruction = $("[data-instruction-id="+data.instruction.__id__+"]");
         var $bg = $instruction.find(".build-status");
-
+        $instruction.removeClass("running");
         if ((parseInt(data.build.status || "0") == 0) && ((data.build.signal + "") == "null")) {
             $instruction.addClass('success');
             $bg.removeClass("info").addClass("success");
