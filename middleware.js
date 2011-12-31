@@ -1,5 +1,4 @@
 var _ = require('underscore')._;
-var ansispan = require('ansispan');
 var fs = require('fs');
 var entity = require('./models');
 var settings = require('./settings');
