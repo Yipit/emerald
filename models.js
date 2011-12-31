@@ -3,6 +3,7 @@ var models = require('clay');
 var crypto = require('crypto');
 var mkdirp = require('mkdirp');
 var async = require('async');
+var moment = require('moment');
 var path = require('path');
 var fs = require('fs');
 var child_process = require('child_process');
@@ -87,10 +88,12 @@ var Build = models.declare("Build", function(it, kind) {
         hash.update(this.author_email || '');
         return 'http://www.gravatar.com/avatar/' + hash.digest('hex') + '?s=' + size;
     });
+    it.has.getter('succeeded', function() {
+        return ((parseInt(this.status || 0) == 0) && this.signal === 'null');
+    });
     it.has.getter('duration', function() {
-        var started = new Date(this.started_at);
-        var finished = new Date(this.finished_at);
-        return finished.getSecondsBetween(started) + ' seconds';
+        var finished = moment(this.finished_at);
+        return finished.fromNow()
     });
 
     it.has.getter('started_at', function() {
