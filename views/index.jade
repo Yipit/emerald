@@ -2,10 +2,11 @@
   h1 Builds
   ul#builds
     - each instruction in instructions
+      - var klass = ' '
       - if (instruction.last_build)
-        - var klass = instruction.last_build.succeeded ? 'success': 'failure'
-      - else
-        - var klass = ''
+        - klass += instruction.last_build.stage_name
+        - klass += instruction.last_build.succeeded ? 'success': 'failure'
+
       li
         article.instruction(data-instruction-id=instruction.__id__, class=klass)
           ul.data
@@ -25,12 +26,13 @@
               - else
                 strong Never
             li
-              a.btn.small.info(href="#", emerald-action="run", emerald-entity="BuildInstruction", rel=instruction.__id__) Add to the queue
-            - if (instruction.last_build)
-              li
-                a.btn.small.success(href="#", emerald-action="show:output", emerald-entity="Build", rel=instruction.last_build.__id__) STDOUT
-                a.btn.small.error(href="#", emerald-action="show:error", emerald-entity="Build", rel=instruction.last_build.__id__) STDERR
-
+              ul.menu
+                li
+                  a.btn.small.info(href="#", emerald-action="run", emerald-entity="BuildInstruction", rel=instruction.__id__) Add to the queue
+                  - if (instruction.last_build)
+                    a.btn.small.success(href="#", emerald-action="show:output", emerald-entity="Build", rel=instruction.last_build.__id__) STDOUT
+                    a.btn.small.error(href="#", emerald-action="show:error", emerald-entity="Build", rel=instruction.last_build.__id__) STDERR
+            li(style='clear:both')
 
 
           ol.buildlog

@@ -91,6 +91,10 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.getter('succeeded', function() {
         return ((parseInt(this.status || 0) == 0) && this.signal === 'null');
     });
+    it.has.getter('stage_name', function() {
+        return (STAGES_BY_NAME[this.stage] || 'running').toLowerCase();
+    });
+
     it.has.getter('duration', function() {
         var finished = moment(this.finished_at);
         return finished.fromNow()
