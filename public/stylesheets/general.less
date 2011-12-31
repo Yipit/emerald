@@ -190,6 +190,11 @@ ul#builds {
     }
 }
 
+a, a:hover{
+  text-decoration: none;
+  color: @darkest_aluminum;
+}
+
 .instruction {
     background:#eeeeec;
     color:#333;
@@ -276,11 +281,11 @@ ul#builds {
             margin-bottom:5px;
         }
 
-        .success {
+        .success, .success * {
             color:#4e9a06;
         }
 
-        .failure {
+        .failure, .failure * {
             color:#ef2929;
         }
     }

@@ -2,6 +2,7 @@
   .row
     .span11
       h2= "Build #" + build.__id__
+      img(style="float: right;border:10px solid white", src=build.gravatar_of_size(100), width="100", height="100")
       p: strong= "by " + build.author_name + '<' + build.author_email + '>'
       p
         strong commit message:

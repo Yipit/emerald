@@ -3,7 +3,7 @@
   ul#builds
     - each instruction in instructions
       li
-        article.instruction
+        article.instruction(data-instruction-id=instruction.__id__)
           ul.data
             li.avatar
               - if (instruction.last_build)
@@ -13,6 +13,13 @@
 
             li.title
               h1= instruction.name
+
+            li.lastbuild.last-build last build:
+              - if (instruction.last_build)
+                strong
+                  a(href=instruction.last_build.permalink)= '#' + instruction.last_build.__id__ + ' ('+instruction.last_build.duration+')';
+              - else
+                strong Never
 
             li.lastfailure last failure:
               - if (instruction.last_failure)
@@ -33,8 +40,9 @@
               a(href="#") Show output
 
             li.build
-              a(href="#", emerald-action="run", rel=instruction.__id__) Build Now
+              a(href="#", emerald-action="run", emerald-entity="BuildInstruction", rel=instruction.__id__) Build Now
 
           ol.buildlog
             - each build in instruction.all_builds
-              li(class=build.status == 0 ? "success" : "failure")= "#" + build.__id__ + " &mdash; " + build.message;
+              li(class=build.status == 0 ? "success" : "failure")
+                a(href=build.permalink)= "#" + build.__id__ + " &mdash; " + build.message;

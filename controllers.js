@@ -74,7 +74,7 @@ exports.map = function(app, redis){
     app.all('/instructions', function(request, response){
         switch (request.method) {
             case "GET":
-                entity.BuildInstruction.all(function(err, instructions){
+                entity.BuildInstruction.get_latest_with_builds(function(err, instructions){
                     response.show('manage-instructions', {instructions: instructions, has_instructions: instructions.length > 0});
                 });
             break;

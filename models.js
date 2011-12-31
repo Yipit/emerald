@@ -168,7 +168,6 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             function turn_into_instructions (instructions, callback){
                 logger.debug(['get_latest_with_builds: turning into instructions', instructions]);
                 async.map(instructions, function(data, callback){
-                    console.log(data);
                     BuildInstruction.with_builds_from_data(data, callback);
                 }, callback);
             }
@@ -398,7 +397,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         var b = filter_output(data.toString());
                         var already_there = (build.output.indexOf(b.trim()) > 0);
                         if (already_there){return;}
-                        build.output += b;
+                        build.output = build.output + b;
                         build.stage = STAGES_BY_NAME.RUNNING;
                         redis.publish("Build output", JSON.stringify({meta: build.__data__, output: b, instruction: self.__data__}));
 

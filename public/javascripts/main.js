@@ -31,6 +31,7 @@ $(function(){
     });
     socket.on('Build started', function(data){
         var $instruction = $("[data-instruction-id="+data.instruction.__id__+"]");
+        $instruction.addClass('running');
         var $bg = $instruction.find(".build-status");
         $bg.removeClass("warning").addClass("info");
         $instruction.find(".last-build").html("<strong>Building now</strong>");
@@ -41,20 +42,28 @@ $(function(){
         var $bg = $instruction.find(".build-status");
 
         if ((parseInt(data.build.status || "0") == 0) && ((data.build.signal + "") == "null")) {
+            $instruction.addClass('success');
             $bg.removeClass("info").addClass("success");
         } else {
+            $instruction.addClass('failure');
             $bg.removeClass("info").addClass("error");
         }
         $instruction.find(".last-build").html("<strong>Finished just now</strong>");
     });
 
     socket.on('Build output', function(data){
+        var $instruction = $("[data-instruction-id="+data.instruction.__id__+"]");
+        $instruction.addClass('running');
+
         var $terminal = $("#terminal-wrapper");
         $terminal.fadeIn();
         $terminal.find("#terminal").html($terminal.find("#terminal").html() + data.output);
     });
 
     socket.on('Repository being fetched', function(data){
+        var $instruction = $("[data-instruction-id="+data.instruction.__id__+"]");
+        $instruction.addClass('running');
+
         var $pb = $("#progress-bar");
         $pb.fadeIn();
         $pb.find(".gif").show();
@@ -63,6 +72,9 @@ $(function(){
         $pb.find(".status").text(data.instruction.name+": "+data.phase);
     });
     socket.on('Repository finished fetching', function(data){
+        var $instruction = $("[data-instruction-id="+data.instruction.__id__+"]");
+        $instruction.addClass('running');
+
         var $pb = $("#progress-bar");
         $pb.fadeOut();
         $pb.find(".gif").hide();
