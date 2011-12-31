@@ -74,12 +74,24 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.field("pid", kind.numeric);
     it.has.field("stage", kind.numeric);
     it.has.field("commit", kind.string);
+    it.has.field("message", kind.string);
     it.has.field("author_name", kind.string);
     it.has.field("author_email", kind.string);
     it.has.field("build_started_at", kind.auto);
-    it.has.field("build_finished_at", kind.datetime);
+    it.has.field("build_finished_at", kind.string);
     it.has.field("fetching_started_at", kind.auto);
-    it.has.field("fetching_finished_at", kind.datetime);
+    it.has.field("fetching_finished_at", kind.string);
+
+    it.has.method('gravatar_of_size', function(size){
+        var hash = crypto.createHash('md5');
+        hash.update(this.author_email || '');
+        return 'http://www.gravatar.com/avatar/' + hash.digest('hex') + '?s=' + size;
+    });
+    it.has.getter('duration', function() {
+        var started = new Date(this.started_at);
+        var finished = new Date(this.finished_at);
+        return finished.getSecondsBetween(started) + ' seconds';
+    });
 
     it.has.getter('started_at', function() {
         return this.build_started_at || this.fetching_started_at;
@@ -92,6 +104,14 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.getter('permalink', function() {
         return '/build/' + this.__id__;
     });
+
+    it.has.class_method('from_key', function(key, callback) {
+        var id = /Build:(\d+)/.exec(key)[1];
+        Build.find_by_id(parseInt(id), function(err, item){
+            callback(err, item);
+        });
+    });
+
 });
 
 var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
@@ -107,6 +127,16 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
         return '/instruction/' + this.__id__;
     });
 
+    it.has.getter('last_build', function() {
+        return this.all_builds[0];
+    });
+    it.has.getter('last_success', function() {
+        return this.succeeded_builds[0];
+    });
+    it.has.getter('last_failure', function() {
+        return this.failed_builds[0];
+    });
+
     it.has.getter('keys', function() {
         var prefix = 'emerald:Instruction:' + this.__id__ + ':';
         return {
@@ -119,6 +149,66 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
         };
     });
 
+    it.has.class_method('get_latest_with_builds', function(callback) {
+        var self = this;
+
+        var redis = self._meta.storage.connection;
+
+        async.waterfall([
+            function fetch_all_instruction_keys (callback){
+                logger.debug('get_latest_with_builds: getting keys');
+                redis.keys('clay:BuildInstruction:id:*', callback);
+            },
+            function get_instructions_data (keys, callback){
+                logger.debug(['get_latest_with_builds: getting data', keys]);
+                async.map(keys, function(key, callback){
+                    return redis.hgetall(key, callback);
+                }, callback);
+            },
+            function turn_into_instructions (instructions, callback){
+                logger.debug(['get_latest_with_builds: turning into instructions', instructions]);
+                async.map(instructions, function(data, callback){
+                    console.log(data);
+                    BuildInstruction.with_builds_from_data(data, callback);
+                }, callback);
+            }
+        ], callback);
+    });
+    it.has.class_method('with_builds_from_data', function(data, callback) {
+        var self = new this(data);
+        async.waterfall([
+            function get_all_builds(callback) {
+                redis.zrevrange(self.keys.all_builds, 0, -1, function(err, builds){
+                    async.map(builds, function(key, callback){
+                        return Build.from_key(key, callback);
+                    }, callback);
+                });
+            },
+            function get_succeeded_builds(all_builds, callback) {
+                redis.zrevrange(self.keys.succeeded_builds, 0, -1, function(err, builds){
+                    async.map(builds, function(key, callback){
+                        return Build.from_key(key, callback);
+                    }, function(err, succeeded_builds){
+                        callback(err, all_builds, succeeded_builds);
+                    });
+                });
+            },
+            function get_failed_builds(all_builds, succeeded_builds, callback) {
+                redis.zrevrange(self.keys.failed_builds, 0, -1, function(err, builds){
+                    async.map(builds, function(key, callback){
+                        return Build.from_key(key, callback);
+                    }, function(err, failed_builds){
+                        callback(err, all_builds, succeeded_builds, failed_builds);
+                    });
+                });
+            }
+        ], function(err, all_builds, succeeded_builds, failed_builds){
+            self.all_builds = all_builds;
+            self.succeeded_builds = succeeded_builds;
+            self.failed_builds = failed_builds;
+            callback(err, self);
+        });
+    });
     it.has.method('run', function(current_build, lock) {
         var self = this;
 
@@ -250,6 +340,27 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                     });
                 });
             },
+            function update_builds_author(self, callback){
+                child_process.exec('git log --format=short HEAD...HEAD^', {cwd: repository_full_path}, function(error, stdout, stderr){
+                    var lines = _.map(stdout.split('\n'), function(x){return x.trim()});
+                    var author_data = /Author[:] ([^<]+)[<]([^>]+)[>]/.exec(lines[1]);
+                    var commit_hash = /commit (\w{40})/.exec(lines[0]);
+                    var commit_message = stdout.split('\n').splice(2).join('\n');
+
+                    Build.find_by_id(current_build.__id__, function(err, build) {
+
+                        build.author_name = author_data[1].trim();
+                        build.author_email = author_data[2].trim();
+                        build.commit = commit_hash[1];
+                        build.message = commit_message;
+
+                        build.save(function(err){
+                            callback(err, self);
+                        });
+
+                    });
+                });
+            },
             function write_build_script(self, callback){
                 var now = new Date();
                 logger.debug('writting build script at ' + script_path);
@@ -352,7 +463,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 var name = build_succeeded ? 'succeeded' : 'failed';
 
                 redis.zadd(key, unix_timestamp, self.keys.for_build_id(build.__id__), function(){
-                    logger.info(['adding Build #' + current_build, 'to Instruction #' + self.__id__ + "'s", name, 'builds list'])
+                    logger.info(['adding Build #' + build.__id__, 'to Instruction #' + self.__id__ + "'s", name, 'builds list'])
                     callback(null, self, build);
                 });
             }

@@ -17,7 +17,7 @@ $(function(){
                 text: "#" + data.id,
                 image: window.emerald.domain + "/images/control_double_down.png"
             });
-            $(".btn[emerald-action='run'][emerald-entity='BuildInstruction'][rel='"+data.id+"']").button('reset');
+            $("a[emerald-action='run'][emerald-entity='BuildInstruction'][rel='"+data.id+"']").button('reset');
         });
     });
 
@@ -27,7 +27,7 @@ $(function(){
             text: "The build instruction #" + data.id + " has been added to the queue",
             image: window.emerald.domain + "/images/control_double_down.png"
         });
-        $(".btn[emerald-action='run'][emerald-entity='BuildInstruction'][rel='"+data.id+"']").button('reset');
+        $("a[emerald-action='run'][emerald-entity='BuildInstruction'][rel='"+data.id+"']").button('reset');
     });
     socket.on('Build started', function(data){
         var $instruction = $("[data-instruction-id="+data.instruction.__id__+"]");
@@ -85,7 +85,7 @@ $(function(){
         socket.emit('delete BuildInstruction', {id: id});
         return e.preventDefault();
     });
-    $(".btn[emerald-action='run']").die('click').live('click', function(e){
+    $("a[emerald-action='run']").die('click').live('click', function(e){
         var $self = $(this);
 
         var id = $self.attr("rel")

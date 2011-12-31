@@ -1,0 +1,20 @@
+.container
+  .row
+    .span11
+      h2= "Build #" + build.__id__
+      p: strong= "by " + build.author_name + '<' + build.author_email + '>'
+      p
+        strong commit message:
+          pre= build.message
+      p
+        strong STDOUT
+          pre!= build.output
+      p
+        strong STDERR
+          pre!= build.error
+      p
+        strong exit status
+          pre!= build.status
+      p
+        strong killed by signal?
+          pre!= (build.signal === "null") ? build.signal : 'nah, it ran just fine'

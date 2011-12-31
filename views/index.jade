@@ -1,83 +1,40 @@
 #dashboard.container
   h1 Builds
   ul#builds
-    li
-      article.instruction
-        ul.data
-          li.avatar
-            img(src="/images/gravatar100x100.jpg", width="50")
-          li.title
-            h1 Yipit Unit Tests
-          li.commitmsg Fixing to_review and needs (...)
-          li.lastfailure last failure: #231 (31s)
-          li.lastsuccess last success: #230 (2s)
-        ul.menu
-          li.output
-            a(href="#") Show output
-          li.build
-            a(href="#") Build Now
-        ol.buildlog
-          li.success #229 &mdash; Another fix in blah
-          li.success #228 &mdash; Fixing a typo in the main model
-          li.failure #227 &mdash; Implementing the login feature
+    - each instruction in instructions
+      li
+        article.instruction
+          ul.data
+            li.avatar
+              - if (instruction.last_build)
+                img(src=instruction.last_build.gravatar_of_size(50), width="50")
+              - else
+                img(src="/images/avatar.png", width="50")
 
-    li
-      article.instruction.failed
-        ul.data
-          li.avatar
-            img(src="/images/gravatar100x100.jpg", width="50")
-          li.title
-            h1 Yipit Unit Tests
-          li.commitmsg Fixing to_review and needs (...)
-          li.lastfailure last failure: #231 (31s)
-          li.lastsuccess last success: #230 (2s)
-        ul.menu
-          li.output
-            a(href="#") Show output
-          li.build
-            a(href="#") Build Now
-        ol.buildlog
-          li.success #229 &mdash; Another fix in blah
-          li.success #228 &mdash; Fixing a typo in the main model
-          li.failure #227 &mdash; Implementing the login feature
+            li.title
+              h1= instruction.name
 
-    li
-      article.instruction.success
-        ul.data
-          li.avatar
-            img(src="/images/gravatar100x100.jpg", width="50")
-          li.title
-            h1 Yipit Unit Tests
-          li.commitmsg Fixing to_review and needs (...)
-          li.lastfailure last failure: #231 (31s)
-          li.lastsuccess last success: #230 (2s)
-        ul.menu
-          li.output
-            a(href="#") Show output
-          li.build
-            a(href="#") Build Now
-        ol.buildlog
-          li.success #229 &mdash; Another fix in blah
-          li.success #228 &mdash; Fixing a typo in the main model
-          li.failure #227 &mdash; Implementing the login feature
+            li.lastfailure last failure:
+              - if (instruction.last_failure)
+                strong
+                  a(href=instruction.last_failure.permalink)= '#' + instruction.last_failure.__id__ + ' ('+instruction.last_failure.duration+')';
+              - else
+                strong Never
 
-    li
-      article.instruction.running
-        ul.data
-          li.avatar
-            img(src="/images/gravatar100x100.jpg", width="50")
-          li.title
-            h1 Yipit Unit Tests
-          li.commitmsg Fixing to_review and needs (...)
-          li.lastfailure last failure: #231 (31s)
-          li.lastsuccess last success: #230 (2s)
-        ul.menu
-          li.output
-            a(href="#") Show output
-          li.stop
-            a(href="#") Stop running
-        ol.buildlog
-          li.success #229 &mdash; Another fix in blah
-          li.success #228 &mdash; Fixing a typo in the main model
-          li.failure #227 &mdash; Implementing the login feature
-    .row-end
+            li.lastsuccess last success:
+              - if (instruction.last_success)
+                strong
+                  a(href=instruction.last_success.permalink)= '#' + instruction.last_success.__id__ + ' ('+instruction.last_success.duration+')';
+              - else
+                strong Never
+
+          ul.menu
+            li.output
+              a(href="#") Show output
+
+            li.build
+              a(href="#", emerald-action="run", rel=instruction.__id__) Build Now
+
+          ol.buildlog
+            - each build in instruction.all_builds
+              li(class=build.status == 0 ? "success" : "failure")= "#" + build.__id__ + " &mdash; " + build.message;

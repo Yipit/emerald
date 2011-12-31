@@ -5,7 +5,12 @@ var logger = new (require('./logger').Logger)("[controllers]".yellow);
 
 exports.map = function(app, redis){
     app.get('/', function(request, response){
-        response.show('index');
+        entity.BuildInstruction.get_latest_with_builds(function(err, instructions){
+            response.show('index', {
+                instructions:instructions
+            });
+        });
+
     });
     app.get('/logout', function(request, response){
         request.session.user_id = null;
@@ -54,6 +59,14 @@ exports.map = function(app, redis){
         entity.User.find_by_id(id, function(err, user) {
             response.show('user', {
                 user: user
+            });
+        });
+    });
+    app.get('/build/:id', function(request, response){
+        var id = parseInt(request.param('id'));
+        entity.Build.find_by_id(id, function(err, build) {
+            response.show('build', {
+                build: build
             });
         });
     });
