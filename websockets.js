@@ -1,7 +1,7 @@
 var entity = require("./models");
 var settings = require('./settings');
 
-var logger = new (require('./logger').Logger)("[WEBSOCKET]".blue.bold);
+var logger = new (require('./logger').Logger)("[WEBSOCKET]".magenta.bold);
 
 exports.work_on = function(redis, io) {
     io.configure(function(){
