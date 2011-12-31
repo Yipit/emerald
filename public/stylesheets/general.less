@@ -261,9 +261,8 @@ a, a:hover{
         color:#ef2929;
     }
 }
-
-.instruction.failed .data {
-    background:#cc0000;
+.instruction.running .data {
+    background: @light_sky_blue;
     li {
         color:#fff;
     }
@@ -276,12 +275,13 @@ a, a:hover{
     }
 }
 
-.instruction.running .data {
-    background: @light_sky_blue;
+.instruction.failed .data {
+    background:#cc0000;
     li {
         color:#fff;
     }
 }
+
 
 /* -- Form stuff -- */
 
