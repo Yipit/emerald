@@ -236,15 +236,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             instruction: self.__data__
         }));
         async.waterfall([
-            function associate_build_to_instruction(callback){
-                /* the unix timestamp is always the score, so that we can fetch it ordered by date*/
-                var unix_timestamp = (new Date()).getTime();
-
-                redis.zadd(self.keys.all_builds, unix_timestamp, self.keys.for_build_id(current_build.__id__), function(){
-                    callback(null, self);
-                })
-            },
-            function decide_whether_pull_or_clone (self, callback){
+            function decide_whether_pull_or_clone (callback){
                 logger.info('preparing to fetch data from "'+self.name+'" through "'+self.repository_address+'@'+branch_to_build+'" at ' + repository_full_path);
                 path.exists(repository_bare_path, function(exists){callback(null, self, exists)})
             },
@@ -267,6 +259,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 var now = new Date();
                 Build.find_by_id(current_build.__id__, function(err, build) {
                     build.fetching_started_at = now;
+                    build.pid = command.pid;
                     redis.publish('Repository started fetching', JSON.stringify({
                         at: now,
                         build:build.__data__,
@@ -385,6 +378,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 var command = child_process.spawn("bash", args, {cwd: repository_full_path});
                 Build.find_by_id(current_build.__id__, function(err, build) {
                     build.build_started_at = new Date();
+                    build.pid = command.pid;
                     build.save(function(err){
                         callback(err, self, command, args);
                     });
@@ -452,8 +446,15 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                     });
                 });
             },
-            function associate_build_to_proper_list(self, build, callback){
+            function associate_build_to_instruction(self, build, callback){
+                /* the unix timestamp is always the score, so that we can fetch it ordered by date*/
                 var unix_timestamp = (new Date()).getTime();
+
+                redis.zadd(self.keys.all_builds, unix_timestamp, self.keys.for_build_id(current_build.__id__), function(){
+                    callback(null, self, build, unix_timestamp);
+                })
+            },
+            function associate_build_to_proper_list(self, build, unix_timestamp, callback){
                 var exit_code_zero = parseInt(build.status || 0) == 0;
                 var was_not_killed = build.signal === "null";
 
