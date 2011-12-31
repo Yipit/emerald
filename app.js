@@ -60,13 +60,10 @@
         var unicode_scissor = String.fromCharCode(0x272D).yellow.bold;
         var unicode_emerald = String.fromCharCode(0x25C8).green;
         /* handling control-C */
-        process.stdout.write('\r');
-        var line = '=========================================='.black.bold;
-        console.log(line);
-        console.log([unicode_emerald, "               Emerald               ", unicode_emerald].join(unicode_emerald));
-        console.log(['    ', unicode_scissor, '      Killed by Control-C      '.yellow.bold, unicode_scissor, '   '].join(''));
-        console.log([unicode_heart, 'Thanks for the merciful killing, sir!', unicode_heart].join(' ').green.bold);
-        console.log(line);
+        process.stdout.write('\r  \n');
+        console.log(unicode_emerald, "EMERALD".green.bold, unicode_emerald, "says: farewell!".white.bold);
+        console.log([unicode_heart, 'And thanks for the '.red+'CONTROL-C'.yellow.bold, unicode_heart].join(' ').green.bold);
+        process.stdout.write('\n\n');
         process.reallyExit(1);
     });
 
