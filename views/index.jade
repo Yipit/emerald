@@ -2,8 +2,12 @@
   h1 Builds
   ul#builds
     - each instruction in instructions
+      - if (instruction.last_build)
+        - var klass = instruction.last_build.succeeded ? 'success': 'failure'
+      - else
+        - var klass = ''
       li
-        article.instruction(data-instruction-id=instruction.__id__)
+        article.instruction(data-instruction-id=instruction.__id__, class=klass)
           ul.data
             li.avatar
               - if (instruction.last_build)
@@ -16,19 +20,21 @@
 
             li.last-build last build:
               - if (instruction.last_build)
-                strong(class=instruction.last_build.succeeded ? 'success': 'failure')
+                strong(class=klass)
                   a(href=instruction.last_build.permalink)= instruction.last_build.message + ' ('+instruction.last_build.duration+')';
               - else
                 strong Never
+            li
+              a.btn.small.info(href="#", emerald-action="run", emerald-entity="BuildInstruction", rel=instruction.__id__) Add to the queue
+            - if (instruction.last_build)
+              li
+                a.btn.small.success(href="#", emerald-action="show:output", emerald-entity="Build", rel=instruction.last_build.__id__) STDOUT
+                a.btn.small.error(href="#", emerald-action="show:error", emerald-entity="Build", rel=instruction.last_build.__id__) STDERR
 
-          ul.menu
-            li.output
-              a(href="#") Show output
 
-            li.build
-              a(href="#", emerald-action="run", emerald-entity="BuildInstruction", rel=instruction.__id__) Build Now
 
           ol.buildlog
+          li: strong latest builds:
             - each build in instruction.all_builds
-              li(class=build.succeeded ? "success" : "failure")
+              li(class=klass)
                 a(href=build.permalink)= "#" + build.__id__ + " &mdash; " + build.message;

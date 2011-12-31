@@ -206,13 +206,17 @@ a, a:hover{
         background:#d3d7cf;
         padding-bottom:10px;
         box-shadow:0 0 10px #666;
+        li {
+          padding-left:72px;
+          color:#999;
+          .btn {
+            margin: 5px;
+          }
+        }
     }
-
-    .data li {
-        padding-left:72px;
-        color:#999;
+    .buildlog {
+      margin: 10px 0 0 10px ;
     }
-
     .data .avatar {
         float:left;
         margin-right:20px;
@@ -290,14 +294,14 @@ a, a:hover{
 }
 
 .instruction.success .data {
-    background:#4e9a06;
+    background: @chameleon;
     li {
-        color:#fff;
+        color: @darkest_aluminum;
     }
 }
 
 .instruction.running .data {
-    background:#fcaf3e;
+    background: @light_sky_blue;
     li {
         color:#fff;
     }
@@ -438,3 +442,4 @@ table {
 #terminal-wrapper {
   display: none;
 }
+
