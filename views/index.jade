@@ -14,24 +14,10 @@
             li.title
               h1= instruction.name
 
-            li.lastbuild.last-build last build:
+            li.last-build last build:
               - if (instruction.last_build)
-                strong
-                  a(href=instruction.last_build.permalink)= '#' + instruction.last_build.__id__ + ' ('+instruction.last_build.duration+')';
-              - else
-                strong Never
-
-            li.lastfailure last failure:
-              - if (instruction.last_failure)
-                strong
-                  a(href=instruction.last_failure.permalink)= '#' + instruction.last_failure.__id__ + ' ('+instruction.last_failure.duration+')';
-              - else
-                strong Never
-
-            li.lastsuccess last success:
-              - if (instruction.last_success)
-                strong
-                  a(href=instruction.last_success.permalink)= '#' + instruction.last_success.__id__ + ' ('+instruction.last_success.duration+')';
+                strong(class=instruction.last_build.succeeded ? 'success': 'failure')
+                  a(href=instruction.last_build.permalink)= instruction.last_build.message + ' ('+instruction.last_build.duration+')';
               - else
                 strong Never
 
@@ -44,5 +30,5 @@
 
           ol.buildlog
             - each build in instruction.all_builds
-              li(class=build.status == 0 ? "success" : "failure")
+              li(class=build.succeeded ? "success" : "failure")
                 a(href=build.permalink)= "#" + build.__id__ + " &mdash; " + build.message;

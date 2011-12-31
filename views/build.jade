@@ -1,6 +1,6 @@
 .container
   .row
-    .span11
+    .span16
       h2= "Build #" + build.__id__
       img(style="float: right;border:10px solid white", src=build.gravatar_of_size(100), width="100", height="100")
       p: strong= "by " + build.author_name + '<' + build.author_email + '>'
@@ -9,13 +9,13 @@
           pre= build.message
       p
         strong STDOUT
-          pre!= build.output
+          pre.terminal!= build.output
       p
         strong STDERR
-          pre!= build.error
+          pre.terminal!= build.error
       p
         strong exit status
-          pre!= build.status
+          pre.terminal!= build.status
       p
         strong killed by signal?
-          pre!= (build.signal === "null") ? build.signal : 'nah, it ran just fine'
+          pre.terminal!= (build.signal === "null") ? build.signal : 'nah, it ran just fine'
