@@ -22,6 +22,7 @@
     , "async": ">= 0.1.15"
     , "colors": ">= 0.5.1"
     , "mkdirp": ">= 0.2.1"
+    , "moment": ">= 1.2.0"
   }
   , "devDependencies": {
       "vows": "0.5.13"
