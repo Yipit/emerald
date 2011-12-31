@@ -106,42 +106,17 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
     it.has.getter('permalink', function() {
         return '/instruction/' + this.__id__;
     });
-    it.has.getter('total_builds', function() {
-        return 0;
-    });
 
-    it.has.method('get_builds', function(callback) {
-        var self = this;
-        var now = new Date();
-        var redis = self._meta.storage.connection;
-        if (_.isArray(self._builds) && (self._builds.length > 0)) {
-            /*                      && ((now - self._builds_cache_timestamp) < settings.DB_CACHE_TIMEOUT)) {*/
-            return self._builds;
-        }
-
-        redis.zrange("clay:BuildInstruction:id:" + self.__id__ + ":builds", 0, -1, function(err, builds){
-            async.map(builds, function(build_key, callback){
-                Build.find_by_id(build_key, function(err, key, build){
-                    self._builds_cache_timestamp = now;
-                    return callback(err, build);
-                });
-            }, callback);
-        });
-    });
-    it.has.method('get_latest_build', function(callback) {
-        var self = this;
-        var now = new Date();
-        if (_.isObject(self._latest_build) && _.isNumber(self._latest_build.__id__)){
-                                        /* && ((now - self._latest_build_cache_timestamp) > settings.DB_CACHE_TIMEOUT){*/
-            return self._latest_build;
-        }
-        self.get_builds(function(err, builds){
-            var first_build = builds.pop(0);
-            async.reduce(builds, first_build, function(memo, item, callback){
-                self._latest_build_cache_timestamp = now;
-                callback((memo.finished_at > item.finished_at) ? memo : item);
-            }, callback);
-        });
+    it.has.getter('keys', function() {
+        var prefix = 'emerald:Instruction:' + this.__id__ + ':';
+        return {
+            all_builds: prefix + 'all_builds',
+            succeeded_builds: prefix + 'succeeded_builds',
+            failed_builds: prefix + 'failed_builds',
+            for_build_id: function(id){
+                return 'Build:' + id;
+            }
+        };
     });
 
     it.has.method('run', function(current_build, lock) {
@@ -172,10 +147,13 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             instruction: self.__data__
         }));
         async.waterfall([
-            function sync_the_builds(callback){
-                self._meta.storage.sync(self, function(err, self){
-                    callback(err, self);
-                });
+            function associate_build_to_instruction(callback){
+                /* the unix timestamp is always the score, so that we can fetch it ordered by date*/
+                var unix_timestamp = (new Date()).getTime();
+
+                redis.zadd(self.keys.all_builds, unix_timestamp, self.keys.for_build_id(current_build.__id__), function(){
+                    callback(null, self);
+                })
             },
             function decide_whether_pull_or_clone (self, callback){
                 logger.info('preparing to fetch data from "'+self.name+'" through "'+self.repository_address+'@'+branch_to_build+'" at ' + repository_full_path);
@@ -358,10 +336,24 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                                     build: build.__data__,
                                     instruction: self.__data__
                                 }));
-                                callback(null, self);
+                                callback(null, self, build);
                             });
                         });
                     });
+                });
+            },
+            function associate_build_to_proper_list(self, build, callback){
+                var unix_timestamp = (new Date()).getTime();
+                var exit_code_zero = parseInt(build.status || 0) == 0;
+                var was_not_killed = build.signal === "null";
+
+                var build_succeeded = exit_code_zero && was_not_killed;
+                var key = build_succeeded ? self.keys.succeeded_builds : self.keys.failed_builds;
+                var name = build_succeeded ? 'succeeded' : 'failed';
+
+                redis.zadd(key, unix_timestamp, self.keys.for_build_id(build.__id__), function(){
+                    logger.info(['adding Build #' + current_build, 'to Instruction #' + self.__id__ + "'s", name, 'builds list'])
+                    callback(null, self, build);
                 });
             }
         ], function(err){
