@@ -23,12 +23,11 @@ QueueConsumer.prototype.start = function(){
 
     var seconds = (parseFloat(settings.GIT_POLL_INTERVAL) / 1000);
 
-    logger.info(["running with an interval of", seconds, seconds == 1 ? "second" : "seconds"]);
+    logger.success(["running with an interval of", seconds, seconds == 1 ? "second" : "seconds"]);
 
     /* lets start the loop and save the handler for later*/
     self.loop = setInterval(function(){
         /* see if there is a build runnning already */
-        console.log("             --------------------------------------------------------------------------------".white.bold);
         self.lifecycle.consume_build_queue(function(instruction_id_to_get, handle) {
             self.lifecycle.create_build_from_instruction(instruction_id_to_get, handle, function(instruction_to_run, current_build, handle){
                 /* no errors so far, let's remove it from the queue and build */
@@ -56,7 +55,7 @@ PollerLock.prototype.acquire = function(callback){
 
         /* if not building, let's quit and wait for the next interval */
         if (current_build) {
-            logger.info("already building:", JSON.stringify(current_build));
+            logger.debug("already building:", JSON.stringify(current_build));
             return;
         }
         return callback(self.handle);
@@ -95,11 +94,11 @@ Lifecycle.prototype.consume_build_queue = function(callback){
     self.lock.acquire(function(handle){
         self.lock.redis.zrange(self.key_for_build_queue, 0, 1, function(err, items) {
             if (err || items.length < 1) {
-                logger.info("there are no builds queued");
+                logger.debug("there are no builds queued");
                 return handle.release();
             }
 
-            logger.info("consuming the build queue");
+            logger.info("consuming the build queue: found an item to build");
             return callback(items.first, handle);
         });
     });

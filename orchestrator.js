@@ -1,7 +1,6 @@
 var logger = new (require('./logger').Logger)("[ ORCHESTRATOR ]".red.bold);
 
 module.exports.use = function(redis, socket) {
-    logger.info("I'm awake");
     const subscribe = require('redis').createClient();
     subscribe.subscribe("BuildInstruction enqueued");
 
@@ -25,7 +24,7 @@ module.exports.use = function(redis, socket) {
             case "BuildInstruction enqueued":
             logger.info("The BuildInstruction #"+parsed.id+" was successfully enqueued");
                 break;
-            case "Repository being fetched":
+            case "Repository started fetching":
             logger.info("The Build #"+parsed.build.__id__+" started fetching changes from the repository");
                 break;
             case "Repository finished fetched":

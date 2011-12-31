@@ -4,6 +4,10 @@ var settings = require('./settings');
 var logger = new (require('./logger').Logger)("[WEBSOCKET]".blue.bold);
 
 exports.work_on = function(redis, io) {
+    io.configure(function(){
+        io.set('logger', logger);
+    });
+
     io.sockets.on('connection', function (socket) {
         socket.emit('connected');
 

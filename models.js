@@ -7,7 +7,7 @@ var path = require('path');
 var fs = require('fs');
 var child_process = require('child_process');
 var settings = require('./settings');
-var logger = new (require('./logger').Logger)("[models]".cyan.bold);
+var logger = new (require('./logger').Logger)("[ MODELS / RUNNER ]".green.bold);
 
 var STAGES_BY_INDEX = {
     0: 'BEGINNING',
@@ -92,12 +92,6 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.getter('permalink', function() {
         return '/build/' + this.__id__;
     });
-    it.has.getter('non_circular_data', function() {
-        var self = this;
-        var data = _.clone(self.__data__);
-        delete data.instruction;
-        return data;
-    });
 });
 
 var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
@@ -106,31 +100,14 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
     it.has.field("repository_address", kind.string);
     it.has.field("branch", kind.string);
     it.has.field("build_script", kind.string);
+
     it.has.one("author", User, "created_instructions");
-
-    it.validates.uniquenessOf("name");
-
-    it.has.index("repository_address");
-    it.has.many("builds", Build, "instruction");
 
     it.has.getter('permalink', function() {
         return '/instruction/' + this.__id__;
     });
     it.has.getter('total_builds', function() {
-        return this.builds.length;
-    });
-    it.has.getter('non_circular_data', function() {
-        var self = this;
-        var data = _.clone(this.__data__);
-        var clean_builds = _.filter(_.map(data.builds, function fetch_non_circular_data_from_each_build (_build){
-            var build = _build && _build.non_circular_data && _.clone(_build.non_circular_data) || null;
-            return build;
-        }), function filter_by_non_null_items(build){
-            return !_.isNull(build) && !_.isUndefined(build);
-        });
-        delete data.builds;
-        data.builds = clean_builds;
-        return data;
+        return 0;
     });
 
     it.has.method('get_builds', function(callback) {
@@ -191,8 +168,8 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
 
         var branch_to_build = self.branch || "master";
         redis.publish("Build started", JSON.stringify({
-            build: current_build.non_circular_data,
-            instruction: self.non_circular_data
+            build: current_build.__data__,
+            instruction: self.__data__
         }));
         async.waterfall([
             function sync_the_builds(callback){
@@ -225,8 +202,8 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                     build.fetching_started_at = now;
                     redis.publish('Repository started fetching', JSON.stringify({
                         at: now,
-                        build:build.non_circular_data,
-                        instruction: self.non_circular_data
+                        build:build.__data__,
+                        instruction: self.__data__
                     }));
                     build.save(function(err){
                         callback(err, self, command, command_args);
@@ -262,8 +239,8 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                     if (found) {
                         logger.debug('publishing signal')
                         redis.publish('Repository being fetched', JSON.stringify({
-                            instruction: self.non_circular_data,
-                            build: build.non_circular_data,
+                            instruction: self.__data__,
+                            build: build.__data__,
                             phase: found[1].toLowerCase(),
                             percentage: found[2]
                         }));
@@ -285,8 +262,8 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
 
                         redis.publish("Repository finished fetching", JSON.stringify({
                             at: now,
-                            build:build.non_circular_data,
-                            instruction: self.non_circular_data
+                            build:build.__data__,
+                            instruction: self.__data__
                         }));
                         build.save(function(err){
                             logger.handleException("build(#"+build.__id__+").save", err);
@@ -334,7 +311,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         if (already_there){return;}
                         build.output = build.output + b;
                         build.stage = STAGES_BY_NAME.RUNNING;
-                        redis.publish("Build output", JSON.stringify({meta: build.non_circular_data, output: build.output, instruction: self.non_circular_data}));
+                        redis.publish("Build output", JSON.stringify({meta: build.__data__, output: build.output, instruction: self.__data__}));
 
                         build.save(function(err, key, build) {
                             logger.debug('persisting "'+b+'" to Build#'+build.__id__+'\'s "output" field');
@@ -354,7 +331,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         build.error = build.error + b;
                         build.stage = STAGES_BY_NAME.RUNNING;
 
-                        redis.publish("Build output", JSON.stringify({meta: build.non_circular_data, output: build.error, instruction: self.non_circular_data}));
+                        redis.publish("Build output", JSON.stringify({meta: build.__data__, output: build.error, instruction: self.__data__}));
                         build.save(function(err, key, build) {
                             logger.debug('persisting "'+b+'" to Build#'+build.__id__+'\'s "error" field');
                         });
@@ -378,8 +355,8 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                             lock.release(function(){
                                 redis.publish("Build finished", JSON.stringify({
                                     at: now,
-                                    build: build.non_circular_data,
-                                    instruction: self.non_circular_data
+                                    build: build.__data__,
+                                    instruction: self.__data__
                                 }));
                                 callback(null, self);
                             });
@@ -397,22 +374,10 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
     });
 });
 
-var Pipeline = models.declare("Pipeline", function(it, kind) {
-    it.has.field("name", kind.string);
-    it.has.many("instructions", BuildInstruction, "pipeline");
-
-    it.validates.uniquenessOf("name");
-
-    it.has.getter('permalink', function(){
-        return '/pipeline/' + this.__id__;
-    });
-});
-
 module.exports = {
     User: User,
     BuildInstruction: BuildInstruction,
     Build: Build,
-    Pipeline: Pipeline,
     connection: User._meta.storage.connection,
     storage: User._meta.storage,
     clear_keys: function(pattern, callback) {

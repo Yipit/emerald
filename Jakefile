@@ -67,10 +67,6 @@ task('data', [], function () {
                 branch: "master",
                 build_script: './run-build-for unit',
                 author: {__id__: 1}
-            }),
-            new entity.Pipeline({
-                name: "Emerald Tests",
-                instructions: [{__id__: 1}, {__id__: 2}]
             })
         ];
         entity.storage.persist(entities, function(err, items){
