@@ -254,7 +254,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                     options.cwd = repository_full_path;
                     logger.info('found an existing git repo at "'+repository_bare_path+'", gonna use git-pull');
                 } else {
-                    args = ["clone", self.repository_address, repository_folder_name];
+                    args = ["clone", "--progress", self.repository_address, repository_folder_name];
                     logger.info('local copy does not exist, will clone at "'+repository_full_path+'"');
                     options.cwd = settings.SANDBOX_PATH;
                 }
@@ -302,16 +302,17 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         build.save(function(err){
                             logger.handleException("build(#"+build.__id__+").save", err);
                         });
+
+                        if (found) {
+                            logger.debug('publishing signal')
+                            redis.publish('Repository being fetched', JSON.stringify({
+                                instruction: self.__data__,
+                                build: build.__data__,
+                                phase: found[1].toLowerCase(),
+                                percentage: found[2]
+                            }));
+                        }
                     });
-                    if (found) {
-                        logger.debug('publishing signal')
-                        redis.publish('Repository being fetched', JSON.stringify({
-                            instruction: self.__data__,
-                            build: build.__data__,
-                            phase: found[1].toLowerCase(),
-                            percentage: found[2]
-                        }));
-                    }
                 });
                 callback(null, self, command, args);
             },
