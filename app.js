@@ -20,10 +20,22 @@
 
     var app = express.createServer();
     var io = require('socket.io').listen(app);
+    var swig = require('swig');
+
+
 
     app.configure(function(){
+        swig.init({
+            root: settings.LOCAL_FILE('views'),
+            allowErrors: true
+        });
+        app.set('views', settings.LOCAL_FILE('views'));
+        app.register('.html', swig);
+
         app.set('views', __dirname + '/views');
-        app.set('view engine', 'jade');
+        app.set('view engine', 'html');
+        app.set('view options', { layout: false });
+
         app.use(express.bodyParser());
         app.use(express.methodOverride());
         app.use(express.cookieParser());

@@ -8,16 +8,16 @@ html
     link(rel='stylesheet', href='/stylesheets/jquery-ui-1.8.16.custom.css', type='text/css')
     link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Armata', type='text/css')
 
+    script(type="text/javascript", src="/javascripts/json2.js")
+    script(type="text/javascript", src="/javascripts/underscore.js")
     script(type="text/javascript", src="/javascripts/jquery-1.7.1.min.js")
     script(type="text/javascript", src="/javascripts/jquery-ui-1.8.16.custom.min.js")
+    script(type="text/javascript", src="/javascripts/backbone.js")
     script(type="text/javascript", src="/javascripts/jquery.gritter.min.js")
-    script(type="text/javascript", src="/javascripts/bootstrap-alerts.js")
-    script(type="text/javascript", src="/javascripts/bootstrap-modal.js")
-    script(type="text/javascript", src="/javascripts/bootstrap-buttons.js")
-    script(type="text/javascript", src="/javascripts/bootstrap-twipsy.js")
-    script(type="text/javascript", src="/javascripts/bootstrap-popover.js")
     script(type="text/javascript", src="/socket.io/socket.io.js")
     script(type="text/javascript", src="/javascripts/main.js")
+    script(type="text/javascript", src="/javascripts/app.js")
+    //script(type="text/javascript", src="/javascripts/app."+template_name+".js")
     script(type="text/javascript")!= "(function(window){window.emerald = " + emerald_json + ";})(window)"
 
   body
@@ -70,3 +70,4 @@ html
     #terminal-wrapper
       a.toggle-terminal(href="#") Show/Hide current build
       pre#terminal.hidden
+    include modals/terminal.jade

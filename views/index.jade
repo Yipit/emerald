@@ -1,45 +1,29 @@
-#dashboard.container
-  h1 Builds
-  ul#builds
-    - each instruction in instructions
-      - var klass = ' '
-      - if (instruction.last_build)
-        - klass += instruction.last_build.stage_name + ' '
-        - klass += instruction.last_build.succeeded ? 'success': 'failure'
+script(type="text/template", id="template-instruction-list")
+  #dashboard.container
+    h1 Builds
+    ul#builds
 
+script(type="text/template", id="template-instruction")
+  article.instruction(data-instruction-id="", class="")
+    ul.data
+      li.avatar
+        img(src="<%= last_build.gravatar %>", width="50")
+
+      li.title
+        h1.title <%= name %>
+
+      li.build.last-build last build:
+        strong(class="status-color <%= last_build.style_name %>")
+          a(href="<%= last_build.get_route() %>")
+            span.message Never built
       li
-        article.instruction(data-instruction-id=instruction.__id__, class=klass)
-          ul.data
-            li.avatar
-              - if (instruction.last_build)
-                img(src=instruction.last_build.gravatar_of_size(50), width="50")
-              - else
-                img(src="/images/avatar.png", width="50")
+        ul.menu
+          li
+            a.btn.small.info(href="#", emerald-action="run", emerald-entity="BuildInstruction", rel=1) Add to the queue
+            a.btn.small.success(href="#output", emerald-action="show", emerald-entity="Build", rel=1) STDOUT
+            a.btn.small.error(href="#error", emerald-action="show", emerald-entity="Build", rel=1) STDERR
 
-            li.title
-              h1= instruction.name
-
-            li.last-build last build:
-              - if (instruction.last_build)
-                strong(class=klass)
-                  a(href=instruction.last_build.permalink)= instruction.last_build.message + ' ('+instruction.last_build.duration+')';
-              - else
-                strong Never
-            li
-              ul.menu
-                li
-                  - if (instruction.last_build)
-                    a.btn.small.info(href="#", emerald-action="run", emerald-entity="BuildInstruction", rel=instruction.__id__) Add to the queue
-                    a.btn.small.success(href="#", emerald-action="show:output", emerald-entity="Build", rel=instruction.last_build.__id__) STDOUT
-                    a.btn.small.error(href="#", emerald-action="show:error", emerald-entity="Build", rel=instruction.last_build.__id__) STDERR
-                  - else
-                    a.btn.small.info(href="#", emerald-action="run", emerald-entity="BuildInstruction", rel=instruction.__id__) Build now!
-
-            li(style='clear:both')
-
-          - if (instruction.last_build)
-            ol.buildlog
-            li: strong latest builds:
-              - each build in instruction.all_builds
-                li(class=klass)
-                  a(href=build.permalink)= "#" + build.__id__ + " &mdash; " + build.message;
+     ol.buildlog
+       li: strong latest builds:
+       li(class="")
+         a(href="#") build.message

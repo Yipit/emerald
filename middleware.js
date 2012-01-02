@@ -19,7 +19,7 @@ exports.authentication = function(request, response, next) {
                 emerald: emerald_meta,
                 emerald_json: JSON.stringify(emerald_meta),
             }, context || {});
-            response.render(name, c);
+            response.render(name+'.html', c);
         }
         return next();
     });

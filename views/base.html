@@ -1,0 +1,98 @@
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+	<title>{{ title  }}</title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+
+	<link rel="stylesheet" href="/stylesheets/bootstrap.min.css" type="text/css" />
+	<link rel="stylesheet" href="/stylesheets/general.css" type="text/css" />
+	<link rel="stylesheet" href="/stylesheets/jquery.gritter.css" type="text/css" />
+	<link rel="stylesheet" href="/stylesheets/jquery-ui-1.8.16.custom.css" type="text/css" />
+	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Armata" type="text/css" />
+	<script type="text/javascript" src="/javascripts/modernizr-2.0.6.min.js"></script>
+	<script type="text/javascript" src="/javascripts/json2.js"></script>
+	<script type="text/javascript" src="/javascripts/underscore.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery-ui-1.8.16.custom.min.js"></script>
+	<script type="text/javascript" src="/javascripts/backbone.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.gritter.min.js"></script>
+	<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+	<script type="text/javascript" src="/javascripts/app.js"></script>
+	<!-- script(type="text/javascript", src="/javascripts/app."+template_name+".js") -->
+	<script type="text/javascript">
+	  (function(window){window.emerald = " + emerald_json + ";})(window)
+	</script>
+</head>
+<body>
+  <div id="progress-bar">
+    <div class="inset">
+      <div class="label">0%</div>
+      <div class="bar"></div>
+      <span class="status"></span>
+      <img src="/images/progress-bar-loader.gif" />
+    </div>
+  </div><!--#progress-bar-->
+
+  <a id="fork_me_on_github" target="_blank" href="https://github.com/Yipit/emerald">
+    <span>Fork me on GitHub!</span>
+  </a><!--github ribbon-->
+
+  <header>
+    <div class="container">
+      <div class="row">
+	<div class="span13">
+	  <h1 class="title"><a href="/">Emerald</a></h1>
+	</div><!-- .span13 -->
+	<div class="span3">
+	  {% if user.email %}
+	  <menu class="user">
+	    <li class="avatar">
+	      <img src="{{ user.gravatar_of_size('25') }}" width="25" height="25" />
+	    </li>
+	    <li>{{ user.name }}</li>
+	    <li class="stuff">
+	      <a href="/profile">profile</a>
+	      <span>|</span>
+	      <a href="/logout">exit</a>
+	    </li>
+	  </menu>
+	  {% else %}
+	  <menu class="user">
+	    <span>please</span>
+	    <a href="/login">login</a>
+	  </menu>
+	  {% endif %}
+	</div><!-- .span3 -->
+      </div><!-- .row -->
+      <div class="row">
+	<div class="span8">
+	  <p></p>
+	</div>
+	<div class="span8">
+	  <menu class="main">
+	    <li class="dashboard"><a href="/">dashboard</a></li>
+	    <li class="instructions"><a href="/instructions">instructions</a></li>
+	    <li class="users"><a href="/users">users</a></li>
+	  </menu>
+	</div>
+
+      </div>
+    </div>
+  </header>
+  {% block body %}{% endblock %}
+  <div id="terminal-wrapper">
+    <a class="toggle-terminal" href="#">Show/Hide current build</a>
+    <pre id="terminal" class="hidden">
+
+    </pre>
+  </div>
+</body>
