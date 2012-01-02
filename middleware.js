@@ -15,6 +15,7 @@ exports.authentication = function(request, response, next) {
                 title: 'Emerald - Continuous Integration',
                 request: request,
                 user: user,
+                template_name: name,
                 emerald: emerald_meta,
                 emerald_json: JSON.stringify(emerald_meta),
             }, context || {});
