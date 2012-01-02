@@ -162,9 +162,13 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
     });
     it.has.method('toBackbone', function() {
         var data = this.__data__;
+        data.has_last_build = this.last_build ? true : false;
         data.last_build = this.last_build && this.last_build.toBackbone() || null;
         data.last_failure = this.last_failure && this.last_failure.toBackbone() || null;
         data.last_success = this.last_success && this.last_success.toBackbone() || null;
+        data.all_builds = _.map(this.all_builds, function(b){b.toBackbone()});
+        data.succeeded_builds = _.map(this.succeeded_builds, function(b){b.toBackbone()});
+        data.failed_builds = _.map(this.failed_builds, function(b){b.toBackbone()});
         return data;
     });
     it.has.class_method('get_latest_with_builds', function(callback) {

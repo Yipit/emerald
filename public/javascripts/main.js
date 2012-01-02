@@ -1,6 +1,5 @@
 $(function(){
     var socket = io.connect();
-    $("#new-build").modal({show: false, keyboard: false});
 
     $.each(["BuildInstruction", "User"], function(index, ModelName){
         socket.on(ModelName + ' deleted', function(data){
