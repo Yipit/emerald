@@ -118,7 +118,12 @@ var Build = models.declare("Build", function(it, kind) {
             callback(err, item);
         });
     });
-
+    it.has.method('toBackbone', function() {
+        var data = this.__data__;
+        data.gravatar = this.gravatar_of_size(50);
+        data.style_name = this.succeeded ? 'success': 'failure';
+        data.stage_name = this.stage_name
+    });
 });
 
 var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
@@ -155,7 +160,13 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             }
         };
     });
-
+    it.has.method('toBackbone', function() {
+        var data = this.__data__;
+        data.last_build = this.last_build && this.last_build.toBackbone() || null;
+        data.last_failure = this.last_failure && this.last_failure.toBackbone() || null;
+        data.last_success = this.last_success && this.last_success.toBackbone() || null;
+        return data;
+    });
     it.has.class_method('get_latest_with_builds', function(callback) {
         var self = this;
 
@@ -176,6 +187,12 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 logger.debug(['get_latest_with_builds: turning into instructions', instructions]);
                 async.map(instructions, function(data, callback){
                     BuildInstruction.with_builds_from_data(data, callback);
+                }, callback);
+            },
+            function backbone_them (instructions, callback){
+                logger.debug(['get_latest_with_builds: turning into backbone-ish data', instructions]);
+                async.map(instructions, function(i, callback){
+                    callback(null, i.toBackbone());
                 }, callback);
             }
         ], callback);
