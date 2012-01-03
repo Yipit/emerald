@@ -19,7 +19,12 @@
             var build = new Build({__id__: id})
             var view = new DetailedBuildView({model: build});
             this.$app.empty().append(view.render().el);
+        },
+        manage_instructions: function() {
+            var view = new InstructionManagementView();
+            this.$app.empty().append(view.render().el);
         }
+
 
     });
 })})(jQuery);

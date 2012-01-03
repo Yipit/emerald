@@ -13,10 +13,16 @@
             this.template = get_template(this.template_name);
         },
         render: function(){
-            var rendered = this.template(this.model.toJSON());
+            var data = {};
+            if (this.model) {
+                data = this.model.toJSON();
+            }
+
+            var rendered = this.template(data);
             $(this.el).html(rendered);
             return this;
-        }
+        },
+        className: 'row'
     });
 
     window.BuildListView = EmeraldView.extend({
@@ -55,6 +61,10 @@
     window.DetailedBuildView = EmeraldView.extend({
         template_name: 'detailed-build',
         className: 'build'
+    });
+
+    window.InstructionManagementView = EmeraldView.extend({
+        template_name: 'instruction-management'
     });
 
 })})(jQuery);

@@ -40,10 +40,8 @@
 </head>
 <body>
 <script type="text/template" id="template-instruction-list">
-  <div id="dashboard" class="container">
-    <h1>Builds</h1>
-    <ul id="builds"></ul>
-  </div>
+  <h2>Builds</h2>
+  <ul id="builds"></ul>
 </script>
 <script type="text/template" id="template-instruction">
   <article class="instruction" data-instruction-id="<%= __id__ %>">
@@ -102,6 +100,13 @@
     </div>
   </div>
 </script>
+<script type="text/template" id="template-instruction-management">
+  <div class="row">
+    <div class="span16">
+      <h2>Manage Instructions</h2>
+    </div>
+  </div>
+</script>
 
   <div id="progress-bar">
     <div class="inset">
@@ -136,7 +141,7 @@
       </div>
     </div>
   </header>
-  <div id="app">
+  <div id="app" class="container">
   </div>
   <div id="terminal-wrapper">
     <a class="toggle-terminal" href="#">Show/Hide current build</a>
