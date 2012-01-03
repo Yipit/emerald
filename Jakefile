@@ -37,16 +37,6 @@ task('data', [], function () {
         }
 
         var entities = [
-            new entity.User({
-                name: "Gabriel Falcão",
-                email: "gabriel@yipit.com",
-                password: '123'
-            }),
-            new entity.User({
-                name: "Adam Nelson",
-                email: "adam@yipit.com",
-                password: '123'
-            }),
             new entity.BuildInstruction({
                 name: "Emerald Unit Tests",
                 description: "Asserting that basic business rules\nare working perfectly in emerald",

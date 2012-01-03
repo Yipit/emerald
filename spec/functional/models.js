@@ -4,7 +4,7 @@ var vows = require('vows')
 
 var entity = require('../../models');
 
-vows.describe('A User').addBatch({
+/*vows.describe('A User').addBatch({
     'has a static method for authentication': function(){
         entity.User.should.be.a('function');
     },
@@ -63,3 +63,4 @@ vows.describe('A User').addBatch({
 
     }
 }).export(module);
+*/

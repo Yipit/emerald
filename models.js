@@ -25,48 +25,6 @@ var STAGES_BY_NAME = {
     FINISHED: 4
 }
 
-var User = models.declare("User", function(it, kind){
-    it.has.field("name", kind.string);
-    it.has.field("email", kind.email);
-    it.has.field("created_at", kind.auto);
-    it.has.field("password", kind.string);
-
-    it.validates.uniquenessOf("name");
-    it.validates.uniquenessOf("email");
-
-    it.has.getter('permalink', function(){
-        return '/user/' + this.__id__;
-    });
-    it.has.method('gravatar_of_size', function(size){
-        var hash = crypto.createHash('md5');
-        hash.update(this.email || '');
-        return 'http://www.gravatar.com/avatar/' + hash.digest('hex') + '?s=' + size;
-    });
-
-    it.has.method('authenticate', function(attempt, callback){
-        if (attempt === this.password) {
-            return callback(null, this);
-        } else {
-            return callback(new Error('wrong password for the login "' + this.email + '"'), null);
-        }
-    });
-
-    it.has.class_method('authenticate', function(login, password, callback){
-        if (!login) {
-            return callback(new Error("Invalid email: " + login))
-        }
-        this.find_by_email(new RegExp(login), function(err, items){
-            var found = items.first;
-            if (err) {
-                return callback(new Error('there are no users matching the email "' + login + '"'));
-            }
-            return found.authenticate(password, callback);
-        });
-
-    });
-
-});
-
 var Build = models.declare("Build", function(it, kind) {
     it.has.field("status", kind.string);
     it.has.field("signal", kind.string);
@@ -515,12 +473,13 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
     });
 });
 
+var default_storage = Build._meta.storage;
+
 module.exports = {
-    User: User,
     BuildInstruction: BuildInstruction,
     Build: Build,
-    connection: User._meta.storage.connection,
-    storage: User._meta.storage,
+    connection: default_storage.connection,
+    storage: default_storage,
     clear_keys: function(pattern, callback) {
         var self = this;
         var pattern_list = (pattern instanceof Array) ? pattern: [pattern];
