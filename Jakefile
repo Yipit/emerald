@@ -43,11 +43,6 @@ task('data', [], function () {
                 password: '123'
             }),
             new entity.User({
-                name: "Gabriel Falcão",
-                email: "gabriel@nacaolivre.org",
-                password: '123'
-            }),
-            new entity.User({
                 name: "Adam Nelson",
                 email: "adam@yipit.com",
                 password: '123'
@@ -65,8 +60,7 @@ task('data', [], function () {
                 description: "Tests emerald against redis",
                 repository_address: "git@github.com:Yipit/yipit.git",
                 branch: "master",
-                build_script: './run-build-for unit',
-                author: {__id__: 1}
+                build_script: './run-build-for unit'
             })
         ];
         entity.storage.persist(entities, function(err, items){
