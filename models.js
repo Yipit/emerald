@@ -113,7 +113,7 @@ var Build = models.declare("Build", function(it, kind) {
     });
 
     it.has.class_method('from_key', function(key, callback) {
-        var id = /Build:(\d+)/.exec(key)[1];
+        var id = /(Build[:])?(\d+)$/.exec(key.trim())[2];
         Build.find_by_id(parseInt(id), function(err, item){
             callback(err, item);
         });
@@ -122,7 +122,9 @@ var Build = models.declare("Build", function(it, kind) {
         var data = this.__data__;
         data.gravatar = this.gravatar_of_size(50);
         data.style_name = this.succeeded ? 'success': 'failure';
-        data.stage_name = this.stage_name
+        data.stage_name = this.stage_name;
+        data.route = "#build/" + data.__id__;
+        return data;
     });
 });
 
@@ -132,8 +134,6 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
     it.has.field("repository_address", kind.string);
     it.has.field("branch", kind.string);
     it.has.field("build_script", kind.string);
-
-    it.has.one("author", User, "created_instructions");
 
     it.has.getter('permalink', function() {
         return '/instruction/' + this.__id__;
@@ -168,11 +168,9 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             data[attribute] = self[attribute].map(function(b){ return b.toBackbone() });
         });
 
-        data.last_build = this.last_build && this.last_build.toBackbone() || null;
-        data.last_failure = this.last_failure && this.last_failure.toBackbone() || null;
-        data.last_success = this.last_success && this.last_success.toBackbone() || null;
-
-        data.has_last_build = this.last_build ? true : false;
+        data.last_build = data.all_builds.length > 0 ? data.all_builds[0] : null;
+        data.last_failure = data.failed_builds.length > 0 ? data.failed_builds[0] : null;
+        data.last_success = data.succeeded_builds.length > 0 ? data.succeeded_builds[0] : null;
 
         return data;
     });
@@ -208,12 +206,18 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
     });
     it.has.class_method('with_builds_from_data', function(data, callback) {
         var self = new this(data);
+        function filter_builds(builds){
+            return _.filter(builds, function(b){
+                return !_.isNull(b) && !_.isUndefined(b); });
+        }
         async.waterfall([
             function get_all_builds(callback) {
                 redis.zrevrange(self.keys.all_builds, 0, -1, function(err, builds){
                     async.map(builds, function(key, callback){
                         return Build.from_key(key, callback);
-                    }, callback);
+                    }, function(err, builds){
+                        callback(err, filter_builds(builds));
+                    });
                 });
             },
             function get_succeeded_builds(all_builds, callback) {
@@ -221,7 +225,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                     async.map(builds, function(key, callback){
                         return Build.from_key(key, callback);
                     }, function(err, succeeded_builds){
-                        callback(err, all_builds, succeeded_builds);
+                        callback(err, all_builds, filter_builds(succeeded_builds));
                     });
                 });
             },
@@ -230,7 +234,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                     async.map(builds, function(key, callback){
                         return Build.from_key(key, callback);
                     }, function(err, failed_builds){
-                        callback(err, all_builds, succeeded_builds, failed_builds);
+                        callback(err, all_builds, succeeded_builds, filter_builds(failed_builds));
                     });
                 });
             }
