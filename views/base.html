@@ -32,11 +32,77 @@
 	<script type="text/javascript" src="/javascripts/backbone.js"></script>
 	<script type="text/javascript" src="/javascripts/jquery.gritter.min.js"></script>
 	<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+	<script type="text/javascript" src="/javascripts/app.models.js"></script>
+	<script type="text/javascript" src="/javascripts/app.views.js"></script>
+	<script type="text/javascript" src="/javascripts/app.routers.js"></script>
 	<script type="text/javascript" src="/javascripts/app.js"></script>
-	<script type="text/javascript" src="/javascripts/app.{{ template_name }}.js"></script>
 	{% endblock %}
 </head>
 <body>
+<script type="text/template" id="template-instruction-list">
+  <div id="dashboard" class="container">
+    <h1>Builds</h1>
+    <ul id="builds"></ul>
+  </div>
+</script>
+<script type="text/template" id="template-instruction">
+  <article class="instruction" data-instruction-id="<%= __id__ %>">
+    <ul class="data">
+      <li class="avatar">
+	<% if (last_build) { %>
+        <img src="<%= last_build.gravatar %>" width="50" />
+	<% } else { %>
+        <img src="/images/avatar.png" width="50" />
+	<% } %>
+      </li>
+      <li class="title">
+        <h1 class="title"><%= name %></h1>
+      </li>
+      <li class="build last-build">
+	last build:
+	<% if (last_build) { %>
+	<strong class="status-color <%= last_build.style_name %>">
+	  <a href="<%= last_build.route %>">
+            <span class="message"><%= last_build.message %></span>
+	  </a>
+	</strong>
+	<% } else { %>
+	<strong> Never :(</strong>
+	<% } %>
+      </li>
+    </ul>
+    <ul class="menu">
+      <% if (last_build) { %>
+      <li>
+	<a class="btn small info do-schedule" href="#">Add to the queue</a>
+	<a class="btn small success" href="#">STDOUT</a>
+	<a class="btn small error" href="#">STDERR</a>
+      </li>
+      <% } else { %>
+      <li>
+	<a class="btn small info do-schedule" href="#">Build now</a>
+      </li>
+      <% } %>
+    </ul>
+    <ol class="buildlog">
+      <li><strong>latest builds</strong></li>
+      <% _.each(all_builds, function(build) { %>
+      <li class="<%= build.style_name %>">
+	<a href="<%= build.route %>"><%= build.message %></a>
+      </li>
+      <% }); %>
+    </ol>
+
+  </article>
+</script>
+<script type="text/template" id="template-detailed-build">
+  <div class="row">
+    <div class="span16">
+      <h1>Build #<%= __id__ %></h1>
+    </div>
+  </div>
+</script>
+
   <div id="progress-bar">
     <div class="inset">
       <div class="label">0%</div>
@@ -54,7 +120,7 @@
     <div class="container">
       <div class="row">
 	<div class="span13">
-	  <h1 class="title"><a href="/">Emerald</a></h1>
+	  <h1 class="title"><a href="#">Emerald</a></h1>
 	</div><!-- .span13 -->
 	<div class="span3">
 	  {% if user.email %}
@@ -83,20 +149,19 @@
 	</div>
 	<div class="span8">
 	  <menu class="main">
-	    <li class="dashboard"><a href="/">dashboard</a></li>
-	    <li class="instructions"><a href="/instructions">instructions</a></li>
-	    <li class="users"><a href="/users">users</a></li>
+	    <li class="dashboard"><a href="#dashboard">dashboard</a></li>
+	    <li class="instructions"><a href="#instructions">instructions</a></li>
+	    <li class="users"><a href="#users">users</a></li>
 	  </menu>
 	</div>
 
       </div>
     </div>
   </header>
-  {% block body %}{% endblock %}
+  <div id="app">
+  </div>
   <div id="terminal-wrapper">
     <a class="toggle-terminal" href="#">Show/Hide current build</a>
-    <pre id="terminal" class="hidden">
-
-    </pre>
+    <pre id="terminal" class="hidden"></pre>
   </div>
 </body>
