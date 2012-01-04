@@ -10,7 +10,6 @@ exports.map = function(app, redis){
     app.get('/', function(request, response){
         async.waterfall([
             function scan_filesystem(callback){
-                console.log('settings.BACKBONE_VIEW_PATH', settings.BACKBONE_VIEW_PATH)
                 fs.readdir(settings.BACKBONE_VIEW_PATH, callback);
             },
             function read_files(files, callback){
