@@ -342,11 +342,11 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 });
             },
             function update_builds_author(self, callback){
-                child_process.exec('git log --format=short HEAD...HEAD^', {cwd: repository_full_path}, function(error, stdout, stderr){
+                child_process.exec('git log --format=full HEAD...HEAD^', {cwd: repository_full_path}, function(error, stdout, stderr){
                     var lines = _.map(stdout.split('\n'), function(x){return x.trim()});
-                    var author_data = /Author[:] ([^<]+)[<]([^>]+)[>]/.exec(lines[1]);
+                    var author_data = /(Author|Commit)[:] ([^<]+)[<]([^>]+)[>]/i.exec(stdout);
                     var commit_hash = /commit (\w{40})/.exec(lines[0]);
-                    var commit_message = stdout.split('\n').splice(2).join('\n');
+                    var commit_message = stdout.split('\n').splice(4).join('\n');
 
                     Build.find_by_id(current_build.__id__, function(err, build) {
 
