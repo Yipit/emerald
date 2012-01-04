@@ -78,6 +78,7 @@ var Build = models.declare("Build", function(it, kind) {
     });
     it.has.method('toBackbone', function() {
         var data = this.__data__;
+        data.id = data.__id__;
         data.gravatar = this.gravatar_of_size(50);
         data.style_name = this.succeeded ? 'success': 'failure';
         data.stage_name = this.stage_name;
@@ -122,6 +123,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
         var self = this;
         var data = this.__data__;
 
+        data.id = data.__id__;
         ['all_builds', 'succeeded_builds', 'failed_builds'].forEach(function(attribute){
             data[attribute] = self[attribute].map(function(b){ return b.toBackbone() });
         });
