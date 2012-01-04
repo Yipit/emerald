@@ -16,10 +16,13 @@
             instructions.fetch();
         },
         build: function(id) {
-            var build = new Build({__id__: id})
-            var view = new DetailedBuildView({model: build});
-            this.$app.empty().append(view.render().el);
-            build.fetch();
+            var $app = this.$app.empty();
+            var build = new Build({__id__: id});
+            build.fetch({success: function(){
+                var view = new DetailedBuildView({model: build});
+                $app.append(view.render().el);
+            }});
+
         },
         manage_instructions: function() {
             var view = new InstructionManagementView();
