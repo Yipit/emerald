@@ -1,0 +1,48 @@
+<article class="instruction" data-instruction-id="<%= __id__ %>">
+  <ul class="data">
+    <li class="avatar">
+      <% var last_build = _.first(all_builds); %>
+      <% if (last_build) { %>
+      <img src="<%= last_build.gravatar %>" width="50" />
+      <% } else { %>
+      <img src="/images/avatar.png" width="50" />
+      <% } %>
+    </li>
+    <li class="title">
+      <h1 class="title"><%= name %></h1>
+    </li>
+    <li class="build last-build">
+      last build:
+      <% if (last_build) { %>
+      <strong class="status-color <%= last_build.style_name %>">
+	<a href="<%= last_build.route %>">
+          <span class="message"><%= last_build.message %></span>
+	</a>
+      </strong>
+      <% } else { %>
+      <strong> Never :(</strong>
+      <% } %>
+    </li>
+  </ul>
+  <ul class="menu">
+    <% if (last_build) { %>
+    <li>
+      <a class="btn small info do-schedule" href="#">Add to the queue</a>
+      <a class="btn small success" href="#">STDOUT</a>
+      <a class="btn small error" href="#">STDERR</a>
+    </li>
+    <% } else { %>
+    <li>
+      <a class="btn small info do-schedule" href="#">Build now</a>
+    </li>
+    <% } %>
+  </ul>
+  <ol class="buildlog">
+    <li><strong>latest builds</strong></li>
+    <% _.each(all_builds, function(build) { %>
+    <li class="<%= build.style_name %>">
+      <a href="<%= build.route %>"><%= build.message %></a>
+    </li>
+    <% }); %>
+  </ol>
+</article>
