@@ -1,5 +1,33 @@
-<div class="row">
+<div class="row <%= style_name %> <%= stage_name %>">
   <div class="span16">
     <h1>Build #<%= __id__ %></h1>
+    <img class="build gravatar" src="<%= gravatars['100'] %>" width="100" height="100" />
+    <p>
+      <strong>by <%= author_name %> &lt;<%= author_email %>&gt;</strong>
+    </p>
+    <p>
+      <strong>Permalink</strong>
+      <a href="<%= permalink %>" class="copy-n-paste-area"><%= permalink %></a>
+    </p>
+    <p>
+      <strong>exit status</strong>
+      <pre><%= status %></pre>
+      <strong>signal</strong>
+      <pre><%= signal %></pre>
+
+    </p>
+    <p>
+      <strong>Message</strong>
+      <pre><%= message%></pre>
+    </p>
+    <p>
+      <strong>STDOUT</strong>
+      <pre class="terminal"><%= output %></pre>
+    </p>
+    <p>
+      <strong>STDERR</strong>
+      <pre class="terminal"><%= error %></pre>
+    </p>
+
   </div>
 </div>

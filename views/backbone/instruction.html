@@ -3,7 +3,7 @@
     <li class="avatar">
       <% var last_build = _.first(all_builds); %>
       <% if (last_build) { %>
-      <img src="<%= last_build.gravatar %>" width="50" />
+      <img src="<%= last_build.gravatars['50'] %>" width="50" />
       <% } else { %>
       <img src="/images/avatar.png" width="50" />
       <% } %>

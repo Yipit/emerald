@@ -66,10 +66,6 @@ var Build = models.declare("Build", function(it, kind) {
         return this.build_finished_at || this.fetching_finished_at;
     });
 
-    it.has.getter('permalink', function() {
-        return '/build/' + this.__id__;
-    });
-
     it.has.class_method('from_key', function(key, callback) {
         var id = /(Build[:])?(\d+)$/.exec(key.trim())[2];
         Build.find_by_id(parseInt(id), function(err, item){
@@ -79,10 +75,15 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.method('toBackbone', function() {
         var data = this.__data__;
         data.id = data.__id__;
-        data.gravatar = this.gravatar_of_size(50);
+        data.gravatars = {
+            "50": this.gravatar_of_size(50),
+            "100": this.gravatar_of_size(100)
+        };
+
         data.style_name = this.succeeded ? 'success': 'failure';
         data.stage_name = this.stage_name;
         data.route = "#build/" + data.__id__;
+        data.permalink = settings.EMERALD_DOMAIN + "#build/" + data.__id__;
         data.started_at = this.started_at;
         data.finished_at = this.finished_at;
         return data;
@@ -95,10 +96,6 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
     it.has.field("repository_address", kind.string);
     it.has.field("branch", kind.string);
     it.has.field("build_script", kind.string);
-
-    it.has.getter('permalink', function() {
-        return '/instruction/' + this.__id__;
-    });
 
     it.has.getter('last_build', function() {
         return this.all_builds[0];
