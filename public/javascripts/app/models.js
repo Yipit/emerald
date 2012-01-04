@@ -10,6 +10,14 @@
                   self.set('id', self.get('__id__'));
               }
             });
+            ['Build finished', 'Build started'].forEach(function(event){
+                window.socket.on(event, function(data){
+                    console.log([event, data]);
+                    _.each(data[self.__name__], function(key, value){
+                        self.set({key: value});
+                    });
+                });
+            });
         },
         url: function(){
             return [
@@ -33,7 +41,11 @@
             var self = this;
             self.__init__();
             self.bind("change", function() {
-                ['all_builds', 'failed_builds', 'succeeded_builds'].forEach(function(attr){
+                [
+                    'all_builds',
+                    'failed_builds',
+                    'succeeded_builds'
+                ].forEach(function(attr){
                     if (self.hasChanged(attr)) {
                         self.set({attr: new Builds(self.get(attr))});
                     }

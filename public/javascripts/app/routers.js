@@ -19,6 +19,7 @@
             var build = new Build({__id__: id})
             var view = new DetailedBuildView({model: build});
             this.$app.empty().append(view.render().el);
+            build.fetch();
         },
         manage_instructions: function() {
             var view = new InstructionManagementView();

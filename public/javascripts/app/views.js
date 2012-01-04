@@ -1,5 +1,4 @@
 (function($){$(function(){
-    var socket = io.connect();
     function get_template(name){
         var selector = "script#template-" + name;
         var raw = $(selector).html();
@@ -53,7 +52,7 @@
             'click .do-schedule': 'run'
         },
         run: function(e){
-            socket.emit('run BuildInstruction', {id: this.model.get('__id__')});
+            window.socket.emit('run BuildInstruction', {id: this.model.get('__id__')});
             return e.preventDefault();
         }
     });
