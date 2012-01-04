@@ -1,6 +1,5 @@
-(function($){$(function(){window.socket.on('connected', function(){
+(function($){$(function(){
     window.socket = io.connect();
-
     window.socket.on('BuildInstruction created', function(data){
         $.gritter.add({
             title: "An instruction was created",
@@ -16,5 +15,4 @@
             image: window.emerald.domain + "/images/control_double_down.png"
         });
     });
-
-})})})(jQuery);
+})})(jQuery);
