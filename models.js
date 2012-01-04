@@ -83,6 +83,8 @@ var Build = models.declare("Build", function(it, kind) {
         data.style_name = this.succeeded ? 'success': 'failure';
         data.stage_name = this.stage_name;
         data.route = "#build/" + data.__id__;
+        data.started_at = this.started_at;
+        data.finished_at = this.finished_at;
         return data;
     });
 });
@@ -109,7 +111,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
     });
 
     it.has.getter('keys', function() {
-        var prefix = 'emerald:Instruction:' + this.__id__ + ':';
+        var prefix = 'emerald-m2i:Instruction:' + this.__id__ + ':';
         return {
             all_builds: prefix + 'all_builds',
             succeeded_builds: prefix + 'succeeded_builds',
@@ -350,8 +352,8 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
 
                     Build.find_by_id(current_build.__id__, function(err, build) {
 
-                        build.author_name = author_data[1].trim();
-                        build.author_email = author_data[2].trim();
+                        build.author_name = author_data[2].trim();
+                        build.author_email = author_data[3].trim();
                         build.commit = commit_hash[1];
                         build.message = commit_message;
 
