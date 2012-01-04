@@ -306,7 +306,6 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         });
 
                         if (found) {
-                            logger.debug('publishing signal')
                             redis.publish('Repository being fetched', JSON.stringify({
                                 instruction: self.toBackbone(),
                                 build: build.toBackbone(),
