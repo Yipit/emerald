@@ -3,7 +3,7 @@ var path = require('path');
 
 var EMERALD_PORT = parseInt(process.env.EMERALD_PORT || 3000);
 var EMERALD_HOSTNAME = process.env.EMERALD_HOSTNAME || 'localhost';
-var EMERALD_DOMAIN = ('http://' + EMERALD_HOSTNAME + (EMERALD_PORT == 80 ? "" : (":" + EMERALD_PORT))).trim("/");
+var EMERALD_DOMAIN = ('http://' + (EMERALD_HOSTNAME + (EMERALD_PORT == 80 ? "" : (":" + EMERALD_PORT))));
 var EMERALD_PATH = process.env.EMERALD_PATH || path.join(process.env.HOME, '.emerald');
 
 function LOCAL_FILE(){
