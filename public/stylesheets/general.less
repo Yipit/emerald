@@ -1,10 +1,18 @@
-.box-shadow (@x: 0, @y: 0, @blur: 1px, @alpha) {
+.box-shadow (@x: 0, @y: 0, @blur: 1px, @alpha: 0.5) {
   @val: @x @y @blur rgba(255, 255, 255, @alpha);
 
   box-shadow:         @val;
   -webkit-box-shadow: @val;
   -moz-box-shadow:    @val;
 }
+.box-inset (@x: 0, @y: 0, @blur: 2px, @alpha: 0.3) {
+  @val: inset @x @y @blur rgba(0, 0, 0, @alpha);
+
+  box-shadow:         @val;
+  -webkit-box-shadow: @val;
+  -moz-box-shadow:    @val;
+}
+
 .rounded-corners (@radius: 3px) {
   border-radius: @radius;
   -webkit-border-radius: @radius;
@@ -75,8 +83,7 @@ li {
 }
 
 h1 {
-    font-size:16px;
-    font-weight:bold;
+  font-weight:bold;
 }
 
 .row { margin-bottom:0; }
@@ -421,3 +428,24 @@ table {
   display: none;
 }
 
+
+.copy-n-paste-area {
+  font-family: Monaco, Monospace;
+  font-size: 10px;
+  height: 12px;
+  background: @lightest_aluminum;
+  padding: 6px;
+  .box-inset;
+}
+
+.build {
+  .gravatar {
+    float: right;
+    border: 10px solid white;
+    .box-shadow;
+  }
+}
+
+#app {
+  padding-top: 20px;
+}
