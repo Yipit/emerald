@@ -47,6 +47,7 @@
   <article class="instruction" data-instruction-id="<%= __id__ %>">
     <ul class="data">
       <li class="avatar">
+	<% var last_build = _.first(all_builds); %>
 	<% if (last_build) { %>
         <img src="<%= last_build.gravatar %>" width="50" />
 	<% } else { %>

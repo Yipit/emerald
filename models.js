@@ -126,10 +126,6 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             data[attribute] = self[attribute].map(function(b){ return b.toBackbone() });
         });
 
-        data.last_build = data.all_builds.length > 0 ? data.all_builds[0] : null;
-        data.last_failure = data.failed_builds.length > 0 ? data.failed_builds[0] : null;
-        data.last_success = data.succeeded_builds.length > 0 ? data.succeeded_builds[0] : null;
-
         return data;
     });
     it.has.class_method('get_latest_with_builds', function(callback) {
