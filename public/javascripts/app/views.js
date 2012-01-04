@@ -6,9 +6,12 @@
     }
     window.EmeraldView = Backbone.View.extend({
         initialize: function(){
-            _.bindAll(this, 'render');
+            this.__init__();
             this.model && this.model.bind('change', this.render);
             this.collection && this.collection.bind('reset', this.render);
+        },
+        __init__: function(){
+            _.bindAll(this, 'render');
             this.template = get_template(this.template_name);
         },
         render: function(){
@@ -16,7 +19,6 @@
             if (this.model) {
                 data = this.model.toJSON();
             }
-
             var rendered = this.template(data);
             $(this.el).html(rendered);
             return this;
@@ -50,6 +52,12 @@
         className: 'instruction',
         events: {
             'click .do-schedule': 'run'
+        },
+        initialize: function(){
+            this.__init__();
+            _.bindAll(this, 'render');
+            this.model.bind('change', this.render);
+            this.model.bind('build_added', this.render);
         },
         run: function(e){
             window.socket.emit('run BuildInstruction', {id: this.model.get('__id__')});

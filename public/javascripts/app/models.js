@@ -33,7 +33,6 @@
         update_from_socket: function(data){
             var self = this;
             if (parseInt(data.build.__id__) == (this.get('__id__'))) {
-                console.log("got a build:", data.build);
                 _.each(data.build, function(key, value){
                     self.set({key: value});
                 });
@@ -41,7 +40,10 @@
         }
     });
     window.Builds = Backbone.Collection.extend({
-        model: Build
+        model: Build,
+        comparator: function(){
+            return (new Date(this.get('finished_at'))).getTime();
+        }
     });
 
     window.BuildInstruction = EmeraldModel.extend({
@@ -49,40 +51,14 @@
         initialize: function(){
             this.__init__();
             _.bindAll(this, 'build_started', 'build_finished');
-
             window.socket.on('Build started', this.build_started);
             window.socket.on('Build finished', this.build_finished);
-
-            var self = this;
-            this.bind("change", function() {
-                [
-                    'all_builds',
-                    'failed_builds',
-                    'succeeded_builds'
-                ].forEach(function(attr){
-                    if (self.hasChanged(attr)) {
-                        self.set({attr: new Builds(self.get(attr))});
-                    }
-                });
-            });
         },
         build_started: function(data){
-            var self = this;
-            if (parseInt(data.instruction.__id__) == (this.get('__id__'))) {
-                console.log("started running instruction:", data.instruction);
-                _.each(data.instruction, function(key, value){
-                    self.set({key: value});
-                });
-            }
+            this.change();
         },
         build_finished: function(data){
-            var self = this;
-            if (parseInt(data.instruction.__id__) == (this.get('__id__'))) {
-                console.log("finished running instruction:", data.instruction);
-                _.each(data.instruction, function(key, value){
-                    self.set({key: value});
-                });
-            }
+            this.change();
         }
 
     });

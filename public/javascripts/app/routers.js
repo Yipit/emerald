@@ -25,7 +25,5 @@
             var view = new InstructionManagementView();
             this.$app.empty().append(view.render().el);
         }
-
-
     });
 })})(jQuery);
