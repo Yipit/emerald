@@ -22,7 +22,7 @@
 	{% endblock %}
 	{% block js %}
 	<script type="text/javascript">
-	  (function(window){window.emerald = " + emerald_json + ";})(window)
+	  (function(window){window.emerald = {{ emerald_json|raw }};})(window)
 	</script>
 	<script type="text/javascript" src="/javascripts/modernizr-2.0.6.min.js"></script>
 	<script type="text/javascript" src="/javascripts/json2.js"></script>
@@ -39,76 +39,7 @@
 	{% endblock %}
 </head>
 <body>
-<script type="text/template" id="template-instruction-list">
-  <h2>Builds</h2>
-  <ul id="builds"></ul>
-</script>
-<script type="text/template" id="template-instruction">
-  <article class="instruction" data-instruction-id="<%= __id__ %>">
-    <ul class="data">
-      <li class="avatar">
-	<% var last_build = _.first(all_builds); %>
-	<% if (last_build) { %>
-        <img src="<%= last_build.gravatar %>" width="50" />
-	<% } else { %>
-        <img src="/images/avatar.png" width="50" />
-	<% } %>
-      </li>
-      <li class="title">
-        <h1 class="title"><%= name %></h1>
-      </li>
-      <li class="build last-build">
-	last build:
-	<% if (last_build) { %>
-	<strong class="status-color <%= last_build.style_name %>">
-	  <a href="<%= last_build.route %>">
-            <span class="message"><%= last_build.message %></span>
-	  </a>
-	</strong>
-	<% } else { %>
-	<strong> Never :(</strong>
-	<% } %>
-      </li>
-    </ul>
-    <ul class="menu">
-      <% if (last_build) { %>
-      <li>
-	<a class="btn small info do-schedule" href="#">Add to the queue</a>
-	<a class="btn small success" href="#">STDOUT</a>
-	<a class="btn small error" href="#">STDERR</a>
-      </li>
-      <% } else { %>
-      <li>
-	<a class="btn small info do-schedule" href="#">Build now</a>
-      </li>
-      <% } %>
-    </ul>
-    <ol class="buildlog">
-      <li><strong>latest builds</strong></li>
-      <% _.each(all_builds, function(build) { %>
-      <li class="<%= build.style_name %>">
-	<a href="<%= build.route %>"><%= build.message %></a>
-      </li>
-      <% }); %>
-    </ol>
-
-  </article>
-</script>
-<script type="text/template" id="template-detailed-build">
-  <div class="row">
-    <div class="span16">
-      <h1>Build #<%= __id__ %></h1>
-    </div>
-  </div>
-</script>
-<script type="text/template" id="template-instruction-management">
-  <div class="row">
-    <div class="span16">
-      <h2>Manage Instructions</h2>
-    </div>
-  </div>
-</script>
-
+{% for template in templates %}  <script type="text/template" id="template-{{ template.name }}">{{ template.html|raw }}</script>{% endfor %}
   <div id="progress-bar">
     <div class="inset">
       <div class="label">0%</div>
