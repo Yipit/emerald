@@ -1,3 +1,4 @@
+var async = require('async');
 var entity = require("./models");
 var settings = require('./settings');
 
@@ -13,34 +14,34 @@ exports.work_on = function(redis, io) {
 
         require('./orchestrator').use(redis, socket);
 
-        ['BuildInstruction', 'User'].forEach(function(ModelName){
-            socket.on('delete ' + ModelName, function (data) {
-                entity[ModelName].find_by_id(parseInt(data.id), function(err, instance){
-                    logger.handleException("entity." + ModelName + ".find_by_id", err);
-                    instance.delete(function(err){
-                        logger.handleException("(new " + ModelName + ")({__id__:" + data.id + "}).delete():", err);
-                        logger.info([ModelName, "#" + data.id, "deleted"]);
-                        socket.emit(ModelName + ' deleted', {id: data.id});
-                    });
-                });
-            });
-        });
-
         socket.on('run BuildInstruction', function (data) {
-            logger.info("enqueuing instruction #" + data.id);
-            redis.zincrby(settings.REDIS_KEYS.build_queue, 1, data.id, function(err){
-                logger.handleException("redis.zincrby", err);
+            var now = new Date();
 
-                var now = new Date();
-                entity.BuildInstruction.find_by_id(parseInt(data.id), function(err, instruction) {
+            var instruction_id = parseInt(data.id);
+
+            async.waterfall([
+                function find_by_id(callback){
+                    entity.BuildInstruction.find_by_id(instruction_id, callback);
+                },
+                function fetch_builds(instruction, callback){
+                    entity.BuildInstruction.with_builds_from_data(instruction.__data__, callback);
+                },
+                function add_build_to_queue_raising_score(instruction, callback){
+                    redis.zincrby(settings.REDIS_KEYS.build_queue, 1, instruction_id, function(){
+                        callback(null, instruction);
+                    });
+                },
+                function notify_redis_about_it(instruction, callback) {
+                    redis.publish("BuildInstruction enqueued", JSON.stringify(instruction.toBackbone()));
+                    callback(null, instruction);
+                }
+            ], function(err, instruction) {
+                if (err) {
                     logger.handleException(err);
-
-                    redis.publish("BuildInstruction enqueued", JSON.stringify({
-                        data: instruction.__data__,
-                        id: instruction.__id__,
-                        at: now.toTimeString()
-                    }));
-                });
+                    logger.fail('EMERALD has failed to run the build instruction:' + err.toString().red.bold);
+                } else {
+                    logger.success("enqueuing instruction #" + instruction.__id__);
+                }
             });
         });
     });
