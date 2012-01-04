@@ -1,16 +1,5 @@
 (function($){$(function(){
     window.EmeraldModel = Backbone.Model.extend({
-        initialize: function(){
-            this.__init__();
-        },
-        __init__: function(){
-            var self = this;
-            self.bind("change", function() {
-              if (self.hasChanged("__id__")) {
-                  self.set('id', self.get('__id__'));
-              }
-            });
-        },
         url: function(){
             return [
                 '/api',
@@ -24,8 +13,6 @@
         __name__: 'build',
         initialize: function(){
             _.bindAll(this, 'update_from_socket');
-
-            this.__init__();
 
             window.socket.on('Build started', this.update_from_socket);
             window.socket.on('Build finished', this.update_from_socket);
@@ -49,7 +36,6 @@
     window.BuildInstruction = EmeraldModel.extend({
         __name__: 'instruction',
         initialize: function(){
-            this.__init__();
             _.bindAll(this, 'build_started', 'build_finished');
             window.socket.on('Build started', this.build_started);
             window.socket.on('Build finished', this.build_finished);
