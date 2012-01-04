@@ -1,30 +1,36 @@
 (function(){
     var logger = new (require('./logger').Logger)("[MAIN]".white.bold);
 
+    /* importing dependencies */
     var _ = require('underscore')._,
     async = require('async'),
+    swig = require('swig'),
     settings = require('./settings'),
 
     boot = require('./boot'),
 
     express = require('express'),
 
+    /* importing some emerald actors */
     queueconsumer = require('./queueconsumer'),
     websockets = require('./websockets'),
     controllers = require('./controllers');
 
+    /* preparing redis */
     RedisStore = require('connect-redis')(express),
     Redis = require('redis'),
-    redis = Redis.createClient(),
-    middleware = require('./middleware');
+    redis = Redis.createClient();
 
+    /* preparing the http server and the socket.io */
     var app = express.createServer();
     var io = require('socket.io').listen(app);
-    var swig = require('swig');
 
-
-
+    /* configuring the express app */
     app.configure(function(){
+        /*
+           swig provides a django-like templates
+           the code below configures espress to use swig as default templates
+        */
         swig.init({
             root: settings.LOCAL_FILE('views'),
             allowErrors: true
@@ -36,16 +42,19 @@
         app.set('view engine', 'html');
         app.set('view options', { layout: false });
 
+        /* very basic HTTP stuff */
         app.use(express.bodyParser());
         app.use(express.methodOverride());
         app.use(express.cookieParser());
+
+        /* and session */
         app.use(express.session({
             secret: 'ac39aeb9ab288f96fe51ef594bfca20262fa184e',
             store: new RedisStore({ client: redis })
         }));
 
+        /* using http://lesscss.org for stylesheets */
         app.use(express.compiler({src: settings.LOCAL_FILE('public'), enable: ['less'] }));
-        app.use(middleware.authentication);
 
         app.use(app.router);
         app.use(express.static(settings.LOCAL_FILE('/public')));
@@ -59,6 +68,8 @@
         app.use(express.errorHandler());
     });
 
+    /* start up the emerald actors */
+
     boot.now(app, io, redis, settings, function(cwd){
         app.listen(parseInt(process.env.PORT || 3000));
         queueconsumer.use(redis);
@@ -67,16 +78,39 @@
     });
 
 
+    /* handling CONTROL-C */
+
     process.on("SIGINT", function(signal){
-        var unicode_heart = String.fromCharCode(0x2764).red.bold;
-        var unicode_scissor = String.fromCharCode(0x272D).yellow.bold;
-        var unicode_emerald = String.fromCharCode(0x25C8).green;
+        var unicode_heart = String.fromCharCode(0x2764).red;
+
         /* handling control-C */
         process.stdout.write('\r  \n');
-        console.log(unicode_emerald, "EMERALD".green.bold, unicode_emerald, "says: farewell!".white.bold);
-        console.log([unicode_heart, 'And thanks for the '.red+'CONTROL-C'.yellow.bold, unicode_heart].join(' ').green.bold);
-        process.stdout.write('\n\n');
-        process.reallyExit(1);
+        console.log(['EMERALD'.green, 'caught a'.white, 'CONTROL-C'.red.bold, unicode_heart].join(' ').green.bold);
+
+        process.stdout.write('Cleaning up redis... ');
+        async.waterfall(
+            [
+                function looking_for_emerald_stuff_in_redis(callback){
+                    /* matching keys */
+                    redis.keys("emerald:*", callback);
+                },
+                function clean_whatever_requires_to (keys, callback){
+                    /* cleaning up queue, cache, etc. */
+                    async.forEach(keys, function(key, callback){
+                        redis.del(key, callback);
+                    }, callback);
+                }
+            ], function(err) {
+                if (err) {
+                    process.stdout.write('FAILED\n\n'.red.bold);
+                    console.log(['Exception:', err.toString()].join(' ').red.bold);
+                    console.log(['\n', err.stack, '\n'].join(''));
+                } else {
+                    process.stdout.write('OK\n\n'.green.bold);
+                }
+                process.reallyExit(1);
+            });
+
     });
 
     process.on('uncaughtException', function (err) {
