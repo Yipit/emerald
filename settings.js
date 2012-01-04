@@ -12,8 +12,11 @@ function LOCAL_FILE(){
     return path.join.apply(path, parts);
 }
 
+var VIEW_PATH = LOCAL_FILE('views');
+var BACKBONE_VIEW_PATH = path.join(VIEW_PATH, 'backbone');
+
 module.exports = {
-    LOG_LEVEL: 3,
+    LOG_LEVEL: 5,
     GIT_POLL_INTERVAL: 3000, /* 60.000 miliseconds = 1 second */
     EMERALD_PORT: EMERALD_PORT,
     EMERALD_HOSTNAME: EMERALD_HOSTNAME,
@@ -24,5 +27,7 @@ module.exports = {
     },
     EMERALD_PATH: EMERALD_PATH,
     SANDBOX_PATH: process.env.EMERALD_SANDBOX_PATH || path.join(EMERALD_PATH, "builds"),
-    LOCAL_FILE: LOCAL_FILE
+    LOCAL_FILE: LOCAL_FILE,
+    VIEW_PATH: VIEW_PATH,
+    BACKBONE_VIEW_PATH: BACKBONE_VIEW_PATH
 }
