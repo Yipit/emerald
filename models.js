@@ -130,6 +130,22 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
 
         return data;
     });
+    it.has.class_method('fetch_by_id', function(id, callback) {
+        var self = this;
+
+        var redis = self._meta.storage.connection;
+
+        async.waterfall([
+            function fetch_instruction (callback){
+                logger.debug('fetch_by_id: fetching raw data');
+                return redis.hgetall('clay:BuildInstruction:id:' + id, callback);
+            },
+            function fetch_builds (data, callback){
+                BuildInstruction.with_builds_from_data(data, callback);
+            }
+        ], callback);
+    });
+
     it.has.class_method('get_latest_with_builds', function(callback) {
         var self = this;
 
@@ -225,8 +241,8 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
 
         var branch_to_build = self.branch || "master";
         redis.publish("Build started", JSON.stringify({
-            build: current_build.__data__,
-            instruction: self.__data__
+            build: current_build.toBackbone(),
+            instruction: self.toBackbone()
         }));
         async.waterfall([
             function decide_whether_pull_or_clone (callback){
@@ -255,8 +271,8 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                     build.pid = command.pid;
                     redis.publish('Repository started fetching', JSON.stringify({
                         at: now,
-                        build:build.__data__,
-                        instruction: self.__data__
+                        build:build.toBackbone(),
+                        instruction: self.toBackbone()
                     }));
                     build.save(function(err){
                         callback(err, self, command, command_args);
@@ -292,8 +308,8 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         if (found) {
                             logger.debug('publishing signal')
                             redis.publish('Repository being fetched', JSON.stringify({
-                                instruction: self.__data__,
-                                build: build.__data__,
+                                instruction: self.toBackbone(),
+                                build: build.toBackbone(),
                                 phase: found[1].toLowerCase(),
                                 percentage: found[2]
                             }));
@@ -316,8 +332,8 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
 
                         redis.publish("Repository finished fetching", JSON.stringify({
                             at: now,
-                            build:build.__data__,
-                            instruction: self.__data__
+                            build:build.toBackbone(),
+                            instruction: self.toBackbone()
                         }));
                         build.save(function(err){
                             logger.handleException("build(#"+build.__id__+").save", err);
@@ -387,7 +403,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         if (already_there){return;}
                         build.output = build.output + b;
                         build.stage = STAGES_BY_NAME.RUNNING;
-                        redis.publish("Build output", JSON.stringify({meta: build.__data__, output: b, instruction: self.__data__}));
+                        redis.publish("Build output", JSON.stringify({meta: build.toBackbone(), output: b, instruction: self.toBackbone()}));
 
                         build.save(function(err, key, build) {
                             logger.debug('persisting "'+b+'" to Build#'+build.__id__+'\'s "output" field');
@@ -407,7 +423,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         build.error = build.error + b;
                         build.stage = STAGES_BY_NAME.RUNNING;
 
-                        redis.publish("Build output", JSON.stringify({meta: build.__data__, output: build.error, instruction: self.__data__}));
+                        redis.publish("Build output", JSON.stringify({meta: build.toBackbone(), output: build.error, instruction: self.toBackbone()}));
                         build.save(function(err, key, build) {
                             logger.debug('persisting "'+b+'" to Build#'+build.__id__+'\'s "error" field');
                         });
@@ -431,8 +447,8 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                             lock.release(function(){
                                 redis.publish("Build finished", JSON.stringify({
                                     at: now,
-                                    build: build.__data__,
-                                    instruction: self.__data__
+                                    build: build.toBackbone(),
+                                    instruction: self.toBackbone()
                                 }));
                                 callback(null, self, build);
                             });

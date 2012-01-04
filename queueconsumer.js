@@ -105,7 +105,7 @@ Lifecycle.prototype.consume_build_queue = function(callback){
 }
 Lifecycle.prototype.create_build_from_instruction = function(instruction_id_to_get, handle, callback) {
     var self = this;
-    exports.entities.BuildInstruction.find_by_id(instruction_id_to_get, function(err, instruction) {
+    exports.entities.BuildInstruction.fetch_by_id(instruction_id_to_get, function(err, instruction) {
         if (err) {return handle.release();}
         var now = new Date();
         exports.entities.Build.create({
