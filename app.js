@@ -104,7 +104,7 @@
                 if (err) {
                     process.stdout.write('FAILED\n\n'.red.bold);
                     console.log(['Exception:', err.toString()].join(' ').red.bold);
-                    console.log(['\n', err.stack, '\n'].join(''));
+                    console.log(err.stack.toString().red.bold);
                 } else {
                     process.stdout.write('OK\n\n'.green.bold);
                 }
@@ -133,7 +133,7 @@
             }], function(err) {
                 if (err) {
                     logger.warning(['There was also a failure while cleaning up redis...', err.toString() + ''].join('"').yellow.bold);
-                    logger.warning((err.stack + "").yellow.bold)
+                    logger.warning(err.stack.toString().yellow.bold);
                 } else {
                     logger.info("redis cleansed successfully".white.bold);
                 }
