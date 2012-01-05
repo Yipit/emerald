@@ -1,4 +1,6 @@
-(function($){$(function(){
+(function($){
+    window.UIError = Backbone.Model.extend({});
+
     window.EmeraldModel = Backbone.Model.extend({
         url: function(){
             return [
@@ -8,7 +10,6 @@
             ].join('/') + '.json';
         }
     });
-    window.UIError = EmeraldModel.extend({});
 
     window.Build = EmeraldModel.extend({
         __name__: 'build',
@@ -26,9 +27,6 @@
                 });
             }
         }
-    });
-    window.Builds = Backbone.Collection.extend({
-        model: Build
     });
 
     window.BuildInstruction = EmeraldModel.extend({
@@ -52,4 +50,4 @@
         model: BuildInstruction,
         url: '/api/instructions.json'
     });
-})})(jQuery);
+})(jQuery);
