@@ -8,6 +8,7 @@
             ].join('/') + '.json';
         }
     });
+    window.UIError = EmeraldModel.extend({});
 
     window.Build = EmeraldModel.extend({
         __name__: 'build',
