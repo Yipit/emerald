@@ -18,11 +18,17 @@
         build: function(id) {
             var $app = this.$app.empty();
             var build = new Build({__id__: id});
-            build.fetch({success: function(){
-                var view = new DetailedBuildView({model: build});
-                $app.append(view.render().el);
-            }});
-
+            build.fetch({
+                success: function(){
+                    var view = new DetailedBuildView({model: build});
+                    $app.append(view.render().el);
+                },
+                error: function(build, response){
+                    var error = new UIError(JSON.parse(response.responseText));
+                    var view = new ErrorView({model: error});
+                    $app.append(view.render().el);
+                }
+            });
         },
         manage_instructions: function() {
             var view = new InstructionManagementView();
