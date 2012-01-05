@@ -89,7 +89,11 @@ var Build = models.declare("Build", function(it, kind) {
         data.id = data.__id__;
         data.gravatars = {
             "50": this.gravatar_of_size(50),
-            "100": this.gravatar_of_size(100)
+            "75": this.gravatar_of_size(75),
+            "100": this.gravatar_of_size(100),
+            "125": this.gravatar_of_size(125),
+            "150": this.gravatar_of_size(150),
+            "300": this.gravatar_of_size(300)
         };
 
         if (this.succeeded) {
