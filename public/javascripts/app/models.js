@@ -28,26 +28,24 @@
         }
     });
     window.Builds = Backbone.Collection.extend({
-        model: Build,
-        comparator: function(){
-            return (new Date(this.get('finished_at'))).getTime();
-        }
+        model: Build
     });
 
     window.BuildInstruction = EmeraldModel.extend({
         __name__: 'instruction',
         initialize: function(){
-            _.bindAll(this, 'build_started', 'build_finished');
-            window.socket.on('Build started', this.build_started);
-            window.socket.on('Build finished', this.build_finished);
-        },
-        build_started: function(data){
-            this.change();
-        },
-        build_finished: function(data){
-            this.change();
+            var self = this;
+            window.socket.on('Build started' , function(data){
+                if (data.instruction.id == self.get('id')) {
+                    self.trigger('build_started', data.build, data.instruction);
+                }
+            });
+            window.socket.on('Build finished' , function(data){
+                if (data.instruction.id == self.get('id')) {
+                    self.trigger('build_finished', data.build, data.instruction);
+                }
+            });
         }
-
     });
 
     window.BuildInstructions = Backbone.Collection.extend({
