@@ -72,13 +72,15 @@ exports.map = function(app, redis){
         /* defining the controller responsible to fetch ONLY one instance */
         app.get('/api/' + name + '/:id.json', function(request, response){
             Model.fetch_by_id(parseInt(request.param('id')), function(err, instance){
-                var status = 404;
+                var status, raw;
                 var headers = {'Content-Type': 'application/json'};
-                var raw = {
-                    message: err.toString(),
-                    stack: err.stack.toString()
-                };
-                if (!err) {
+                if (err) {
+                    raw = {
+                        message: err.toString(),
+                        stack: err.stack.toString()
+                    };
+                    status = 404;
+                } else {
                     raw = JSON.stringify(instance.toBackbone());
                     status = 200;
                 }
