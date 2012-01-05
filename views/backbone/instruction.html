@@ -11,13 +11,11 @@
     <li class="title">
       <h1 class="title"><%= name %></h1>
     </li>
-    <li class="build last-build">
+    <li class="last-build">
       last build:
       <% if (last_build) { %>
       <strong class="status-color <%= last_build.style_name %>">
-	<a href="<%= last_build.route %>">
-          <span class="message"><%= last_build.message %></span>
-	</a>
+	<a href="<%= last_build.permalink %>"><%= last_build.message %></a>
       </strong>
       <% } else { %>
       <strong> Never :(</strong>
@@ -28,8 +26,8 @@
     <% if (last_build) { %>
     <li>
       <a class="btn small info do-schedule" href="#">Add to the queue</a>
-      <a class="btn small success" href="#">STDOUT</a>
-      <a class="btn small error" href="#">STDERR</a>
+      <a class="btn small success show-output" href="#">STDOUT</a>
+      <a class="btn small error show-error" href="#">STDERR</a>
     </li>
     <% } else { %>
     <li>
@@ -38,10 +36,10 @@
     <% } %>
   </ul>
   <ol class="buildlog">
-    <li><strong>latest builds</strong></li>
+    <li class="title"><strong>latest builds</strong></li>
     <% _.each(all_builds, function(build) { %>
-    <li class="<%= build.style_name %>">
-      <a href="<%= build.route %>"><%= build.message %></a>
+    <li class="<%= build.style_name %>" id="clay:Build:id:<%= build.__id__ %>">
+      <a href="<%= build.permalink %>"><%= build.message %></a>
     </li>
     <% }); %>
   </ol>
