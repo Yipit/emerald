@@ -105,7 +105,7 @@
 
             $article.removeClass('running').addClass(build.style_name);
 
-            $last_build.empty().append(this.make_build_li(build));
+            $last_build.html(this.make_build_li(build));
 
             $li.attr('class', build.style_name);
             $li.find('a').text(build.message);

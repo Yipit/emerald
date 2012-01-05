@@ -261,12 +261,12 @@ a, a:hover{
             overflow:hidden;
         }
     }
-    .success, .success * {
-        color:#4e9a06;
+    .success, .success a {
+        color:@dark_chameleon;
     }
 
-    .failure, .failure * {
-        color:#ef2929;
+    .failure, .failure a {
+        color:@dark_scarlet_red;
     }
 }
 .instruction.running .data {
@@ -277,16 +277,17 @@ a, a:hover{
 }
 
 .instruction.success .data {
-    background: @chameleon;
-    li {
-        color: @darkest_aluminum;
-    }
+  background: @chameleon;
+  color: #FFF;
+  li {
+    color: @darkest_aluminum;
+  }
 }
 
 .instruction.failed .data {
-    background:#cc0000;
+    background: @light_scarlet_red;
     li {
-        color:#fff;
+        color: #fff;
     }
 }
 
