@@ -41,7 +41,7 @@
       }
   ]
   , "scripts": {
-      "start": "npm install && node ./app.js"
+      "start": "rm -rf ~/.emerald; jake data; npm install && node ./app.js"
     , "test": "jake unit && jake functional"
   }
   , "keywords": [
