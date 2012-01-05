@@ -16,7 +16,7 @@ var VIEW_PATH = LOCAL_FILE('views');
 var BACKBONE_VIEW_PATH = path.join(VIEW_PATH, 'backbone');
 
 module.exports = {
-    LOG_LEVEL: 5,
+    LOG_LEVEL: 3,
     GIT_POLL_INTERVAL: 3000, /* 60.000 miliseconds = 1 second */
     EMERALD_PORT: EMERALD_PORT,
     EMERALD_HOSTNAME: EMERALD_HOSTNAME,
