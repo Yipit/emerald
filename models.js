@@ -65,11 +65,22 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.getter('finished_at', function() {
         return this.build_finished_at || this.fetching_finished_at;
     });
+    it.has.class_method('fetch_by_id', function(id, callback) {
+        var key = 'clay:Build:id:' + id;
+        return this.fetch_by_key(key, callback);
+    });
 
-    it.has.class_method('from_key', function(key, callback) {
-        var id = /(Build[:])?(\d+)$/.exec(key.trim())[2];
-        Build.find_by_id(parseInt(id), function(err, item){
-            callback(err, item);
+    it.has.class_method('fetch_by_key', function(key, callback) {
+        var self = this;
+        var redis = this._meta.storage.connection;
+        redis.hgetall(key, function(err, data){
+            var instance = data;
+            err = err || (_.isEmpty(data) && new Error('no build was found for the key ' + key));
+
+            if (!err) {
+                instance = new self(data);
+            }
+            return callback(err, instance);
         });
     });
     it.has.method('toBackbone', function() {
@@ -185,7 +196,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             function get_all_builds(callback) {
                 redis.zrevrange(self.keys.all_builds, 0, -1, function(err, builds){
                     async.map(builds, function(key, callback){
-                        return Build.from_key(key, callback);
+                        return Build.fetch_by_key(key, callback);
                     }, function(err, builds){
                         callback(err, filter_builds(builds));
                     });
@@ -194,7 +205,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             function get_succeeded_builds(all_builds, callback) {
                 redis.zrevrange(self.keys.succeeded_builds, 0, -1, function(err, builds){
                     async.map(builds, function(key, callback){
-                        return Build.from_key(key, callback);
+                        return Build.fetch_by_key(key, callback);
                     }, function(err, succeeded_builds){
                         callback(err, all_builds, filter_builds(succeeded_builds));
                     });
@@ -203,7 +214,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             function get_failed_builds(all_builds, succeeded_builds, callback) {
                 redis.zrevrange(self.keys.failed_builds, 0, -1, function(err, builds){
                     async.map(builds, function(key, callback){
-                        return Build.from_key(key, callback);
+                        return Build.fetch_by_key(key, callback);
                     }, function(err, failed_builds){
                         callback(err, all_builds, succeeded_builds, filter_builds(failed_builds));
                     });
@@ -265,7 +276,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 logger.info('spawning "git '+command_args.join(' ')+'"');
                 var command = child_process.spawn("git", command_args, command_options);
                 var now = new Date();
-                Build.find_by_id(current_build.__id__, function(err, build) {
+                Build.fetch_by_id(current_build.__id__, function(err, build) {
                     build.fetching_started_at = now;
                     build.pid = command.pid;
                     redis.publish('Repository started fetching', JSON.stringify({
@@ -281,7 +292,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             function capture_git_stdout(self, command, args, callback){
                 logger.debug('capturing the git command stdout');
                 command.stdout.on('data', function (data) {
-                    Build.find_by_id(current_build.__id__, function(err, build) {
+                    Build.fetch_by_id(current_build.__id__, function(err, build) {
                         logger.handleException("Build.find_by_id", err);
                         build.stage = STAGES_BY_NAME.FETCHING;
                         build.save(function(err){
@@ -297,7 +308,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                     var regex = /([a-zA-Z0-9 ]+)[:]\s*(\d+[%])/g;
                     var raw_string = data.toString();
                     var found = regex.exec(raw_string);
-                    Build.find_by_id(current_build.__id__, function(err, build) {
+                    Build.fetch_by_id(current_build.__id__, function(err, build) {
                         logger.handleException("Build.find_by_id", err);
                         build.stage = STAGES_BY_NAME.FETCHING;
                         build.save(function(err){
@@ -320,7 +331,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 logger.debug('emerald will handle the exit of the git command');
                 command.on('exit', function (code, signal) {
                     logger.debug(['git has exited |', 'exit code:', code, " SIGNAL:", signal]);
-                    Build.find_by_id(current_build.__id__, function(err, build) {
+                    Build.fetch_by_id(current_build.__id__, function(err, build) {
                         logger.handleException("Build.find_by_id", err);
                         var now = new Date();
 
@@ -347,7 +358,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                     var commit_hash = /commit (\w{40})/.exec(lines[0]);
                     var commit_message = stdout.split('\n').splice(4).join('\n');
 
-                    Build.find_by_id(current_build.__id__, function(err, build) {
+                    Build.fetch_by_id(current_build.__id__, function(err, build) {
 
                         build.author_name = author_data[2].trim();
                         build.author_email = author_data[3].trim();
@@ -384,7 +395,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 logger.info('spawning build script');
                 var args = [script_path];
                 var command = child_process.spawn("bash", args, {cwd: repository_full_path});
-                Build.find_by_id(current_build.__id__, function(err, build) {
+                Build.fetch_by_id(current_build.__id__, function(err, build) {
                     build.build_started_at = new Date();
                     build.pid = command.pid;
                     build.save(function(err){
@@ -395,7 +406,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             function capture_build_stdout (self, command, args, callback){
                 logger.debug('capturing build script stdout');
                 command.stdout.on('data', function (data) {
-                    Build.find_by_id(current_build.__id__, function(err, build) {
+                    Build.fetch_by_id(current_build.__id__, function(err, build) {
                         var b = filter_output(data.toString());
                         var already_there = (build.output.indexOf(b.trim()) > 0);
                         if (already_there){return;}
@@ -414,7 +425,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 logger.debug('capturing build script stderr');
                 command.stderr.on('data', function (data) {
                     var b = filter_output(data.toString());
-                    Build.find_by_id(current_build.__id__, function(err, build) {
+                    Build.fetch_by_id(current_build.__id__, function(err, build) {
                         var already_there = (build.error.indexOf(b) > 0);
                         if (already_there) {return;}
 
@@ -435,7 +446,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
 
                 command.on('exit', function (code, signal) {
                     logger.debug('finished running the build script, code: ' + code + ', signal: ' + signal);
-                    Build.find_by_id(current_build.__id__, function(err, build) {
+                    Build.fetch_by_id(current_build.__id__, function(err, build) {
                         build.status = code;
                         build.signal = signal;
                         build.build_finished_at = now;
