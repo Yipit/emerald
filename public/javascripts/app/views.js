@@ -23,6 +23,9 @@
         className: 'row'
     });
 
+    window.ErrorView = EmeraldView.extend({
+        template_name: 'error',
+    });
     window.BuildListView = EmeraldView.extend({
         template_name: 'instruction-list',
         render: function(){
@@ -61,7 +64,7 @@
     });
 
     window.DetailedBuildView = EmeraldView.extend({
-        template_name: 'detailed-build',
+        template_name: 'build',
         className: 'build'
     });
 
