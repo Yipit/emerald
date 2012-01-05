@@ -1,8 +1,8 @@
-(function($){$(function(){
+(function($){
     function get_template(name){
         var selector = "script#template-" + name;
         var raw = $.trim($(selector).html());
-        if (raw.length == 0){
+        if (raw.length === 0){
             throw new Error('The template "'+name+'" could not be found.');
         }
         return _.template(raw);
@@ -10,9 +10,16 @@
     window.EmeraldView = Backbone.View.extend({
         initialize: function(){
             _.bindAll(this, 'render');
-            this.model && this.model.bind('change', this.render);
-            this.collection && this.collection.bind('reset', this.render);
-            this.template = get_template(this.template_name);
+            if (this.model) {
+                this.model.bind('change', this.render);
+            }
+            if (this.collection) {
+                this.collection.bind('reset', this.render);
+            }
+            if (this.template_name) {
+                this.template = get_template(this.template_name);
+            }
+
         },
         render: function(){
             var data = {};
@@ -26,9 +33,10 @@
         className: 'row'
     });
 
-    window.ErrorView = EmeraldView.extend({
-        template_name: 'error',
+    window.ErrorView = Backbone.View.extend({
+        template_name: 'error'
     });
+
     window.BuildListView = EmeraldView.extend({
         template_name: 'instruction-list',
         render: function(){
@@ -76,9 +84,9 @@
             return [
                 '<li class="last-build">',
                 '  last build:',
-                '  <strong class="status-color ' + build.style_name + '">',
-                '  <a href="'+build.permalink+'">' + build.message + '</a>',
-                '  </strong>'
+                ('  <strong class="status-color ' + build.style_name + '">'),
+                ('  <a href="'+build.permalink+'">' + build.message + '</a>'),
+                '  </strong>',
                 '</li>'
             ].join('\n');
         },
@@ -123,5 +131,4 @@
     window.InstructionManagementView = EmeraldView.extend({
         template_name: 'instruction-management'
     });
-
-})})(jQuery);
+})(jQuery);
