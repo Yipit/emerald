@@ -12,6 +12,13 @@ exports.map = function(app, redis){
             function scan_filesystem(callback){
                 fs.readdir(settings.BACKBONE_VIEW_PATH, callback);
             },
+            function filter_for_valid_filenames(files, callback){
+                var pattern = /^\w+.*[.]html$/i;
+
+                return callback(null, _.filter(files, function(file){
+                    return pattern.test(file);
+                }));
+            },
             function read_files(files, callback){
                 async.map(files, function(name, callback){
                     var fullpath = path.join(settings.BACKBONE_VIEW_PATH, name);
