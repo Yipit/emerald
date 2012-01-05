@@ -13,7 +13,17 @@ exports.work_on = function(redis, io) {
         socket.emit('connected');
 
         require('./orchestrator').use(redis, socket);
-
+        socket.on('abort Build', function (data) {
+            entity.Build.fetch_by_id(data.id, function(err, build){
+                if (err) {
+                    logger.fail(['could not abort the build #' + data.id, 'due', err.toString()]);
+                    logger.fail(err.stack.toString());
+                    return;
+                }
+                logger.info('someone issued a manual abort onto build #' + data.id);
+                build.abort();
+            });
+        });
         socket.on('run BuildInstruction', function (data) {
             var now = new Date();
 

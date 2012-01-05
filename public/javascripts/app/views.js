@@ -1,11 +1,14 @@
 (function($){
-    STAGE_TO_UI = {
+    var STAGE_TO_UI = {
         0: 'ui-state-default',
         1: 'ui-state-default',
         2: 'ui-state-highlight',
         3: 'ui-state-highlight',
-        4: 'ui-state-error'
+        4: 'ui-state-error',
+        5: 'ui-state-error',
+        6: 'ui-state-success'
     };
+
     function get_template(name){
         var selector = "script#template-" + name;
         var raw = $.trim($(selector).html());
@@ -34,7 +37,9 @@
                 data = this.model.toJSON();
             }
             this.trigger('pre-render', {redefine:data});
-            var rendered = this.template(data);
+            var rendered = this.template(_.extend(data, {
+                STAGE_TO_UI: STAGE_TO_UI
+            }));
             $(this.el).html(rendered);
             this.trigger('post-render', this);
             return this;
@@ -70,6 +75,7 @@
         className: 'instruction',
         events: {
             'click .do-schedule': 'run',
+            'click .do-abort': 'abort',
             'click .show-output': 'show_output',
             'click .show-error': 'show_error'
         },
@@ -94,7 +100,7 @@
         },
         /* utility functions */
         refresh_widgets: function(){
-            this.$widget = this.$("article.instruction .ui-widget");
+            this.$widget = this.$("article.instruction > div");
 
             this.$header = this.$widget.find(".instruction-header");
             this.$body =   this.$widget.find(".instruction-body");
@@ -102,6 +108,10 @@
 
             this.$last_build = this.$header.find(".last-build");
             this.$avatar = this.$header.find(".avatar");
+            this.$toolbar = this.$footer.find(".toolbar");
+        },
+        make_abort_button: function(build){
+            return ['<a class="btn small large error do-abort" rel=', build.__id__,' href="#">Abort</a>'].join('"');
         },
         make_build_li: function(build){
             return [
@@ -139,12 +149,8 @@
             /* expand the body */
             this.$body.removeClass('hidden');
 
-            /* set the body title */
-            if (total_builds === 0) {
-                this.$body.find(".title").text('running ...');
-            } else {
-                this.$body.find(".title").text('latest builds');
-            }
+            /* add an abort button */
+            this.$toolbar.empty().append(this.make_abort_button(build));
 
             /* although the build object still incomplete, let's add
              * the current build to the log */
@@ -154,7 +160,7 @@
             this.refresh_widgets();
             /* make the widget look like is done */
             this.$widget
-                .removeClass('ui-state-default')
+                .attr('class', 'ui-widget ui-corner-all')
                 .addClass(STAGE_TO_UI[build.stage]);
 
             /* expand the body the body title */
@@ -181,6 +187,11 @@
         },
         run: function(e){
             window.socket.emit('run BuildInstruction', {id: this.model.get('__id__')});
+            return e.preventDefault();
+        },
+        abort: function(e){
+            var id = this.$(".do-abort").attr('rel');
+            window.socket.emit('abort Build', {id: id});
             return e.preventDefault();
         }
     });

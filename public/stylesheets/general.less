@@ -212,6 +212,10 @@ a, a:hover{
   overflow:hidden;
   position: relative;
   margin-bottom: 0px;
+  .ui-widget {
+    padding: 0;
+    margin: 0;
+  }
   .instruction-header, .instruction-footer {
     margin:0;
     padding:0;
@@ -236,6 +240,13 @@ a, a:hover{
     .toolbar {
       text-align: right;
       padding: 7px;
+      .btn {
+        color: white;
+      }
+      .btn:hover {
+        color: white;
+      }
+
     }
   }
 
@@ -273,6 +284,14 @@ a, a:hover{
   }
 
   .instruction-body {
+    .title {
+      margin-top: 20px;
+      font-size: 24px;
+      color: @dark_aluminum;
+      font-weight: normal;
+      border: none;
+      letter-spacing: 1px;
+    }
     &.hidden {
       height: 0;
       overflow: hidden;
@@ -290,6 +309,7 @@ a, a:hover{
       display: block;
       width: 100%;
       li {
+        margin: 0;
         padding: 5px 0;
       }
     }
@@ -329,3 +349,47 @@ a, a:hover{
 #app {
   padding-top: 20px;
 }
+
+/* jquery-ui-bootstrap aditions */
+@dark-green: #B7E18C;
+@light-green: #a5b556;
+
+.ui-success-success p {
+  font-size: 13px;
+  font-weight: normal;
+  line-height: 18px;
+  margin:7px 15px;
+}
+
+.ui-state-success{
+  position: relative;
+  margin-bottom: 18px;
+  color: @lightest_aluminum;
+  border-width: 1px;
+  border-style: solid;
+  webkit-border-radius: 4px;
+  moz-border-radius: 4px;
+  border-radius: 4px;
+  webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  background-color: @light-green;
+  background-repeat: repeat-x;
+  background-image: -khtml-gradient(linear, left top, left bottom, from(@dark-green), to(@light-green));
+  background-image: -moz-linear-gradient(top, @dark-green, @light-green);
+  background-image: -ms-linear-gradient(top, @dark-green, @light-green);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, @dark-green), color-stop(100%, @light-green));
+  background-image: -webkit-linear-gradient(top, @dark-green, @light-green);
+  background-image: -o-linear-gradient(top, @dark-green, @light-green);
+  background-image: linear-gradient(top, @dark-green, @light-green);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='@dark-green', endColorstr='@light-green', GradientType=0);
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+  border-color: @light-green @light-green @dark-green;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+
+
+}
+.ui-state-success a, .ui-widget-content .ui-state-success a, .ui-widget-header .ui-state-success a { color: @darkest_aluminum; }
+.ui-state-success-text, .ui-widget-content .ui-state-success-text, .ui-widget-header .ui-state-success-text { color: @darkest_aluminum; }
+
+.ui-state-success .ui-icon, .ui-state-success-text .ui-icon {background-image: url(images/ui-icons_f6cf3b_256x240.png); }

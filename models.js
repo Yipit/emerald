@@ -15,14 +15,18 @@ var STAGES_BY_INDEX = {
     1: 'FETCHING',
     2: 'PREPARING_ENVIRONMENT',
     3: 'RUNNING',
-    4: 'FINISHED'
+    4: 'ABORTED',
+    5: 'FAILED',
+    6: 'SUCCEEDED'
 }
 var STAGES_BY_NAME = {
     BEGINNING: 0,
     FETCHING: 1,
     PREPARING_ENVIRONMENT: 2,
     RUNNING: 3,
-    FINISHED: 4
+    ABORTED: 4,
+    FAILED: 5,
+    SUCCEEDED: 6
 }
 
 var Build = models.declare("Build", function(it, kind) {
@@ -66,6 +70,25 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.getter('finished_at', function() {
         return this.build_finished_at || this.fetching_finished_at;
     });
+    it.has.method('abort', function() {
+        var self = this;
+        var signal = 'SIGKILL';
+
+        self.stage = STAGES_BY_NAME.ABORTED;
+        var logging_prefix = ('[aborting Build #'+this.__id__+']').red.bold;
+        logger.info([logging_prefix, 'the stage was set to:', this.stage]);
+        self.save(function(err){
+            if (self.build_pid) {
+                logger.info([logging_prefix, 'killing build script (pid: ' + self.build_pid + ')']);
+                process.kill(self.build_pid, signal);
+            }
+            if (self.fetching_pid) {
+                logger.info([logging_prefix, 'killing git (pid: ' + self.fetching_pid + ')']);
+                process.kill(self.fetching_pid, signal);
+            }
+            logger.success([logging_prefix, 'DONE!']);
+        });
+    });
     it.has.class_method('fetch_by_id', function(id, callback) {
         var key = 'clay:Build:id:' + id;
         return this.fetch_by_key(key, callback);
@@ -104,7 +127,7 @@ var Build = models.declare("Build", function(it, kind) {
             data.style_name = this.stage_name.toLowerCase();
             data.message = data.style_name + " ...";
         }
-
+        data.succeeded = this.succeeded;
         data.stage_name = this.stage_name;
         data.route = "#build/" + data.__id__;
         data.permalink = settings.EMERALD_DOMAIN + "#build/" + data.__id__;
@@ -267,6 +290,24 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             build: current_build.toBackbone(),
             instruction: self.toBackbone()
         }));
+        function abort_if_requested (){
+            /* This function is a filter to be ran between the
+             * functions of the waterfall below. It checks if the
+             * current build was aborted by the user, and if so, it
+             * stops the execution by passing an exception called
+             * `BuildAborted` */
+            var args = [null];
+            var callback = arguments[arguments.length - 1];
+
+            _.each(arguments, function(arg){if (arg !== callback) {args.push(arg);}});
+
+            Build.fetch_by_id(current_build.__id__, function(err, build){
+                if (build && parseInt(build.stage) === STAGES_BY_NAME.ABORTED) {
+                    args[0] = new Error("the build #" + current_build.__id__ + " was aborted by the user");
+                }
+                return callback.apply(null, args);
+            });
+        }
         async.waterfall([
             function decide_whether_pull_or_clone (callback){
                 logger.info('preparing to fetch data from "'+self.name+'" through "'+self.repository_address+'@'+branch_to_build+'" at ' + repository_full_path);
@@ -302,6 +343,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                     });
                 });
             },
+            abort_if_requested,
             function capture_git_stdout(self, command, args, callback){
                 logger.debug('capturing the git command stdout');
                 command.stdout.on('data', function (data) {
@@ -315,6 +357,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 });
                 callback(null, self, command, args);
             },
+            abort_if_requested,
             function capture_git_stderr(self, command, args, callback){
                 logger.debug('capturing the git command stderr');
                 command.stderr.on('data', function (data) {
@@ -340,6 +383,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 });
                 callback(null, self, command, args);
             },
+            abort_if_requested,
             function handle_the_exit_of_git(self, command, args, callback) {
                 logger.debug('emerald will handle the exit of the git command');
                 command.on('exit', function (code, signal) {
@@ -364,19 +408,25 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                     });
                 });
             },
+            abort_if_requested,
             function update_builds_author(self, callback){
                 child_process.exec('git log --format=full HEAD...HEAD^', {cwd: repository_full_path}, function(error, stdout, stderr){
                     var lines = _.map(stdout.split('\n'), function(x){return x.trim()});
                     var author_data = /(Author|Commit)[:] ([^<]+)[<]([^>]+)[>]/i.exec(stdout);
                     var commit_hash = /commit (\w{40})/.exec(lines[0]);
-                    var commit_message = stdout.split('\n').splice(4).join('\n');
+                    var commit_message = (stdout.split('\n').splice(4).join('\n')).trim();
 
                     Build.fetch_by_id(current_build.__id__, function(err, build) {
-
-                        build.author_name = author_data[2].trim();
-                        build.author_email = author_data[3].trim();
-                        build.commit = commit_hash[1];
-                        build.message = commit_message;
+                        if (author_data) {
+                            build.author_name = author_data[2].trim();
+                            build.author_email = author_data[3].trim();
+                        }
+                        if (commit_hash) {
+                            build.commit = commit_hash[1];
+                        }
+                        if (commit_message.length > 0) {
+                            build.message = commit_message;
+                        }
 
                         build.save(function(err){
                             callback(err, self);
@@ -385,6 +435,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                     });
                 });
             },
+            abort_if_requested,
             function write_build_script(self, callback){
                 var now = new Date();
                 logger.debug('writting build script at ' + script_path);
@@ -398,12 +449,14 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                     callback(err, self);
                 });
             },
+            abort_if_requested,
             function make_it_writtable(self, callback){
                 logger.debug('adding execution permission on the build script');
                 fs.chmod(script_path, 0755, function(err){
                     callback(err, self);
                 });
             },
+            abort_if_requested,
             function spawn_build_script(self, callback){
                 logger.info('spawning build script');
                 var args = [script_path];
@@ -416,6 +469,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                     });
                 });
             },
+            abort_if_requested,
             function capture_build_stdout (self, command, args, callback){
                 logger.debug('capturing build script stdout');
                 command.stdout.on('data', function (data) {
@@ -434,6 +488,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 });
                 callback(null, self, command, args);
             },
+            abort_if_requested,
             function capture_build_stderr (self, command, args, callback){
                 logger.debug('capturing build script stderr');
                 command.stderr.on('data', function (data) {
@@ -453,6 +508,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 });
                 callback(null, self, command, args);
             },
+            abort_if_requested,
             function handle_the_exit_of_build(self, command, args, callback) {
                 var now = new Date();
                 logger.debug('emerald will handle the exit of the command');
@@ -463,7 +519,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         build.status = code;
                         build.signal = signal;
                         build.build_finished_at = now;
-                        build.stage = STAGES_BY_NAME.FINISHED;
+                        build.stage = build.succeeded ? STAGES_BY_NAME.SUCCEEDED : STAGES_BY_NAME.FAILED;
 
                         build.save(function(){
                             lock.release(function(){
