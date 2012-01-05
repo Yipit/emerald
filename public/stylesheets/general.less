@@ -1,16 +1,15 @@
-.box-shadow (@x: 0, @y: 0, @blur: 1px, @alpha: 0.5) {
-  @val: @x @y @blur rgba(255, 255, 255, @alpha);
-
+.raw-box-shadow (@val) {
   box-shadow:         @val;
   -webkit-box-shadow: @val;
   -moz-box-shadow:    @val;
 }
+.box-shadow (@x: 0, @y: 0, @blur: 1px, @alpha: 0.5) {
+  @val: @x @y @blur rgba(255, 255, 255, @alpha);
+  .raw-box-shadow(@val);
+}
 .box-inset (@x: 0, @y: 0, @blur: 2px, @alpha: 0.3) {
   @val: inset @x @y @blur rgba(0, 0, 0, @alpha);
-
-  box-shadow:         @val;
-  -webkit-box-shadow: @val;
-  -moz-box-shadow:    @val;
+  .raw-box-shadow(@val);
 }
 
 .rounded-corners (@radius: 3px) {
@@ -86,14 +85,21 @@ h1 {
   font-weight:bold;
 }
 
-.row { margin-bottom:0; }
+.row {
+  margin-bottom:0;
+  > h1 {
+    font-size: 64px;
+    color: @dark_aluminum;
+    padding: 10px 0;
+  }
+}
 
 /* -- header -- */
 
 header {
     background:url(../images/bg_header.png) repeat-x #444;
     height:82px;
-    box-shadow:0 0 10px #333;
+    .raw-box-shadow(0 0 10px #333);
 }
 
 h1.title {
@@ -163,9 +169,8 @@ menu.main, menu.contextual {
 
 
 /* -- dashboard -- */
-.container {
-  font-family: Armata;
-}
+
+
 .container > h1 {
   font-size:36px;
   font-weight: normal;
@@ -186,7 +191,7 @@ ul#builds {
         margin-bottom:30px;
         overflow:hidden;
         border-radius:5px;
-        box-shadow:0 0 10px #ccc;
+        .raw-box-shadow(0 0 10px #ccc);
         &.single {
            width: 920px;
         }
@@ -203,109 +208,92 @@ a, a:hover{
 }
 
 .instruction {
-    background:#eeeeec;
-    color:#333;
-    overflow:hidden;
+  color: @dark_aluminum;
+  overflow:hidden;
+  position: relative;
+  margin-bottom: 0px;
+  .instruction-header, .instruction-footer {
+    margin:0;
+    padding:0;
 
-    .data {
-        margin:0;
-        padding:0;
-        background:#d3d7cf;
-        padding-bottom:10px;
-        box-shadow:0 0 10px #666;
-        li {
-          padding-left:72px;
-          color:#999;
-          .btn {
-            margin: 2px;
-          }
-        }
+    .commitmsg {
+      padding-bottom:4px;
+      margin-top:-10px;
     }
-    .buildlog {
-      margin: 10px 0 0 10px ;
-    }
-    .data .avatar {
-        float:left;
-        margin-right:20px;
-        padding-left:0px;
-        position:relative;
-        left:10px;
-        top:10px;
-        height:50px;
-        border:solid 1px #666;
-        border-radius:3px;
-    }
-
-    .data .title {
-        padding-left:0px;
-        color:#fff;
-
-        h1 {
-            background:#888a85;
-            border-bottom:solid 1px #666;
-            padding:10px 0 5px 10px;
-        }
-    }
-
-    .data .commitmsg {
-        color:#444;
-        padding-bottom:4px;
-        margin-top:-10px;
-    }
-
-    .menu {
-        margin: 13px;
-        float:right;
-        li {
-            display:block;
-            overflow:hidden;
-        }
-    }
-    .success, .success a {
-        color:@dark_chameleon;
-    }
-
-    .failure, .failure a {
-        color:@dark_scarlet_red;
-    }
-}
-.instruction.running .data {
-    background: @light_sky_blue;
     li {
-        color:#fff;
+      padding-left:72px;
+      .btn {
+        margin: 2px;
+      }
     }
-}
-
-.instruction.success .data {
-  background: @chameleon;
-  color: #FFF;
-  li {
-    color: @darkest_aluminum;
   }
-}
+  .instruction-footer {
+    padding: 10px 0 0 0;
+    left: 0;
+    bottom:0;
+    width: 520px;
 
-.instruction.failed .data {
-    background: @light_scarlet_red;
-    li {
-        color: #fff;
+    .toolbar {
+      text-align: right;
+      padding: 7px;
     }
-}
+  }
 
+  .instruction-header {
+    padding: 0 0 10px 0;
+    .avatar {
+      border: 0;
+      @border-val: solid 3px white;
+      &.picture {
+        .raw-box-shadow(0 5px 5px #666);
+        border-top: @border-val;
+        border-left: @border-val;
+        border-right: @border-val;
+      }
+      float:left;
+      margin: 0 20px 10px 0 ;
+      padding: 0;
+      position:relative;
+      left:10px;
+      top:10px;
+      height:75px;
+      width:75px;
+      border-radius:3px;
+    }
+    .title {
+      padding-left:0px;
+      margin: 0;
+      h1 {
+        padding:10px 0 5px 10px;
+      }
+    }
+    .last-build {
+      margin-left: 40px;
+    }
+  }
 
-/* -- Form stuff -- */
+  .instruction-body {
+    &.hidden {
+      height: 0;
+      overflow: hidden;
+      padding: 0;
+      margin: 0;
+    }
+    padding: 10px 30px 10px 30px;
+    margin: 0 -10px;
+    .raw-box-shadow(inset 0 4px 10px #666);
 
-form label {
-    margin-right:10px;
-}
-
-.helptext {
-    display:block;
-    margin-left:140px;
-    margin-top:5px;
-}
-
-form .button {
-    margin-left:140px;
+    display: block;
+    float: none;
+    background: @lightest_aluminum;
+    ol, ul {
+      display: block;
+      width: 100%;
+      li {
+        padding: 5px 0;
+      }
+    }
+  }
 }
 
 /* github link */
@@ -320,115 +308,6 @@ form .button {
     display: none;
   }
 }
-
-table {
-  tr {
-    td {
-      a.btn.clay {
-        margin-right: 10px;
-        img {
-          margin-left: 5px;
-        }
-      }
-    }
-  }
-}
-
-.terminal {
-  background: @darkest_aluminum;
-  color: @lightest_aluminum;
-  overflow: auto;
-  position: relative;
-  padding: 0px 17px 17px 17px;
-  clear: both;
-  font-family: Monaco, Monospace;
-  &pre {
-    font-family: Monaco, Monospace;
-  }
-}
-
-#terminal-wrapper {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 0;
-  overflow: visible;
-  margin: 0px 10px 10px 10px;
-
-  pre#terminal {
-    .terminal;
-    display: none;
-  }
-
-  .toggle-terminal {
-    float: left;
-    position: relative;
-    display: block;
-    background:url(../images/ico_terminal.png) no-repeat 0 51%;
-    padding: 0 0 0 20px;
-    color: @darkest_aluminum;
-    margin: 13px;
-    &:hover {
-      text-decoration: none;
-      color: @light_aluminum;
-    }
-  }
-}
-
-.modal {
-  display:none;
-}
-
-#progress-bar {
-  position: fixed;
-  .rounded-corners(5px 5px 0 0);
-  border: 2px solid @lightest_aluminum;
-  bottom: 0px;
-  display: none;
-  right: 200px;
-  width: 400px;
-  height: 63px;
-  background: @darkest_aluminum;
-  .inset {
-    float: left;
-    margin: 5px;
-    height: 35px;
-    width: 385px;
-    border: 1px solid black;
-    background: @dark_aluminum;
-    position: relative;
-    .label {
-      position:absolute;
-      width: 100%;
-      margin: 10px 0 0 0;
-      text-align: center;
-      font-family: Monaco, Monospace;
-      font-size: 16px;
-      color: @darkest_aluminum;
-      background: none;
-    }
-    .bar {
-      width: 0%;
-      height: 35px;
-      background: @dark_chameleon;
-    }
-  }
-  .status {
-    font-family: Monaco, Monospace;
-     color: @light_chameleon;
-  }
-  img.gif {
-    float: right;
-    margin: 3px 3px 0 0;
-    display: none;
-   }
-}
-
-#terminal-wrapper {
-  display: none;
-}
-
 
 .copy-n-paste-area {
   font-family: Monaco, Monospace;

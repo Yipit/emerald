@@ -1,47 +1,56 @@
+<% var last_build = _.first(all_builds); %>
 <article class="instruction" data-instruction-id="<%= __id__ %>">
-  <ul class="data">
-    <li class="avatar">
-      <% var last_build = _.first(all_builds); %>
+  <div class="ui-widget ui-corner-all ui-state-default">
+    <ul class="instruction-header">
+      <li class="avatar <%= last_build ? 'picture': '' %>">
+	<% if (last_build) { %>
+	<img src="<%= last_build.gravatars['75'] %>" width="75" height="75" />
+	<% } else { %>
+	<img src="/images/avatar.png" width="75" height="75" />
+	<% } %>
+      </li>
+      <li class="title">
+	<h1 class="title"><%= name %></h1>
+      </li>
+      <li class="last-build">
+	last build:
+	<% if (last_build) { %>
+	<strong class="status-color <%= last_build.style_name %>">
+	  <a href="<%= last_build.permalink %>"><%= last_build.message %></a>
+	</strong>
+	<% } else { %>
+	<strong> Never :(</strong>
+	<% } %>
+      </li>
+    </ul>
+
+    <div class="instruction-body <%= last_build ? '': 'hidden' %>">
+      <h4 class="title"><%= last_build ? 'latest builds' : 'running ...' %></h4>
+      <div class="progress">
+	<div class="bar"></div>
+      </div>
+
+      <ol class="buildlog">
+	<% _.each(all_builds, function(build) { %>
+	<li class="<%= build.style_name %>" id="clay:Build:id:<%= build.__id__ %>">
+	  <a href="<%= build.permalink %>"><%= build.message %></a>
+	</li>
+	<% }); %>
+      </ol>
+    </div>
+
+    <ul class="instruction-footer">
       <% if (last_build) { %>
-      <img src="<%= last_build.gravatars['50'] %>" width="50" />
+      <li class="toolbar">
+	<button class="btn small info do-schedule" href="#">Add to the queue</button>
+	<button class="btn small success show-output" href="#">STDOUT</button>
+	<button class="btn small error show-error" href="#">STDERR</button>
+      </li>
       <% } else { %>
-      <img src="/images/avatar.png" width="50" />
+      <li class="toolbar">
+	<button class="btn small info do-schedule" href="#">Build now</button>
+      </li>
       <% } %>
-    </li>
-    <li class="title">
-      <h1 class="title"><%= name %></h1>
-    </li>
-    <li class="last-build">
-      last build:
-      <% if (last_build) { %>
-      <strong class="status-color <%= last_build.style_name %>">
-	<a href="<%= last_build.permalink %>"><%= last_build.message %></a>
-      </strong>
-      <% } else { %>
-      <strong> Never :(</strong>
-      <% } %>
-    </li>
-  </ul>
-  <ul class="menu">
-    <% if (last_build) { %>
-    <li>
-      <a class="btn small info do-schedule" href="#">Add to the queue</a>
-      <a class="btn small success show-output" href="#">STDOUT</a>
-      <a class="btn small error show-error" href="#">STDERR</a>
-    </li>
-    <% } else { %>
-    <li>
-      <a class="btn small info do-schedule" href="#">Build now</a>
-    </li>
-    <% } %>
-  </ul>
-  <ol class="buildlog">
-    <li class="title"><strong>latest builds</strong></li>
-    <% _.each(all_builds, function(build) { %>
-    <li class="<%= build.style_name %>" id="clay:Build:id:<%= build.__id__ %>">
-      <a href="<%= build.permalink %>"><%= build.message %></a>
-    </li>
-    <% }); %>
-  </ol>
-  <div class="ui-progress-bar" style="width: 400px; height: 20px;border:1px solid black">&nbsp;</div>
+    </ul>
+  </div>
 </article>

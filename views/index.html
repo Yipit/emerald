@@ -18,7 +18,6 @@
 	<link rel="stylesheet" href="/stylesheets/general.css" type="text/css" />
 	<link rel="stylesheet" href="/stylesheets/jquery.gritter.css" type="text/css" />
 	<link rel="stylesheet" href="/stylesheets/jquery-ui-bootstrap.css" type="text/css" />
-	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Armata" type="text/css" />
 	{% endblock %}
 	{% block js %}
 	<script type="text/javascript">
@@ -40,19 +39,11 @@
 	{% endblock %}
 </head>
 <body>
-{% for template in templates %}  <script type="text/template" id="template-{{ template.name }}">{{ template.html|raw }}</script>{% endfor %}
-  <div id="progress-bar">
-    <div class="inset">
-      <div class="label">0%</div>
-      <div class="bar"></div>
-      <span class="status"></span>
-      <img src="/images/progress-bar-loader.gif" />
-    </div>
-  </div><!--#progress-bar-->
-
   <a id="fork_me_on_github" target="_blank" href="https://github.com/Yipit/emerald">
     <span>Fork me on GitHub!</span>
   </a><!--github ribbon-->
+
+  {% for template in templates %}<script type="text/template" id="template-{{ template.name }}">{{ template.html|raw }}</script>{% endfor %}
 
   <header>
     <div class="container">
@@ -75,8 +66,4 @@
     </div>
   </header>
   <div id="app" class="container"></div>
-  <div id="terminal-wrapper">
-    <a class="toggle-terminal" href="#">Show/Hide current build</a>
-    <pre id="terminal" class="hidden"></pre>
-  </div>
 </body>

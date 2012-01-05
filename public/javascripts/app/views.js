@@ -1,4 +1,11 @@
 (function($){
+    STAGE_TO_UI = {
+        0: 'ui-state-default',
+        1: 'ui-state-default',
+        2: 'ui-state-highlight',
+        3: 'ui-state-highlight',
+        4: 'ui-state-error'
+    };
     function get_template(name){
         var selector = "script#template-" + name;
         var raw = $.trim($(selector).html());
@@ -82,8 +89,20 @@
 
             this.template = get_template('instruction');
             this.bind('post-render', this.prepare_progress);
+
+            this.refresh_widgets();
         },
         /* utility functions */
+        refresh_widgets: function(){
+            this.$widget = this.$("article.instruction .ui-widget");
+
+            this.$header = this.$widget.find(".instruction-header");
+            this.$body =   this.$widget.find(".instruction-body");
+            this.$footer = this.$widget.find(".instruction-footer");
+
+            this.$last_build = this.$header.find(".last-build");
+            this.$avatar = this.$header.find(".avatar");
+        },
         make_build_li: function(build){
             return [
                 '<li class="' + build.style_name + '" id="clay:Build:id:'+build.__id__+'">',
@@ -101,7 +120,6 @@
                 '</li>'
             ].join('\n');
         },
-
         /* event reactions */
         prepare_progress: function(data){
             this.$(".ui-progress-bar").progressbar({value: 0});
@@ -113,20 +131,44 @@
             });
         },
         add_build: function(build, instruction){
-            this.$("article.instruction").addClass('running');
-            this.$('.buildlog .title').after(this.make_build_li(build));
+            this.refresh_widgets();
+            var total_builds = this.$('.buildlog li').length;
+            /* make the widget look busy */
+            this.$widget.addClass('ui-state-default');
+
+            /* expand the body */
+            this.$body.removeClass('hidden');
+
+            /* set the body title */
+            if (total_builds === 0) {
+                this.$body.find(".title").text('running ...');
+            } else {
+                this.$body.find(".title").text('latest builds');
+            }
+
+            /* although the build object still incomplete, let's add
+             * the current build to the log */
+            this.$('.buildlog').append(this.make_build_li(build));
         },
         update_latest_build: function(build, instruction){
-            var element = this.make_build_li(build);
+            this.refresh_widgets();
+            /* make the widget look like is done */
+            this.$widget
+                .removeClass('ui-state-default')
+                .addClass(STAGE_TO_UI[build.stage]);
 
-            var $article = this.$("article.instruction");
-            var $last_build = this.$(".last-build");
-            var $li = this.$("li[id='clay:Build:id:" + build.__id__ + "']");
+            /* expand the body the body title */
+            this.$body.removeClass('hidden')
 
-            $article.removeClass('running').addClass(build.style_name);
+            /* set the body title */
+                this.$body.find(".title")
+                .text('latest builds');
 
-            $last_build.html(this.make_build_li(build));
+            this.$avatar.addClass('picture').find("img").attr('src', build.gravatars['75']);
 
+
+            var $li = this.$body.find("li[id='clay:Build:id:" + build.__id__ + "']");
+            this.$last_build.html(this.make_build_li(build));
             $li.attr('class', build.style_name);
             $li.find('a').text(build.message);
         },
