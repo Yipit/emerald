@@ -43,6 +43,17 @@
                     self.trigger('build_finished', data.build, data.instruction);
                 }
             });
+            window.socket.on('Build output' , function(data){
+                if (data.instruction.id == self.get('id')) {
+                    self.trigger('build_output', data);
+                }
+            });
+            window.socket.on('Repository being fetched' , function(data){
+                if (data.instruction.id == self.get('id')) {
+                    self.trigger('fetching_repository', data);
+                }
+            });
+
         }
     });
 

@@ -26,8 +26,10 @@
             if (this.model) {
                 data = this.model.toJSON();
             }
+            this.trigger('pre-render', {redefine:data});
             var rendered = this.template(data);
             $(this.el).html(rendered);
+            this.trigger('post-render', this);
             return this;
         },
         className: 'row'
@@ -65,12 +67,21 @@
             'click .show-error': 'show_error'
         },
         initialize: function(){
-            _.bindAll(this, 'render', 'add_build', 'update_latest_build');
+            _.bindAll(
+                this,
+                'render',
+                'add_build',
+                'update_latest_build',
+                'show_progress',
+                'prepare_progress'
+            );
             this.model.bind('change', this.render);
             this.model.bind('build_started', this.add_build);
             this.model.bind('build_finished', this.update_latest_build);
+            this.model.bind('fetching_repository', this.show_progress);
 
             this.template = get_template('instruction');
+            this.bind('post-render', this.prepare_progress);
         },
         /* utility functions */
         make_build_li: function(build){
@@ -92,6 +103,15 @@
         },
 
         /* event reactions */
+        prepare_progress: function(data){
+            this.$(".ui-progress-bar").progressbar({value: 0});
+        },
+        show_progress: function(data){
+            var value = (parseInt(/\d+/.exec(data.percentage)))[0];
+            this.$(".ui-progress-bar").progressbar({
+		value: value
+            });
+        },
         add_build: function(build, instruction){
             this.$("article.instruction").addClass('running');
             this.$('.buildlog .title').after(this.make_build_li(build));

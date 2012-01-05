@@ -50,7 +50,9 @@
   <div class="container" style="border-bottom: 10px solid #666">
     <h1>{{ template.name}}.html</h1>
     <div class="row">
-      {{ template.html|raw }}
+      <div class="span16">
+	{{ template.html|raw }}
+      </div>
     </div>
   </div>
   {% endfor %}
