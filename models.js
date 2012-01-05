@@ -30,7 +30,8 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.field("signal", kind.string);
     it.has.field("error", kind.string);
     it.has.field("output", kind.string);
-    it.has.field("pid", kind.numeric);
+    it.has.field("fetching_pid", kind.numeric);
+    it.has.field("running_pid", kind.numeric);
     it.has.field("stage", kind.numeric);
     it.has.field("commit", kind.string);
     it.has.field("message", kind.string);
@@ -91,7 +92,15 @@ var Build = models.declare("Build", function(it, kind) {
             "100": this.gravatar_of_size(100)
         };
 
-        data.style_name = this.succeeded ? 'success': 'failure';
+        if (this.succeeded) {
+            data.style_name = 'success';
+        } else if (_.isString(data.message) && data.message.trim().length > 0) {
+            data.style_name = 'failure';
+        } else {
+            data.style_name = this.stage_name.toLowerCase();
+            data.message = data.style_name + " ...";
+        }
+
         data.stage_name = this.stage_name;
         data.route = "#build/" + data.__id__;
         data.permalink = settings.EMERALD_DOMAIN + "#build/" + data.__id__;
@@ -278,7 +287,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 var now = new Date();
                 Build.fetch_by_id(current_build.__id__, function(err, build) {
                     build.fetching_started_at = now;
-                    build.pid = command.pid;
+                    build.fetching_pid = command.pid;
                     redis.publish('Repository started fetching', JSON.stringify({
                         at: now,
                         build:build.toBackbone(),
@@ -397,7 +406,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 var command = child_process.spawn("bash", args, {cwd: repository_full_path});
                 Build.fetch_by_id(current_build.__id__, function(err, build) {
                     build.build_started_at = new Date();
-                    build.pid = command.pid;
+                    build.running_pid = command.pid;
                     build.save(function(err){
                         callback(err, self, command, args);
                     });
