@@ -125,7 +125,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             succeeded_builds: prefix + 'succeeded_builds',
             failed_builds: prefix + 'failed_builds',
             for_build_id: function(id){
-                return 'Build:' + id;
+                return 'clay:Build:id:' + id;
             }
         };
     });
