@@ -10,6 +10,7 @@ module.exports.use = function(redis, socket) {
 
     subscribe.subscribe("Build started");
     subscribe.subscribe("Build finished");
+    subscribe.subscribe("Build aborted");
     subscribe.subscribe("Build output");
 
     subscribe.on("message", function(channel, message) {
@@ -36,6 +37,10 @@ module.exports.use = function(redis, socket) {
             case "Build finished":
             logger.info("The Build #"+parsed.build.__id__+" has finished running");
                 break;
+            case "Build aborted":
+            logger.info("The Build #"+parsed.build.__id__+" was aborted");
+                break;
+
         }
     });
 
