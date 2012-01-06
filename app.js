@@ -32,13 +32,13 @@
            the code below configures espress to use swig as default templates
         */
         swig.init({
-            root: settings.LOCAL_FILE('views'),
+            root: settings.VIEW_PATH,
             allowErrors: true
         });
-        app.set('views', settings.LOCAL_FILE('views'));
+        app.set('views', settings.VIEW_PATH);
         app.register('.html', swig);
 
-        app.set('views', __dirname + '/views');
+        app.set('views', settings.VIEW_PATH);
         app.set('view engine', 'html');
         app.set('view options', { layout: false });
 

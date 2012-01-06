@@ -12,8 +12,8 @@ function LOCAL_FILE(){
     return path.join.apply(path, parts);
 }
 
-var VIEW_PATH = LOCAL_FILE('views');
-var BACKBONE_VIEW_PATH = path.join(VIEW_PATH, 'backbone');
+var VIEW_PATH          = LOCAL_FILE('app', 'server', 'views');
+var BACKBONE_VIEW_PATH = LOCAL_FILE('app', 'client', 'views');
 
 module.exports = {
     LOG_LEVEL: 3,
