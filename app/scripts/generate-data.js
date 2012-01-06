@@ -1,6 +1,7 @@
 require("colors");
 
 var entity = require('../server/models');
+var settings = require('../../settings');
 
 process.stdout.write("Populating the database... ".white.bold);
 console.time("Finished within");
@@ -13,13 +14,22 @@ entity.clear_keys(["emerald*","clay*","sess*"], function(err, keys){
     }
     var entities = [
         new entity.BuildInstruction({
-            name: "Emerald Unit Tests",
-            description: "Asserting that basic business rules\nare working perfectly in emerald",
-            repository_address: "git@github.com:Yipit/emerald.git",
+            name: "Fast successful",
+            description: "green and fast :)",
+            repository_address: "file://" + settings.LOCAL_FILE('.git'),
             branch: "master",
-            build_script: 'npm install\njake unit',
+            build_script: 'make unit',
             author: {__id__: 1}
         }),
+        new entity.BuildInstruction({
+            name: "Fast failful",
+            description: "red and fast :(",
+            repository_address: "file://" + settings.LOCAL_FILE('.git'),
+            branch: "master",
+            build_script: 'make unit',
+            author: {__id__: 1}
+        }),
+
         new entity.BuildInstruction({
             name: "Yipit Unit Tests",
             description: "Tests emerald against redis",
