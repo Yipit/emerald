@@ -45,6 +45,7 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.field("build_finished_at", kind.string);
     it.has.field("fetching_started_at", kind.auto);
     it.has.field("fetching_finished_at", kind.string);
+    it.has.field("instruction", kind.numeric);
 
     it.has.method('gravatar_of_size', function(size){
         var hash = crypto.createHash('md5');
@@ -73,18 +74,31 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.method('abort', function() {
         var self = this;
         var signal = 'SIGKILL';
+        var redis = this._meta.storage.connection;
 
         self.stage = STAGES_BY_NAME.ABORTED;
+
         var logging_prefix = ('[aborting Build #'+this.__id__+']').red.bold;
-        logger.info([logging_prefix, 'the stage was set to:', this.stage]);
+        logger.info([logging_prefix, 'the stage was set to:', self.stage]);
+
         self.save(function(err){
             if (self.build_pid) {
                 logger.info([logging_prefix, 'killing build script (pid: ' + self.build_pid + ')']);
-                process.kill(self.build_pid, signal);
+                try {
+                    process.kill(self.build_pid, signal);
+                } catch (e){
+                    logger.fail([logging_prefix, 'PID'.yellow.bold, self.build_pid, e.toString()]);
+                    logger.fail(e.stack.toString());
+                }
             }
             if (self.fetching_pid) {
                 logger.info([logging_prefix, 'killing git (pid: ' + self.fetching_pid + ')']);
-                process.kill(self.fetching_pid, signal);
+                try {
+                    process.kill(self.fetching_pid, signal);
+                } catch (e){
+                    logger.fail([logging_prefix, 'PID'.yellow.bold, self.fetching_pid, e.toString()]);
+                    logger.fail(e.stack.toString());
+                }
             }
             logger.success([logging_prefix, 'DONE!']);
         });
@@ -302,10 +316,13 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             _.each(arguments, function(arg){if (arg !== callback) {args.push(arg);}});
 
             Build.fetch_by_id(current_build.__id__, function(err, build){
+                current_build = build;
                 if (build && parseInt(build.stage) === STAGES_BY_NAME.ABORTED) {
-                    args[0] = new Error("the build #" + current_build.__id__ + " was aborted by the user");
+                    redis.publish('Build aborted', JSON.stringify({build: build.toBackbone(), instruction: self.toBackbone()}));
+                    return callback(new Error("the build #" + current_build.__id__ + " was aborted by the user"));
+                } else {
+                    return callback.apply(null, args);
                 }
-                return callback.apply(null, args);
             });
         }
         async.waterfall([
@@ -556,11 +573,14 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 });
             }
         ], function(err){
-            if (err){
-                lock.release(function(){
+            lock.release(function(){
+                logger.info('releasing build lock');
+                if (err){
                     logger.fail(err.toString())
-                })
-            }
+                    logger.fail(err.stack.toString())
+                }
+            })
+
         });
     });
 });

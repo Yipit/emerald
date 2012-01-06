@@ -112,7 +112,8 @@ Lifecycle.prototype.create_build_from_instruction = function(instruction_id_to_g
             error: "",
             output: "",
             stage: exports.entities.STAGES_BY_NAME.BEGINNING,
-            build_started_at: new Date()
+            build_started_at: new Date(),
+            instruction: instruction_id_to_get
         }, function(err, current_build_key, current_build) {
             if (err) {return handle.release();}
             handle.lock(current_build.__id__, function() {
