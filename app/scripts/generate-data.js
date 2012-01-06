@@ -26,7 +26,7 @@ entity.clear_keys(["emerald*","clay*","sess*"], function(err, keys){
             description: "red and fast :(",
             repository_address: "file://" + settings.LOCAL_FILE('.git'),
             branch: "master",
-            build_script: 'make unit',
+            build_script: 'ls "forcing a failure"',
             author: {__id__: 1}
         }),
 
