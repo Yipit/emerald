@@ -42,7 +42,7 @@ function Logger (prefix) {
         if (self.level < 1) return;
         this.log("FAILURE:".red, parts);
     };
-    this.warning = function(parts) {
+    this.warn = this.warning = function(parts) {
         if (self.level < 1) return;
         this.log("WARNING:".red.bold, parts);
     };
