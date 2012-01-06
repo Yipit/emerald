@@ -293,136 +293,136 @@ vows.describe("A Poller's *Lifecycle*".cyan).addBatch({
 
         called.should.be.true;
     },
-    '*lifecycle.create_build_from_instruction* should release the lock if there is an error when calling *BuildInstruction.find_by_id*': function(){
-        var called = false;
-        var lock_was_released = false;
-        var find_by_id_was_called = false;
+    // '*lifecycle.create_build_from_instruction* should release the lock if there is an error when calling *BuildInstruction.find_by_id*': function(){
+    //     var called = false;
+    //     var lock_was_released = false;
+    //     var find_by_id_was_called = false;
 
-        lib.entities.BuildInstruction.find_by_id = function(id, callback){
-            id.should.equal('some-id');
-            find_by_id_was_called = true;
-            callback(new Error('just a simple error that was synthesized'));
-        }
+    //     lib.entities.BuildInstruction.find_by_id = function(id, callback){
+    //         id.should.equal('some-id');
+    //         find_by_id_was_called = true;
+    //         callback(new Error('just a simple error that was synthesized'));
+    //     }
 
-        var handle_mock = {
-            release: function(cb){
-                lock_was_released = true;
-            }
-        }
+    //     var handle_mock = {
+    //         release: function(cb){
+    //             lock_was_released = true;
+    //         }
+    //     }
 
-        var lock_mock = {
-            acquire: function(callback){callback(handle_mock);}
-        };
+    //     var lock_mock = {
+    //         acquire: function(callback){callback(handle_mock);}
+    //     };
 
-        var lifecycle = new lib.Lifecycle("cbfi-key", lock_mock);
+    //     var lifecycle = new lib.Lifecycle("cbfi-key", lock_mock);
 
-        lifecycle.create_build_from_instruction('some-id', handle_mock, function(){
-            called = true;
-        });
-        called.should.not.be.true;
-        lock_was_released.should.be.true;
-        find_by_id_was_called.should.be.true;
-    },
-    '*lifecycle.create_build_from_instruction* should release the lock if there is an error when calling *Build.create*': function(){
-        var called = false;
-        var lock_was_released = false;
-        var find_by_id_was_called = false;
-        var Build_create_was_called = false;
+    //     lifecycle.create_build_from_instruction('some-id', handle_mock, function(){
+    //         called = true;
+    //     });
+    //     called.should.not.be.true;
+    //     lock_was_released.should.be.true;
+    //     find_by_id_was_called.should.be.true;
+    // },
+    // '*lifecycle.create_build_from_instruction* should release the lock if there is an error when calling *Build.create*': function(){
+    //     var called = false;
+    //     var lock_was_released = false;
+    //     var find_by_id_was_called = false;
+    //     var Build_create_was_called = false;
 
-        lib.entities.BuildInstruction.find_by_id = function(id, callback){
-            id.should.equal('some-id');
-            find_by_id_was_called = true;
-            callback(null, "key", "this is supposed so be a BuildInstruction");
-        }
+    //     lib.entities.BuildInstruction.find_by_id = function(id, callback){
+    //         id.should.equal('some-id');
+    //         find_by_id_was_called = true;
+    //         callback(null, "key", "this is supposed so be a BuildInstruction");
+    //     }
 
-        lib.entities.Build.create = function(data, callback){
-            Build_create_was_called = true;
+    //     lib.entities.Build.create = function(data, callback){
+    //         Build_create_was_called = true;
 
-            should.exist(data.error);
-            data.error.should.be.a('string')
-            data.output.should.be.a('string')
+    //         should.exist(data.error);
+    //         data.error.should.be.a('string')
+    //         data.output.should.be.a('string')
 
-            callback(new Error('just a simple error that was synthesized'));
-        }
+    //         callback(new Error('just a simple error that was synthesized'));
+    //     }
 
-        var handle_mock = {
-            release: function(cb){
-                lock_was_released = true;
-            }
-        }
+    //     var handle_mock = {
+    //         release: function(cb){
+    //             lock_was_released = true;
+    //         }
+    //     }
 
-        var lock_mock = {
-            acquire: function(callback){callback(handle_mock);}
-        };
+    //     var lock_mock = {
+    //         acquire: function(callback){callback(handle_mock);}
+    //     };
 
-        var lifecycle = new lib.Lifecycle("cbfi-key", lock_mock);
+    //     var lifecycle = new lib.Lifecycle("cbfi-key", lock_mock);
 
-        lifecycle.create_build_from_instruction('some-id', handle_mock, function(){
-            called = true;
-        });
+    //     lifecycle.create_build_from_instruction('some-id', handle_mock, function(){
+    //         called = true;
+    //     });
 
-        called.should.not.be.true;
+    //     called.should.not.be.true;
 
-        lock_was_released.should.be.true;
-        find_by_id_was_called.should.be.true;
-        Build_create_was_called.should.be.true;
-    },
-    '*lifecycle.create_build_from_instruction* should issue the lock if there are no errors after *Build.create*': function(){
-        var called = false;
-        var find_by_id_was_called = false;
-        var Build_create_was_called = false;
-        var handle_lock_was_issued = false;
+    //     lock_was_released.should.be.true;
+    //     find_by_id_was_called.should.be.true;
+    //     Build_create_was_called.should.be.true;
+    // },
+    // '*lifecycle.create_build_from_instruction* should issue the lock if there are no errors after *Build.create*': function(){
+    //     var called = false;
+    //     var find_by_id_was_called = false;
+    //     var Build_create_was_called = false;
+    //     var handle_lock_was_issued = false;
 
-        var instruction_to_run = {
-            run: function(){}
-        }
-        var current_build = {__id__: 'current-build:id'};
+    //     var instruction_to_run = {
+    //         run: function(){}
+    //     }
+    //     var current_build = {__id__: 'current-build:id'};
 
-        lib.entities.BuildInstruction.find_by_id = function(id, callback){
-            id.should.equal('some-id');
-            find_by_id_was_called = true;
-            callback(null, instruction_to_run);
-        }
+    //     lib.entities.BuildInstruction.find_by_id = function(id, callback){
+    //         id.should.equal('some-id');
+    //         find_by_id_was_called = true;
+    //         callback(null, instruction_to_run);
+    //     }
 
-        lib.entities.Build.create = function(data, callback){
-            Build_create_was_called = true;
+    //     lib.entities.Build.create = function(data, callback){
+    //         Build_create_was_called = true;
 
-            should.exist(data.error);
-            data.error.should.be.a('string')
-            data.output.should.be.a('string')
+    //         should.exist(data.error);
+    //         data.error.should.be.a('string')
+    //         data.output.should.be.a('string')
 
-            callback(null, 'build_key', current_build);
-        }
+    //         callback(null, 'build_key', current_build);
+    //     }
 
-        var handle_mock = {
-            release: function(cb){
-                lock_was_released = true;
-            },
-            lock: function(key, cb){
-                key.should.equal('current-build:id');
-                handle_lock_was_issued = true;
-                cb();
-            }
-        }
+    //     var handle_mock = {
+    //         release: function(cb){
+    //             lock_was_released = true;
+    //         },
+    //         lock: function(key, cb){
+    //             key.should.equal('current-build:id');
+    //             handle_lock_was_issued = true;
+    //             cb();
+    //         }
+    //     }
 
-        var lock_mock = {
-            acquire: function(callback){callback(handle_mock);}
-        };
+    //     var lock_mock = {
+    //         acquire: function(callback){callback(handle_mock);}
+    //     };
 
-        var lifecycle = new lib.Lifecycle("cbfi-key", lock_mock);
+    //     var lifecycle = new lib.Lifecycle("cbfi-key", lock_mock);
 
-        lifecycle.create_build_from_instruction('some-id', handle_mock, function(instruction, build, handle){
-            called = true;
-            instruction.should.equal(instruction_to_run);
-            build.should.equal(current_build);
-            handle.should.equal(handle_mock);
-        });
+    //     lifecycle.create_build_from_instruction('some-id', handle_mock, function(instruction, build, handle){
+    //         called = true;
+    //         instruction.should.equal(instruction_to_run);
+    //         build.should.equal(current_build);
+    //         handle.should.equal(handle_mock);
+    //     });
 
-        called.should.be.true;
-        find_by_id_was_called.should.be.true;
-        Build_create_was_called.should.be.true;
-        handle_lock_was_issued.should.be.true;
-    },
+    //     called.should.be.true;
+    //     find_by_id_was_called.should.be.true;
+    //     Build_create_was_called.should.be.true;
+    //     handle_lock_was_issued.should.be.true;
+    // },
     '*lifecycle.run_a_instruction* should release the lock if could not remove the instruction from the queue': function() {
         var called = false;
         var zrem_was_called = false;
