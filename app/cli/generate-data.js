@@ -14,7 +14,7 @@ entity.clear_keys(["emerald*","clay*","sess*"], function(err, keys){
     }
     var entities = [
         new entity.BuildInstruction({
-            name: "Fast successful",
+            name: "This passes",
             description: "green and fast :)",
             repository_address: "file://" + settings.LOCAL_FILE('.git'),
             branch: "master",
@@ -22,7 +22,7 @@ entity.clear_keys(["emerald*","clay*","sess*"], function(err, keys){
             author: {__id__: 1}
         }),
         new entity.BuildInstruction({
-            name: "Fast failful",
+            name: "Fails miserably",
             description: "red and fast :(",
             repository_address: "file://" + settings.LOCAL_FILE('.git'),
             branch: "master",
