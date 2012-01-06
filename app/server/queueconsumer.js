@@ -1,5 +1,5 @@
 var logger = new (require('./logger').Logger)("[QUEUE CONSUMER]".blue.bold);
-var settings = require('./settings');
+var settings = require('../../settings');
 
 exports.entities = require('./models');
 

@@ -1,6 +1,6 @@
 require('colors');
-var _ = require("underscore")._;
-var settings = require('./settings');
+var _ = require('underscore')._;
+var settings = require('../../settings');
 var loglevel = {
     DEBUG: 4,
     SUCCESS: 3,

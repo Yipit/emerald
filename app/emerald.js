@@ -1,20 +1,20 @@
 (function(){
-    var logger = new (require('./logger').Logger)("[MAIN]".white.bold);
+    var logger = new (require('./server/logger').Logger)("[MAIN]".white.bold);
 
     /* importing dependencies */
     var _ = require('underscore')._,
     async = require('async'),
     swig = require('swig'),
-    settings = require('./settings'),
+    settings = require('../settings'),
 
-    boot = require('./boot'),
+    boot = require('./server/boot'),
 
     express = require('express'),
 
     /* importing some emerald actors */
-    queueconsumer = require('./queueconsumer'),
-    websockets = require('./websockets'),
-    controllers = require('./controllers');
+    queueconsumer = require('./server/queueconsumer'),
+    websockets = require('./server/websockets'),
+    controllers = require('./server/controllers');
 
     /* preparing redis */
     RedisStore = require('connect-redis')(express),

@@ -24,7 +24,7 @@ task('default', [], function(pattern){
 });
 desc('cleanse the db and populate the database with test data');
 task('data', [], function () {
-    var entity = require('./models');
+    var entity = require('./app/server/models');
 
     process.stdout.write("Populating the database... ".white.bold);
     console.time("Finished within");

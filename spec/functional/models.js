@@ -2,7 +2,7 @@ var vows = require('vows')
 , should = require('should')
 , _ = require('underscore')._;
 
-var entity = require('../../models');
+var entity = require('../../app/server/models');
 
 /*vows.describe('A User').addBatch({
     'has a static method for authentication': function(){

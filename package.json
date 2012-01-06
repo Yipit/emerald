@@ -6,9 +6,9 @@
   , "keywords": ["continous", "integration", "CI", "build"]
   , "homepage": "http://github.com/Yipit/emerald"
   , "bugs": "http://github.com/Yipit/emerald/issues"
-  , "main": "./index.js"
+  , "main": "./settings.js"
   , "bin": {
-      "emerald": "./app.js"
+      "emerald": "./app/emerald.js"
   }
   , "dependencies": {
       "clay": ">= 1.2.1"
@@ -41,8 +41,8 @@
       }
   ]
   , "scripts": {
-      "start": "rm -rf ~/.emerald; jake data; npm install && node ./app.js"
-    , "test": "jake unit && jake functional"
+      "start": "rm -rf ~/.emerald; jake data; npm install && NODE_PATH=$NODE_PATH:`pwd` node ./app/emerald.js"
+    , "test": "NODE_PATH=$NODE_PATH:`pwd` jake unit && jake functional"
   }
   , "keywords": [
       "continuous integration"
