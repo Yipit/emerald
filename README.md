@@ -11,7 +11,7 @@
 ### 4. global dependencies
 
 ```
-npm install -g jake vows nodemon
+npm install -g vows
 ```
 
 ### 5. local dependencies
@@ -26,16 +26,14 @@ npm install
 
 ## run the tests!
 
-our [Jakefile](https://github.com/Yipit/emerald/blob/master/Jakefile) is full of candy...
-
 ### unit tests
 ```
-jake unit
+make unit
 ```
 
 ### functional tests
 ```
-jake functional
+make functional
 ```
 
 ### or... run them all together
@@ -51,30 +49,8 @@ npm start
 
 ## fixtures for testing locally
 
-In order to make testing emerald locally much more fun, there are some fixtures available.
-If you wanna make changes in it, simply add more entities to the `entities` array in [Jakefile](https://github.com/Yipit/emerald/blob/master/Jakefile):
-
-```javascript
-var entities = [
-    new entity.User({
-        name: "Gabriel Falcão",
-        email: "gabriel@yipit.com",
-        password: '123'
-    }),
-    ...
-
-    /************************
-
-    YOUR OWN ENTITIES HERE...
-
-    ************************/
-
-    ...
-    new entity.Pipeline({
-        name: "Emerald Tests",
-        instructions: [{__id__: 1}, {__id__: 2}]
-    })
-];
+```
+make data
 ```
 
 # Dependencies and its explanations
@@ -106,11 +82,18 @@ webserver, [socket.io](http://socket.io), in turn, is for real-time pushes to th
 shorthand template language, and [less](http://lesscss.org/) a
 shorthand styling language that has powers beyond just CSS.
 
-## underscore
+## underscore.js
 
 this lib is like a
 [polyfill](http://remysharp.com/2010/10/08/what-is-a-polyfill/) for
 manipulating javascript objects with shorthand functions.
+
+## backbone.js
+
+This awesome library allows us to organize the web app a lot better by
+providing MVC support on the client side.  It doesn't mean all our
+client-side models are persisted on the server, they just leverage how
+the views should update themselves.
 
 ## async
 
