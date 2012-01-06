@@ -41,8 +41,8 @@
       }
   ]
   , "scripts": {
-      "start": "rm -rf ~/.emerald; npm install && jake data && NODE_PATH=$NODE_PATH:`pwd` node ./app/emerald.js"
-    , "test": "NODE_PATH=$NODE_PATH:`pwd` jake unit && jake functional"
+      "start": "rm -rf ~/.emerald; npm install && make data && NODE_PATH=$NODE_PATH:`pwd` node ./app/emerald.js"
+    , "test": "NODE_PATH=$NODE_PATH:`pwd` make unit && make functional"
   }
   , "keywords": [
       "continuous integration"
