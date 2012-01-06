@@ -1,7 +1,7 @@
 all: unit functional data
 
-export VOWS_BIN:=$$PWD/node_modules/vows/bin/bows
-export VOWS_CMD:=$$VOWS_BIN --spec spec/kind/*.js
+export VOWS_BIN:=$(PWD)/node_modules/vows/bin/vows
+export VOWS_CMD:=$(VOWS_BIN) --spec spec/kind/*.js
 
 init:
 	@echo "installing vows (if necessary)..."
