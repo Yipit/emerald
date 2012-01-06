@@ -210,7 +210,7 @@ a, a:hover{
 }
 
 .instruction {
-  color: @dark_aluminum;
+  color: @darkest_aluminum;
   overflow:hidden;
   position: relative;
   margin-bottom: 0px;
@@ -272,23 +272,24 @@ a, a:hover{
       position:absolute;
       left:10px;
       top:10px;
-      height:75px;
-      width:75px;
+      height:100px;
+      width:100px;
       border-radius:3px;
     }
     .title {
-      padding:0 0 0 100px;
+      padding:0 0 0 110px;
       margin: 0;
       h1 {
         padding:10px 0 5px 10px;
       }
     }
-    .last-build {
-      margin-left: 40px;
+    .last-build, .author {
+      margin-left: 50px;
     }
   }
 
   .instruction-body {
+
     .title {
       margin-top: 20px;
       font-size: 24px;
@@ -341,7 +342,6 @@ a, a:hover{
 
 .copy-n-paste-area {
   font-family: Monaco, Monospace;
-  font-size: 10px;
   height: 12px;
   background: @lightest_aluminum;
   padding: 6px;
@@ -349,10 +349,24 @@ a, a:hover{
 }
 
 .build {
+  h1 {
+    font-size: 48px;
+  }
+  .title {
+    font-size: 30px;
+  }
   .gravatar {
     float: right;
-    border: 10px solid white;
-    .box-shadow;
+    .raw-box-shadow(inset 10px 10px 10px @darkest_aluminum);
+  }
+  pre {
+    min-height: 300px;
+    font-size: 16px;
+    &.terminal {
+        background: @darkest_aluminum;
+        color: @lightest_aluminum;
+        line-height: 22px;
+    }
   }
 }
 
@@ -409,7 +423,7 @@ a, a:hover{
 }
 
 .ui-state-error {
-  .title, .last-build {
+  .title, .last-build, .author {
     color: @lightest_aluminum;
   }
   li, strong {
@@ -422,7 +436,7 @@ a, a:hover{
   }
 }
 .ui-state-success {
-  .title, .last-build {
+  .title, .last-build, .author {
     color: @darker_aluminum;
   }
   li, strong {
