@@ -23,4 +23,4 @@ clean:
 	@echo "OK!"
 
 data:
-	@node $$PWD/app/scripts/generate-data.js
+	@node $$PWD/app/cli/generate-data.js
