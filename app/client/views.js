@@ -1,4 +1,14 @@
 (function($){
+    var STAGES_BY_INDEX = {
+        0: 'BEGINNING',
+        1: 'FETCHING',
+        2: 'PREPARING_ENVIRONMENT',
+        3: 'RUNNING',
+        4: 'ABORTED',
+        5: 'FAILED',
+        6: 'SUCCEEDED'
+    };
+
     var STAGE_TO_UI = {
         0: 'ui-state-default',
         1: 'ui-state-default',
@@ -98,6 +108,7 @@
                 'render',
                 'add_build',
                 'update_latest_build',
+                'update_toolbar',
                 'show_progress',
                 'prepare_progress'
             );
@@ -105,6 +116,11 @@
             this.model.bind('build_started', this.add_build);
             this.model.bind('build_finished', this.update_latest_build);
             this.model.bind('build_aborted', this.update_latest_build);
+
+            this.model.bind('build_started', this.update_toolbar);
+            this.model.bind('build_finished', this.update_toolbar);
+            this.model.bind('build_aborted', this.update_toolbar);
+
             this.model.bind('fetching_repository', this.show_progress);
 
             this.template = get_template('instruction');
@@ -113,6 +129,39 @@
             this.refresh_widgets();
         },
         /* utility functions */
+        make_toolbar_button: function(title, classes, extra){
+            extra = extra || '';
+            return ['<a class="btn small ' + classes + '" ' + extra + ' href="#">' + title + '</a>'].join('"');
+        },
+        update_toolbar: function(build, instruction){
+            var self = this;
+            this.refresh_widgets();
+            var buttons = [
+                this.make_toolbar_button('Add to the queue', 'info do-schedule'),
+                this.make_toolbar_button('STDOUT', 'success show-output'),
+                this.make_toolbar_button('STDERR', 'error show-error')
+            ];
+            switch (STAGES_BY_INDEX[build.stage]) {
+            case 'BEGINNING':
+            case 'FETCHING':
+            case 'PREPARING_ENVIRONMENT':
+            case 'RUNNING':
+                buttons = [this.make_abort_button(build)];
+                break;
+            case 'ABORTED':
+            case 'FAILED':
+            case 'SUCCEEDED':
+                buttons = [
+                    this.make_toolbar_button('Run again', 'info do-schedule'),
+                    this.make_toolbar_button('STDOUT', 'success show-output'),
+                    this.make_toolbar_button('STDERR', 'error show-error')
+                ];
+            }
+
+            this.$toolbar.fadeIn(function(){
+                self.$toolbar.html(buttons.join('\n'));
+            });
+        },
         refresh_widgets: function(){
             this.$widget = this.$("article.instruction > div");
 
@@ -125,12 +174,15 @@
             this.$toolbar = this.$footer.find(".toolbar");
         },
         make_abort_button: function(build){
-            return ['<a class="btn small large error do-abort" rel=', build.__id__,' href="#">Abort</a>'].join('"');
+            return this.make_toolbar_button('Abort', 'error do-abort', 'rel="' + build.__id__ + '"');
         },
         make_build_li: function(build){
             return [
                 '<li class="' + build.style_name + '" id="clay:Build:id:'+build.__id__+'">',
-                '  <a href="'+build.permalink+'">' + truncate(build.message) + '</a>',
+                '  <a href="'+build.permalink+'">',
+                '    <strong class="id">#' + build.__id__ + '</strong>',
+                '    <span class="message">' + truncate(build.message) + '</span>',
+                '  </a>',
                 '</li>'
             ].join('\n');
         },
@@ -147,7 +199,7 @@
             this.$(".ui-progress-bar").progressbar({value: 0});
         },
         show_progress: function(data){
-            var value = (parseInt(/\d+/.exec(data.percentage)))[0];
+            var value = (parseInt(/\d+/.exec(data.percentage), 10))[0];
             this.$(".ui-progress-bar").progressbar({
 		value: value
             });
@@ -186,7 +238,7 @@
                 .addClass(STAGE_TO_UI[build.stage]);
 
             /* expand the body the body title */
-            this.$body.removeClass('hidden')
+            this.$body.removeClass('hidden');
 
             /* set the body title */
                 this.$body.find(".title")
@@ -212,8 +264,10 @@
             return e.preventDefault();
         },
         abort: function(e){
+            this.refresh_widgets();
             var id = this.$(".do-abort").attr('rel');
             window.socket.emit('abort Build', {id: id});
+            this.$toolbar.fadeOut();
             return e.preventDefault();
         }
     });

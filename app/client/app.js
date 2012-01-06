@@ -3,4 +3,4 @@
 
     window.App = new window.EmeraldRouter();
     Backbone.history.start();
-})})(jQuery);
+});})(jQuery);

@@ -33,7 +33,9 @@
       <ol class="buildlog">
 	<% _.each(all_builds, function(build) { %>
 	<li class="<%= build.style_name %>" id="clay:Build:id:<%= build.__id__ %>">
-	  <a href="<%= build.permalink %>"><%= truncate(build.message) %></a>
+	  <a href="<%= build.permalink %>">
+	    <strong class="id">#<%= build.__id__%></strong>
+	    <span class="message"><%= truncate(build.message) %></a></span>
 	</li>
 	<% }); %>
       </ol>

@@ -21,7 +21,9 @@
         },
         update_from_socket: function(data){
             var self = this;
-            if (parseInt(data.build.__id__) == (this.get('__id__'))) {
+            var data_id = parseInt(data.build.__id__, 10);
+            var my_id = parseInt(this.get('__id__'), 10);
+            if (data_id === my_id) {
                 _.each(data.build, function(key, value){
                     self.set({key: value});
                 });

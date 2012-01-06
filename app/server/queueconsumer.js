@@ -111,6 +111,8 @@ Lifecycle.prototype.create_build_from_instruction = function(instruction_id_to_g
         exports.entities.Build.create({
             error: "",
             output: "",
+            signal: 'SIGKILL',
+            status: 1,
             stage: exports.entities.STAGES_BY_NAME.BEGINNING,
             build_started_at: new Date(),
             instruction: instruction_id_to_get

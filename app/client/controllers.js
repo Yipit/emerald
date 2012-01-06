@@ -46,4 +46,4 @@
             this.$app.empty().append(view.render().el);
         }
     });
-})})(jQuery);
+});})(jQuery);
