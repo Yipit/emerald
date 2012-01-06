@@ -11,7 +11,8 @@ module.exports.use = function(redis, socket) {
     subscribe.subscribe("Build started");
     subscribe.subscribe("Build finished");
     subscribe.subscribe("Build aborted");
-    subscribe.subscribe("Build output");
+    subscribe.subscribe("Build stdout");
+    subscribe.subscribe("Build stderr");
 
     subscribe.on("message", function(channel, message) {
         var parsed;

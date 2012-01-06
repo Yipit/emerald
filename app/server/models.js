@@ -1,6 +1,7 @@
 var _ = require('underscore')._;
 var models = require('clay');
 var crypto = require('crypto');
+var moment = require('moment');
 var mkdirp = require('mkdirp');
 var async = require('async');
 var moment = require('moment');
@@ -148,6 +149,14 @@ var Build = models.declare("Build", function(it, kind) {
         data.permalink = settings.EMERALD_DOMAIN + "#build/" + data.__id__;
         data.started_at = this.started_at;
         data.finished_at = this.finished_at;
+
+        data.humanized = {
+            "build_started": moment(this.build_started_at).fromNow(),
+            "build_finished": moment(this.build_finished_at).fromNow(),
+            "fetching_started": moment(this.fetching_started_at).fromNow(),
+            "fetching_finished": moment(this.fetching_finished_at).fromNow()
+        }
+
         return data;
     });
 });
@@ -498,11 +507,10 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         var b = filter_output(data.toString());
                         var already_there = (build.output.indexOf(b.trim()) > 0);
                         if (already_there){return;}
-                        build.output = build.output + b;
+                        build.output = build.output + '<br />' + b;
                         build.stage = STAGES_BY_NAME.RUNNING;
-                        redis.publish("Build output", JSON.stringify({meta: build.toBackbone(), output: b, instruction: self.toBackbone()}));
-
                         build.save(function(err, key, build) {
+                            redis.publish("Build stdout", JSON.stringify({meta: build.toBackbone(), current: b, full:build.output, instruction: self.toBackbone()}));
                             logger.debug('persisting "'+b+'" to Build#'+build.__id__+'\'s "output" field');
                         });
                     });
@@ -521,7 +529,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         build.error = build.error + b;
                         build.stage = STAGES_BY_NAME.RUNNING;
 
-                        redis.publish("Build output", JSON.stringify({meta: build.toBackbone(), output: build.error, instruction: self.toBackbone()}));
+                        redis.publish("Build stderr", JSON.stringify({meta: build.toBackbone(), current: b, full:build.error, instruction: self.toBackbone()}));
                         build.save(function(err, key, build) {
                             logger.debug('persisting "'+b+'" to Build#'+build.__id__+'\'s "error" field');
                         });
