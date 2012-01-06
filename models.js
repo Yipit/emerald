@@ -79,6 +79,7 @@ var Build = models.declare("Build", function(it, kind) {
         self.stage = STAGES_BY_NAME.ABORTED;
 
         var logging_prefix = ('[aborting Build #'+this.__id__+']').red.bold;
+
         logger.info([logging_prefix, 'the stage was set to:', self.stage]);
 
         self.save(function(err){
@@ -318,8 +319,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             Build.fetch_by_id(current_build.__id__, function(err, build){
                 current_build = build;
                 if (build && parseInt(build.stage) === STAGES_BY_NAME.ABORTED) {
-                    redis.publish('Build aborted', JSON.stringify({build: build.toBackbone(), instruction: self.toBackbone()}));
-                    return callback(new Error("the build #" + current_build.__id__ + " was aborted by the user"));
+                    throw new Error("the build #" + current_build.__id__ + " was aborted by the user");
                 } else {
                     return callback.apply(null, args);
                 }
@@ -330,6 +330,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 logger.info('preparing to fetch data from "'+self.name+'" through "'+self.repository_address+'@'+branch_to_build+'" at ' + repository_full_path);
                 path.exists(repository_bare_path, function(exists){callback(null, self, exists)})
             },
+            abort_if_requested,
             function assemble_the_command_line (self, exists, callback) {
                 var args, options = {};
                 if (exists) {
@@ -343,6 +344,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 }
                 callback(null, self, args, options);
             },
+            abort_if_requested,
             function spawn_git(self, command_args, command_options, callback){
                 logger.info('spawning "git '+command_args.join(' ')+'"');
                 var command = child_process.spawn("git", command_args, command_options);
@@ -551,6 +553,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                     });
                 });
             },
+            abort_if_requested,
             function associate_build_to_instruction(self, build, callback){
                 /* the unix timestamp is always the score, so that we can fetch it ordered by date*/
                 var unix_timestamp = (new Date()).getTime();
@@ -559,6 +562,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                     callback(null, self, build, unix_timestamp);
                 })
             },
+            abort_if_requested,
             function associate_build_to_proper_list(self, build, unix_timestamp, callback){
                 var exit_code_zero = parseInt(build.status || 0) == 0;
                 var was_not_killed = build.signal === "null";
@@ -573,12 +577,13 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 });
             }
         ], function(err){
-            lock.release(function(){
-                logger.info('releasing build lock');
-                if (err){
+            if (err) {
+                redis.publish('Build aborted', JSON.stringify({build: current_build.toBackbone(), instruction: self.toBackbone(), error: err}));
                     logger.fail(err.toString())
                     logger.fail(err.stack.toString())
-                }
+            }
+            lock.release(function(){
+                logger.succeeded(['the build lock was released', err && 'due an error'.red | 'successfully'.green.bold]);
             })
 
         });

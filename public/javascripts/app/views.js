@@ -9,6 +9,14 @@
         6: 'ui-state-success'
     };
 
+    function truncate(string, amount){
+        amount = amount || 45;
+        if (string.length > amount) {
+            return string.substr(0, amount) + ' ...';
+        } else {
+            return string;
+        }
+    }
     function get_template(name){
         var selector = "script#template-" + name;
         var raw = $.trim($(selector).html());
@@ -38,7 +46,8 @@
             }
             this.trigger('pre-render', {redefine:data});
             var rendered = this.template(_.extend(data, {
-                STAGE_TO_UI: STAGE_TO_UI
+                STAGE_TO_UI: STAGE_TO_UI,
+                truncate: truncate
             }));
             $(this.el).html(rendered);
             this.trigger('post-render', this);
@@ -91,6 +100,7 @@
             this.model.bind('change', this.render);
             this.model.bind('build_started', this.add_build);
             this.model.bind('build_finished', this.update_latest_build);
+            this.model.bind('build_aborted', this.update_latest_build);
             this.model.bind('fetching_repository', this.show_progress);
 
             this.template = get_template('instruction');
@@ -116,18 +126,16 @@
         make_build_li: function(build){
             return [
                 '<li class="' + build.style_name + '" id="clay:Build:id:'+build.__id__+'">',
-                '  <a href="'+build.permalink+'">' + build.message + '</a>',
+                '  <a href="'+build.permalink+'">' + truncate(build.message) + '</a>',
                 '</li>'
             ].join('\n');
         },
         make_last_build: function(build){
             return [
-                '<li class="last-build">',
-                '  last build:',
-                ('  <strong class="status-color ' + build.style_name + '">'),
-                ('  <a href="'+build.permalink+'">' + build.message + '</a>'),
-                '  </strong>',
-                '</li>'
+                '<span>last build:</span>',
+                ('<strong class="status-color ' + build.style_name + '">'),
+                ('<a href="'+build.permalink+'">' + truncate(build.message) + '</a>'),
+                '</strong>'
             ].join('\n');
         },
         /* event reactions */
@@ -141,20 +149,30 @@
             });
         },
         add_build: function(build, instruction){
-            this.refresh_widgets();
-            var total_builds = this.$('.buildlog li').length;
+            var self = this;
+            self.refresh_widgets();
+            var total_builds = self.$('.buildlog li').length;
             /* make the widget look busy */
-            this.$widget.addClass('ui-state-default');
+            self.$widget.addClass('ui-state-default');
 
             /* expand the body */
-            this.$body.removeClass('hidden');
+            self.$body.animate({
+                'padding-top': '10px',
+                'padding-bottom': '10px',
+                'padding-left': '30px',
+                'padding-right': '30px',
+                'margin-left': '-10px',
+                'margin-right': '-10px'
+            }, function(){
+                self.$body.removeClass('hidden');
 
-            /* add an abort button */
-            this.$toolbar.empty().append(this.make_abort_button(build));
+                /* add an abort button */
+                self.$toolbar.empty().append(self.make_abort_button(build));
 
-            /* although the build object still incomplete, let's add
-             * the current build to the log */
-            this.$('.buildlog').append(this.make_build_li(build));
+                /* although the build object still incomplete, let's add
+                 * the current build to the log */
+                self.$('.buildlog').append(self.make_build_li(build));
+            });
         },
         update_latest_build: function(build, instruction){
             this.refresh_widgets();
@@ -174,9 +192,9 @@
 
 
             var $li = this.$body.find("li[id='clay:Build:id:" + build.__id__ + "']");
-            this.$last_build.html(this.make_build_li(build));
+            this.$last_build.html(this.make_last_build(build));
             $li.attr('class', build.style_name);
-            $li.find('a').text(build.message);
+            $li.find('a').text(truncate(build.message));
         },
         /* user actions */
         show_output: function(e){

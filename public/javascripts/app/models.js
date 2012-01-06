@@ -43,6 +43,12 @@
                     self.trigger('build_finished', data.build, data.instruction);
                 }
             });
+            window.socket.on('Build aborted' , function(data){
+                if (data.instruction.id == self.get('id')) {
+                    self.trigger('build_aborted', data.build, data.instruction);
+                }
+            });
+
             window.socket.on('Build output' , function(data){
                 if (data.instruction.id == self.get('id')) {
                     self.trigger('build_output', data);

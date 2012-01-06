@@ -13,10 +13,10 @@
 	<h1 class="title"><%= name %></h1>
       </li>
       <li class="last-build">
-	last build:
+	<span>last build:</span>
 	<% if (last_build) { %>
 	<strong class="status-color <%= last_build.style_name %>">
-	  <a href="<%= last_build.permalink %>"><%= last_build.message %></a>
+	  <a href="<%= last_build.permalink %>"><%= truncate(last_build.message) %></a>
 	</strong>
 	<% } else { %>
 	<strong> Never :(</strong>
@@ -33,7 +33,7 @@
       <ol class="buildlog">
 	<% _.each(all_builds, function(build) { %>
 	<li class="<%= build.style_name %>" id="clay:Build:id:<%= build.__id__ %>">
-	  <a href="<%= build.permalink %>"><%= build.message %></a>
+	  <a href="<%= build.permalink %>"><%= truncate(build.message) %></a>
 	</li>
 	<% }); %>
       </ol>
