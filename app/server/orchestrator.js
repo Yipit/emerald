@@ -13,6 +13,7 @@ module.exports.use = function(redis, socket) {
     subscribe.subscribe("Build aborted");
     subscribe.subscribe("Build stdout");
     subscribe.subscribe("Build stderr");
+    subscribe.subscribe("Build running");
 
     subscribe.on("message", function(channel, message) {
         var parsed;

@@ -49,13 +49,19 @@ function PollerLock(key, redis){
 
 PollerLock.prototype.acquire = function(callback){
     var self = this;
-    this.redis.get(this.key, function(err, current_build){
+    self.redis.get(this.key, function(err, current_build){
         logger.handleException("redis.get", err);
         logger.debug(["redis.get('"+settings.REDIS_KEYS.current_build+"')", arguments]);
 
         /* if not building, let's quit and wait for the next interval */
         if (current_build) {
-            logger.debug("already building:", JSON.stringify(current_build));
+            exports.entities.Build.fetch_by_id(current_build, function(err, build){
+                logger.debug("already building:", JSON.stringify(current_build));
+                self.redis.publish('Build running', JSON.stringify({
+                    build: build.toBackbone(),
+                    instruction: build.instruction.toBackbone()
+                }));
+            });
             return;
         }
         return callback(self.handle);
@@ -115,7 +121,7 @@ Lifecycle.prototype.create_build_from_instruction = function(instruction_id_to_g
             status: 1,
             stage: exports.entities.STAGES_BY_NAME.BEGINNING,
             build_started_at: new Date(),
-            instruction: instruction_id_to_get
+            instruction_id: instruction_id_to_get
         }, function(err, current_build_key, current_build) {
             if (err) {return handle.release();}
             handle.lock(current_build.__id__, function() {

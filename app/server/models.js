@@ -42,11 +42,11 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.field("message", kind.string);
     it.has.field("author_name", kind.string);
     it.has.field("author_email", kind.string);
-    it.has.field("build_started_at", kind.auto);
+    it.has.field("build_started_at", kind.string);
     it.has.field("build_finished_at", kind.string);
-    it.has.field("fetching_started_at", kind.auto);
+    it.has.field("fetching_started_at", kind.string);
     it.has.field("fetching_finished_at", kind.string);
-    it.has.field("instruction", kind.numeric);
+    it.has.field("instruction_id", kind.numeric);
 
     it.has.method('gravatar_of_size', function(size){
         var hash = crypto.createHash('md5');
@@ -107,7 +107,19 @@ var Build = models.declare("Build", function(it, kind) {
     });
     it.has.class_method('fetch_by_id', function(id, callback) {
         var key = 'clay:Build:id:' + id;
-        return this.fetch_by_key(key, callback);
+        return this.fetch_by_key(key, function(err, build){
+            if (err) {return callback(err);}
+
+            var instruction_id = parseInt(build.instruction_id, 10);
+            if (instruction_id < 0) {
+                return callback(err, build);
+            }
+            BuildInstruction.fetch_by_id(instruction_id, function(err, instruction){
+                if (err) {return callback(err);}
+                build.instruction = instruction;
+                return callback(err, build);
+            });
+        });
     });
 
     it.has.class_method('fetch_by_key', function(key, callback) {
@@ -149,6 +161,7 @@ var Build = models.declare("Build", function(it, kind) {
         data.permalink = settings.EMERALD_DOMAIN + "#build/" + data.__id__;
         data.started_at = this.started_at;
         data.finished_at = this.finished_at;
+        data.is_building = parseInt(this.stage) < STAGES_BY_NAME.ABORTED;
 
         data.humanized = {
             "build_started": moment(this.build_started_at).fromNow(),
@@ -156,7 +169,9 @@ var Build = models.declare("Build", function(it, kind) {
             "fetching_started": moment(this.fetching_started_at).fromNow(),
             "fetching_finished": moment(this.fetching_finished_at).fromNow()
         }
-
+        if (_.isObject(this.instruction) && _.isFunction(this.instruction.toBackbone)) {
+            data.instruction = this.instruction.toBackbone();
+        }
         return data;
     });
 });
@@ -507,7 +522,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         var b = filter_output(data.toString());
                         var already_there = (build.output.indexOf(b.trim()) > 0);
                         if (already_there){return;}
-                        build.output = build.output + '<br />' + b;
+                        build.output = build.output + b;
                         build.stage = STAGES_BY_NAME.RUNNING;
                         build.save(function(err, key, build) {
                             redis.publish("Build stdout", JSON.stringify({meta: build.toBackbone(), current: b, full:build.output, instruction: self.toBackbone()}));
