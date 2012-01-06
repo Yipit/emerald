@@ -41,7 +41,7 @@
       }
   ]
   , "scripts": {
-      "start": "rm -rf ~/.emerald; jake data; npm install && NODE_PATH=$NODE_PATH:`pwd` node ./app/emerald.js"
+      "start": "rm -rf ~/.emerald; npm install && jake data && NODE_PATH=$NODE_PATH:`pwd` node ./app/emerald.js"
     , "test": "NODE_PATH=$NODE_PATH:`pwd` jake unit && jake functional"
   }
   , "keywords": [
