@@ -142,7 +142,7 @@ var Build = models.declare("Build", function(it, kind) {
             data.style_name = this.stage_name.toLowerCase();
             data.message = data.style_name + " ...";
         }
-        data.succeeded = this.succeeded;
+        data.succeeded = JSON.parse(this.succeeded);
         data.stage_name = this.stage_name;
         data.route = "#build/" + data.__id__;
         data.permalink = settings.EMERALD_DOMAIN + "#build/" + data.__id__;
@@ -415,7 +415,6 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         logger.handleException("Build.find_by_id", err);
                         var now = new Date();
 
-                        build.status = code;
                         build.fetching_finished_at = now;
                         build.stage = STAGES_BY_NAME.PREPARING_ENVIRONMENT;
 
