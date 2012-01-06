@@ -12,8 +12,12 @@ function LOCAL_FILE(){
     return path.join.apply(path, parts);
 }
 
+var CLIENT_PATH        = LOCAL_FILE('app', 'client');
+var BACKBONE_VIEW_PATH = path.join(CLIENT_PATH, 'views');
+
 var VIEW_PATH          = LOCAL_FILE('app', 'server', 'views');
-var BACKBONE_VIEW_PATH = LOCAL_FILE('app', 'client', 'views');
+var ASSETS_PATH        = LOCAL_FILE('public');
+var CSS_PATH           = path.join(ASSETS_PATH, 'public');
 
 module.exports = {
     LOG_LEVEL: 3,
@@ -27,7 +31,10 @@ module.exports = {
     },
     EMERALD_PATH: EMERALD_PATH,
     SANDBOX_PATH: process.env.EMERALD_SANDBOX_PATH || path.join(EMERALD_PATH, "builds"),
+    ASSETS_PATH: ASSETS_PATH,
     LOCAL_FILE: LOCAL_FILE,
     VIEW_PATH: VIEW_PATH,
+    ASSETS_PATH: ASSETS_PATH,
+    CLIENT_PATH: CLIENT_PATH,
     BACKBONE_VIEW_PATH: BACKBONE_VIEW_PATH
 }

@@ -31,11 +31,13 @@
 	<script type="text/javascript" src="/javascripts/backbone.js"></script>
 	<script type="text/javascript" src="/javascripts/jquery.gritter.min.js"></script>
 	<script type="text/javascript" src="/socket.io/socket.io.js"></script>
-	<script type="text/javascript" src="/javascripts/app/models.js"></script>
-	<script type="text/javascript" src="/javascripts/app/views.js"></script>
-	<script type="text/javascript" src="/javascripts/app/routers.js"></script>
-	<script type="text/javascript" src="/javascripts/app/sockets.js"></script>
-	<script type="text/javascript" src="/javascripts/app.js"></script>
+	{% endblock %}
+	{% block js_app %}
+	<script type="text/javascript" src="/models.js"></script>
+	<script type="text/javascript" src="/views.js"></script>
+	<script type="text/javascript" src="/routers.js"></script>
+	<script type="text/javascript" src="/websockets.js"></script>
+	<script type="text/javascript" src="/app.js"></script>
 	{% endblock %}
 </head>
 <body>
