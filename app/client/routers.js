@@ -8,7 +8,14 @@
         },
         initialize: function(){
             this.$app = $("#app");
+            _.bindAll(this,
+                      'dashboard',
+                      'build',
+                      'manage_instructions',
+                      'connection_lost');
+
             this.dashboardView = new BuildListView({collection: instructions});
+            window.socket.on('disconnect', this.connection_lost);
         },
         dashboard: function(){
             var element = this.dashboardView.render().el;
@@ -32,6 +39,10 @@
         },
         manage_instructions: function() {
             var view = new InstructionManagementView();
+            this.$app.empty().append(view.render().el);
+        },
+        connection_lost: function() {
+            var view = new ConnectionLostView();
             this.$app.empty().append(view.render().el);
         }
     });

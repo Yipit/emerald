@@ -23,4 +23,12 @@
             image: window.emerald.domain + "/images/ico_abort.png"
         });
     });
+
+    window.socket.on('BuildInstruction created', function(data){
+        $.gritter.add({
+            title: "An instruction was created",
+            text: "#" + data.id,
+            image: window.emerald.domain + "/images/control_double_down.png"
+        });
+    });
 })(jQuery);

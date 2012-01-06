@@ -25,6 +25,7 @@
         }
         return _.template(raw);
     }
+
     window.EmeraldView = Backbone.View.extend({
         initialize: function(){
             _.bindAll(this, 'render');
@@ -37,7 +38,6 @@
             if (this.template_name) {
                 this.template = get_template(this.template_name);
             }
-
         },
         render: function(){
             var data = {};
@@ -56,8 +56,12 @@
         className: 'row'
     });
 
-    window.ErrorView = Backbone.View.extend({
+    window.ErrorView = EmeraldView.extend({
         template_name: 'error'
+    });
+
+    window.ConnectionLostView = EmeraldView.extend({
+        template_name: 'connection-lost'
     });
 
     window.BuildListView = EmeraldView.extend({
