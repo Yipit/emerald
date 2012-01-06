@@ -237,16 +237,22 @@ a, a:hover{
     padding: 10px 0 0 0;
     left: 0;
     bottom:0;
-    width: 520px;
 
     .toolbar {
       text-align: right;
       padding: 7px;
       .btn {
-        color: white;
-      }
-      .btn:hover {
-        color: white;
+        color: @darkest_aluminum;
+        &.info, &.success, &.error {
+          color: @lightest_aluminum;
+          &:hover {
+          color: @lightest_aluminum;
+          }
+        }
+        &:hover {
+          color: @darkest_aluminum;
+        }
+
       }
 
     }
@@ -259,9 +265,6 @@ a, a:hover{
       @border-val: solid 3px white;
       &.picture {
         .raw-box-shadow(0 5px 5px #666);
-        border-top: @border-val;
-        border-left: @border-val;
-        border-right: @border-val;
       }
       float:left;
       margin: 0 20px 10px 0 ;
@@ -295,6 +298,7 @@ a, a:hover{
       letter-spacing: 1px;
     }
     &.hidden {
+      min-height: 0;
       height: 0;
       overflow: hidden;
       padding: 0;
@@ -311,17 +315,13 @@ a, a:hover{
       width: 100%;
       margin: 0;
       padding: 0;
-      li {
+      li, .ui-state-error {
         margin: 0;
         padding: 5px 0;
+        letter-spacing: 1px;
+	text-shadow: @dark_aluminum 2px 2px 2px;
+        font-size: 14px;
       }
-      .success a {
-        color: @dark_chameleon;
-      }
-      .failure a {
-        color: @dark_scarlet_red;
-      }
-
     }
   }
 }
@@ -406,4 +406,31 @@ a, a:hover{
 
 #connection-lost-dialog {
   display: none;
+}
+
+.ui-state-error {
+  .title, .last-build {
+    color: @lightest_aluminum;
+  }
+  li, strong {
+    a {
+      color: @lightest_aluminum;
+      strong, .message {
+        color: @scarlet_red;
+      }
+    }
+  }
+}
+.ui-state-success {
+  .title, .last-build {
+    color: @darker_aluminum;
+  }
+  li, strong {
+    a {
+      color: @darker_aluminum;
+      strong, .message {
+        color: @dark_chameleon;
+      }
+    }
+  }
 }

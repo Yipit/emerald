@@ -137,8 +137,8 @@
             var self = this;
             this.refresh_widgets();
             var buttons = [
-                this.make_toolbar_button('Add to the queue', 'info do-schedule'),
-                this.make_toolbar_button('STDOUT', 'success show-output'),
+                this.make_toolbar_button('Add to the queue', 'do-schedule'),
+                this.make_toolbar_button('STDOUT', 'info show-output'),
                 this.make_toolbar_button('STDERR', 'error show-error')
             ];
             switch (STAGES_BY_INDEX[build.stage]) {
