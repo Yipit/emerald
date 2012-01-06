@@ -318,13 +318,15 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
 
             Build.fetch_by_id(current_build.__id__, function(err, build){
                 current_build = build;
-                lock.release(function(){
+
                     if (build && parseInt(build.stage) === STAGES_BY_NAME.ABORTED) {
-                        throw new Error("the build #" + current_build.__id__ + " was aborted by the user");
+                        lock.release(function(){
+                            callback(Error("the build #" + current_build.__id__ + " was aborted by the user"));
+                        });
                     } else {
                         return callback.apply(null, args);
                     }
-                });
+
             });
         }
         async.waterfall([
