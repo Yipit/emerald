@@ -13,9 +13,9 @@ function LOCAL_FILE(){
 }
 
 var CLIENT_PATH        = LOCAL_FILE('app', 'client');
-var BACKBONE_VIEW_PATH = path.join(CLIENT_PATH, 'views');
+var BACKBONE_VIEW_PATH = path.join(CLIENT_PATH, 'html');
 
-var VIEW_PATH          = LOCAL_FILE('app', 'server', 'views');
+var VIEW_PATH          = LOCAL_FILE('app', 'server', 'html');
 var ASSETS_PATH        = LOCAL_FILE('public');
 var CSS_PATH           = path.join(ASSETS_PATH, 'public');
 
