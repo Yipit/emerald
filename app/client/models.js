@@ -51,11 +51,17 @@
                 }
             });
 
-            window.socket.on('Build output' , function(data){
+            window.socket.on('Build stdout' , function(data){
                 if (data.instruction.id == self.get('id')) {
-                    self.trigger('build_output', data);
+                    self.trigger('build_stdout', data);
                 }
             });
+            window.socket.on('Build stderr' , function(data){
+                if (data.instruction.id == self.get('id')) {
+                    self.trigger('build_stderr', data);
+                }
+            });
+
             window.socket.on('Repository being fetched' , function(data){
                 if (data.instruction.id == self.get('id')) {
                     self.trigger('fetching_repository', data);

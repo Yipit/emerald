@@ -103,17 +103,23 @@
             'click .show-error': 'show_error'
         },
         initialize: function(){
+            this.avatar_loading_gif = '/images/loading-avatar.gif';
+
             _.bindAll(
                 this,
                 'render',
-                'add_build',
+                'expand_box',
                 'update_latest_build',
                 'update_toolbar',
                 'show_progress',
                 'prepare_progress'
             );
             this.model.bind('change', this.render);
-            this.model.bind('build_started', this.add_build);
+            this.model.bind('build_stdout', this.expand_box);
+            this.model.bind('build_stderr', this.expand_box);
+            this.model.bind('build_running', this.expand_box);
+
+            this.model.bind('build_started', this.expand_box);
             this.model.bind('build_finished', this.update_latest_build);
             this.model.bind('build_aborted', this.update_latest_build);
 
@@ -171,6 +177,7 @@
 
             this.$last_build = this.$header.find(".last-build");
             this.$avatar = this.$header.find(".avatar");
+            this.$img = this.$avatar.find('img');
             this.$toolbar = this.$footer.find(".toolbar");
         },
         make_abort_button: function(build){
@@ -204,12 +211,18 @@
 		value: value
             });
         },
-        add_build: function(build, instruction){
+        expand_box: function(build, instruction){
             var self = this;
             self.refresh_widgets();
             var total_builds = self.$('.buildlog li').length;
             /* make the widget look busy */
             self.$widget.addClass('ui-state-default');
+
+            /* add a loading as placeholder for gravatar */
+            this.$avatar.addClass('picture');
+            if (this.$img.attr("src") !== this.avatar_loading_gif) {
+                this.$img.attr('src', this.avatar_loading_gif);
+            }
 
             /* expand the body */
             self.$body.animate({
@@ -240,12 +253,7 @@
             /* expand the body the body title */
             this.$body.removeClass('hidden');
 
-            /* set the body title */
-                this.$body.find(".title")
-                .text('latest builds');
-
-            this.$avatar.addClass('picture').find("img").attr('src', build.gravatars['75']);
-
+            this.$avatar.addClass('picture').find("img").attr('src', build.gravatars['100']);
 
             var $li = this.$body.find("li[id='clay:Build:id:" + build.__id__ + "']");
             this.$last_build.html(this.make_last_build(build));

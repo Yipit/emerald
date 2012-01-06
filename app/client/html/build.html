@@ -1,33 +1,34 @@
-<div class="row <%= style_name %> <%= stage_name %>">
+<div class="build row <%= style_name %> <%= stage_name %>">
   <div class="span16">
     <h1>Build #<%= __id__ %></h1>
-    <img class="build gravatar" src="<%= gravatars['100'] %>" width="100" height="100" />
-    <p>
+    <img class="gravatar" src="<%= gravatars['150'] %>" width="150" height="150" />
+    <p class="title">
       <strong>by <%= author_name %> &lt;<%= author_email %>&gt;</strong>
     </p>
+    <!--
+    <h2>Timing:</h2>
+    <p><code>started fetching <%= humanized.fetching_started %></code></p>
+    <p><code>finished fetching <%= humanized.fetching_finished %></code></p>
+    <p><code>started building <%= humanized.build_started %></code></p>
+    <p><code>finished building <%= humanized.build_finished %></code></p>
+    -->
     <p>
-      <strong>Permalink</strong>
-      <a href="<%= permalink %>" class="copy-n-paste-area"><%= permalink %></a>
+      <strong>STDOUT</strong>
+      <pre class="terminal"><%= output.replace('\n', '<br />') %></pre>
+    </p>
+    <p>
+      <strong>STDERR</strong>
+      <pre class="terminal"><%= error.replace('\n', '<br />') %></pre>
     </p>
     <p>
       <strong>exit status</strong>
       <pre><%= status %></pre>
       <strong>signal</strong>
       <pre><%= signal %></pre>
-
     </p>
     <p>
       <strong>Message</strong>
       <pre><%= message%></pre>
     </p>
-    <p>
-      <strong>STDOUT</strong>
-      <pre class="terminal"><%= output %></pre>
-    </p>
-    <p>
-      <strong>STDERR</strong>
-      <pre class="terminal"><%= error %></pre>
-    </p>
-
   </div>
 </div>
