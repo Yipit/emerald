@@ -12,7 +12,7 @@
     express = require('express'),
 
     /* importing some emerald actors */
-    queueconsumer = require('./server/queueconsumer'),
+    queueconsumer = require('./server/actors/queueconsumer'),
     websockets = require('./server/websockets'),
     controllers = require('./server/controllers');
 

@@ -1,7 +1,7 @@
-var logger = new (require('./logger').Logger)("[QUEUE CONSUMER]".blue.bold);
-var settings = require('../../settings');
+var logger = new (require('../logger').Logger)("[QUEUE CONSUMER]".blue.bold);
+var settings = require('../../../settings');
 
-exports.entities = require('./models');
+exports.entities = require('../models');
 
 function QueueConsumer(redis) {
     this.interval = settings.GIT_POLL_INTERVAL;
