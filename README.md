@@ -114,4 +114,4 @@ creating directories recursively.
 if you want to hack on emerald's code, then you're gonna need [vows](http://vowsjs.org/) in order to run the tests which are written under the [DSL](http://en.wikipedia.org/wiki/Domain-specific_language) provided by [should.js](https://github.com/visionmedia/should.js)
 # sketch of how this should work:
 
-![diagram](https://github.com/Yipit/emerald/raw/master/design/emerald.png)
+![diagram](https://github.com/Yipit/emerald/raw/master/resources/design/emerald.png)
