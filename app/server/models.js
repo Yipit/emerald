@@ -625,11 +625,11 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
         ], function(err){
             if (err) {
                 redis.publish('Build aborted', JSON.stringify({build: current_build.toBackbone(), instruction: self.toBackbone(), error: err}));
-                    logger.fail(err.toString())
-                    logger.fail(err.stack.toString())
+                logger.fail(err.toString());
+                logger.fail(err.stack.toString());
             }
             lock.release(function(){
-                logger.succeeded(['the build lock was released', err && 'due an error'.red | 'successfully'.green.bold]);
+                logger.success(['the build lock was released', err && 'due an error'.red || 'successfully'.green.bold]);
             })
 
         });
