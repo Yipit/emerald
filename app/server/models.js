@@ -369,15 +369,11 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
 
             Build.fetch_by_id(current_build.__id__, function(err, build){
                 current_build = build;
-
-                    if (build && parseInt(build.stage) === STAGES_BY_NAME.ABORTED) {
-                        lock.release(function(){
-                            callback(Error("the build #" + current_build.__id__ + " was aborted by the user"));
-                        });
-                    } else {
-                        return callback.apply(null, args);
-                    }
-
+                if (build && parseInt(build.stage) === STAGES_BY_NAME.ABORTED) {
+                    callback(Error("the build #" + current_build.__id__ + " was aborted by the user"));
+                } else {
+                    return callback.apply(null, args);
+                }
             });
         }
         async.waterfall([
@@ -593,14 +589,12 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                         build.stage = build.succeeded ? STAGES_BY_NAME.SUCCEEDED : STAGES_BY_NAME.FAILED;
 
                         build.save(function(){
-                            lock.release(function(){
-                                redis.publish("Build finished", JSON.stringify({
-                                    at: now,
-                                    build: build.toBackbone(),
-                                    instruction: self.toBackbone()
-                                }));
-                                callback(null, self, build);
-                            });
+                            redis.publish("Build finished", JSON.stringify({
+                                at: now,
+                                build: build.toBackbone(),
+                                instruction: self.toBackbone()
+                            }));
+                            callback(null, self, build);
                         });
                     });
                 });
