@@ -105,6 +105,17 @@ var Build = models.declare("Build", function(it, kind) {
             logger.success([logging_prefix, 'DONE!']);
         });
     });
+    it.has.class_method('get_current', function(callback) {
+        var self = this;
+        async.waterfall([
+            function get_current_build_id(callback){
+                self._meta.storage.connection.get(settings.REDIS_KEYS.current_build, callback);
+            },
+            function try_to_fetch_it(id, callback) {
+                Build.fetch_by_key('clay:Build:id:' + id, callback);
+            }
+        ], callback);
+    });
     it.has.class_method('fetch_by_id', function(id, callback) {
         var key = 'clay:Build:id:' + id;
         return this.fetch_by_key(key, function(err, build){
@@ -212,6 +223,8 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
         ['all_builds', 'succeeded_builds', 'failed_builds'].forEach(function(attribute){
             data[attribute] = self[attribute].map(function(b){ return b.toBackbone() });
         });
+        data.is_building = self.is_building || false;
+        data.current_build = self.current_build || null;
 
         return data;
     });
@@ -293,6 +306,20 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                     }, function(err, failed_builds){
                         callback(err, all_builds, succeeded_builds, filter_builds(failed_builds));
                     });
+                });
+            },
+            function check_if_has_a_current_build (all_builds, succeeded_builds, failed_builds, callback) {
+                Build.get_current(function(err, current_build){
+                    logger.handleException(err);
+                    if (err) {return callback(null, all_builds, succeeded_builds, failed_builds);}
+                    self.current_build = null;
+                    self.is_building = false;
+
+                    if (parseInt(current_build.instruction_id, 10) === self.__id__) {
+                        self.is_building = true;
+                        self.current_build = current_build;
+                    }
+                    callback(null, all_builds, succeeded_builds, failed_builds);
                 });
             }
         ], function(err, all_builds, succeeded_builds, failed_builds){
