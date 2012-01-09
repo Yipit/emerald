@@ -18,8 +18,7 @@
 
     /* preparing redis */
     RedisStore = require('connect-redis')(express),
-    Redis = require('redis'),
-    redis = Redis.createClient();
+    redis = require('redis').createClient();
 
     /* preparing the http server and the socket.io */
     var app = express.createServer();
