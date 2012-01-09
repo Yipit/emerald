@@ -25,22 +25,22 @@ module.exports.use = function(redis, socket) {
         socket.emit(channel, parsed);
         switch (channel) {
             case "BuildInstruction enqueued":
-            logger.info("The BuildInstruction #"+parsed.id+" was successfully enqueued");
+            logger.debug("The BuildInstruction #"+parsed.id+" was successfully enqueued");
                 break;
             case "Repository started fetching":
-            logger.info("The Build #"+parsed.build.__id__+" started fetching changes from the repository");
+            logger.debug("The Build #"+parsed.build.__id__+" started fetching changes from the repository");
                 break;
             case "Repository finished fetched":
-            logger.info("The Build #"+parsed.build.__id__+" finished fetching changes from the repository");
+            logger.debug("The Build #"+parsed.build.__id__+" finished fetching changes from the repository");
                 break;
             case "Build started":
-            logger.info("The Build #"+parsed.build.__id__+" has started running");
+            logger.debug("The Build #"+parsed.build.__id__+" has started running");
                 break;
             case "Build finished":
-            logger.info("The Build #"+parsed.build.__id__+" has finished running");
+            logger.debug("The Build #"+parsed.build.__id__+" has finished running");
                 break;
             case "Build aborted":
-            logger.info("The Build #"+parsed.build.__id__+" was aborted");
+            logger.debug("The Build #"+parsed.build.__id__+" was aborted");
                 break;
 
         }

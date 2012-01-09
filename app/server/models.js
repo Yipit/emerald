@@ -35,8 +35,7 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.field("signal", kind.string);
     it.has.field("error", kind.string);
     it.has.field("output", kind.string);
-    it.has.field("fetching_pid", kind.numeric);
-    it.has.field("running_pid", kind.numeric);
+    it.has.field("pid", kind.numeric);
     it.has.field("stage", kind.numeric);
     it.has.field("commit", kind.string);
     it.has.field("message", kind.string);
@@ -47,6 +46,33 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.field("fetching_started_at", kind.string);
     it.has.field("fetching_finished_at", kind.string);
     it.has.field("instruction_id", kind.numeric);
+
+    it.has.method('increment_field', function(name, value, callback){
+        var self = this;
+
+        var key = "clay:Build:id:" + self.__id__;
+        var redis = self._meta.storage.connection;
+
+        async.waterfall([
+            function fetch(callback) {
+                redis.hget(key, name, callback);
+            },
+            function update(current, callback) {
+                var full = current + value;
+                redis.hset(key, name, full, function(err){
+                    callback(err, full, current, value);
+                });
+            }
+        ], callback);
+    });
+
+    it.has.method('increment_stdout', function(value, callback){
+        return this.increment_field("output", value, callback);
+    });
+
+    it.has.method('increment_stderr', function(value, callback){
+        return this.increment_field("error", value, callback);
+    });
 
     it.has.method('gravatar_of_size', function(size){
         var hash = crypto.createHash('md5');
@@ -84,21 +110,12 @@ var Build = models.declare("Build", function(it, kind) {
         logger.info([logging_prefix, 'the stage was set to:', self.stage]);
 
         self.save(function(err){
-            if (self.build_pid) {
-                logger.info([logging_prefix, 'killing build script (pid: ' + self.build_pid + ')']);
-                try {
-                    process.kill(self.build_pid, signal);
-                } catch (e){
-                    logger.fail([logging_prefix, 'PID'.yellow.bold, self.build_pid, e.toString()]);
-                    logger.fail(e.stack.toString());
-                }
-            }
-            if (self.fetching_pid) {
-                logger.info([logging_prefix, 'killing git (pid: ' + self.fetching_pid + ')']);
+            if (self.pid) {
+                logger.info([logging_prefix, 'killing build (pid: ' + self.pid + ')']);
                 try {
                     process.kill(self.fetching_pid, signal);
                 } catch (e){
-                    logger.fail([logging_prefix, 'PID'.yellow.bold, self.fetching_pid, e.toString()]);
+                    logger.fail([logging_prefix, 'PID'.yellow.bold, self.pid, e.toString()]);
                     logger.fail(e.stack.toString());
                 }
             }
@@ -276,6 +293,8 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
     });
     it.has.class_method('with_builds_from_data', function(data, callback) {
         var self = new this(data);
+        var redis = this._meta.storage.connection;
+
         function filter_builds(builds){
             return _.filter(builds, function(b){
                 return !_.isNull(b) && !_.isUndefined(b); });
@@ -331,308 +350,23 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
     });
     it.has.method('run', function(current_build, lock) {
         var self = this;
-
-        current_build.started_at = new Date();
-        var hash = crypto.createHash('md5');
-        hash.update((new Date()).toString() + self.name);
-        function filter_output (text) {
-            return text.replace(/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/g, '');
-        }
-
-        var redis = self._meta.storage.connection;
-        /* TODO: extract the repo name and check if already exists e*/
-        var repository_folder_name = (self.repository_address + self.name)
-            .replace(/\W+/g, '-')
-            .toLowerCase()
-            .replace(/[-]?\bgit\b[-]?/g, '');
-        var repository_full_path = path.join(settings.SANDBOX_PATH, repository_folder_name);
-        var repository_bare_path = path.join(repository_full_path, '.git');
-
-        var script_name = hash.digest('hex') + '.sh';
-        var script_path = path.join(repository_full_path, script_name);
-
-        var branch_to_build = self.branch || "master";
-        redis.publish("Build started", JSON.stringify({
-            build: current_build.toBackbone(),
-            instruction: self.toBackbone()
-        }));
-        function abort_if_requested (){
-            /* This function is a filter to be ran between the
-             * functions of the waterfall below. It checks if the
-             * current build was aborted by the user, and if so, it
-             * stops the execution by passing an exception called
-             * `BuildAborted` */
-            var args = [null];
-            var callback = arguments[arguments.length - 1];
-
-            _.each(arguments, function(arg){if (arg !== callback) {args.push(arg);}});
-
-            Build.fetch_by_id(current_build.__id__, function(err, build){
-                current_build = build;
-                if (build && parseInt(build.stage) === STAGES_BY_NAME.ABORTED) {
-                    callback(Error("the build #" + current_build.__id__ + " was aborted by the user"));
-                } else {
-                    return callback.apply(null, args);
-                }
-            });
-        }
-        async.waterfall([
-            function decide_whether_pull_or_clone (callback){
-                logger.info('preparing to fetch data from "'+self.name+'" through "'+self.repository_address+'@'+branch_to_build+'" at ' + repository_full_path);
-                path.exists(repository_bare_path, function(exists){callback(null, self, exists)})
-            },
-            abort_if_requested,
-            function assemble_the_command_line (self, exists, callback) {
-                var args, options = {};
-                if (exists) {
-                    args = ["pull", "origin", branch_to_build || "master"];
-                    options.cwd = repository_full_path;
-                    logger.info('found an existing git repo at "'+repository_bare_path+'", gonna use git-pull');
-                } else {
-                    args = ["clone", "--progress", self.repository_address, repository_folder_name];
-                    logger.info('local copy does not exist, will clone at "'+repository_full_path+'"');
-                    options.cwd = settings.SANDBOX_PATH;
-                }
-                callback(null, self, args, options);
-            },
-            abort_if_requested,
-            function spawn_git(self, command_args, command_options, callback){
-                logger.info('spawning "git '+command_args.join(' ')+'"');
-                var command = child_process.spawn("git", command_args, command_options);
-                var now = new Date();
-                Build.fetch_by_id(current_build.__id__, function(err, build) {
-                    build.fetching_started_at = now;
-                    build.fetching_pid = command.pid;
-                    redis.publish('Repository started fetching', JSON.stringify({
-                        at: now,
-                        build:build.toBackbone(),
-                        instruction: self.toBackbone()
-                    }));
-                    build.save(function(err){
-                        callback(err, self, command, command_args);
-                    });
-                });
-            },
-            abort_if_requested,
-            function capture_git_stdout(self, command, args, callback){
-                logger.debug('capturing the git command stdout');
-                command.stdout.on('data', function (data) {
-                    Build.fetch_by_id(current_build.__id__, function(err, build) {
-                        logger.handleException("Build.find_by_id", err);
-                        build.stage = STAGES_BY_NAME.FETCHING;
-                        build.save(function(err){
-                            logger.handleException("build(#"+build.__id__+").save", err);
-                        });
-                    });
-                });
-                callback(null, self, command, args);
-            },
-            abort_if_requested,
-            function capture_git_stderr(self, command, args, callback){
-                logger.debug('capturing the git command stderr');
-                command.stderr.on('data', function (data) {
-                    var regex = /([a-zA-Z0-9 ]+)[:]\s*(\d+[%])/g;
-                    var raw_string = data.toString();
-                    var found = regex.exec(raw_string);
-                    Build.fetch_by_id(current_build.__id__, function(err, build) {
-                        logger.handleException("Build.find_by_id", err);
-                        build.stage = STAGES_BY_NAME.FETCHING;
-                        build.save(function(err){
-                            logger.handleException("build(#"+build.__id__+").save", err);
-                        });
-
-                        if (found) {
-                            redis.publish('Repository being fetched', JSON.stringify({
-                                instruction: self.toBackbone(),
-                                build: build.toBackbone(),
-                                phase: found[1].toLowerCase(),
-                                percentage: found[2]
-                            }));
-                        }
-                    });
-                });
-                callback(null, self, command, args);
-            },
-            abort_if_requested,
-            function handle_the_exit_of_git(self, command, args, callback) {
-                logger.debug('emerald will handle the exit of the git command');
-                command.on('exit', function (code, signal) {
-                    logger.debug(['git has exited |', 'exit code:', code, " SIGNAL:", signal]);
-                    Build.fetch_by_id(current_build.__id__, function(err, build) {
-                        logger.handleException("Build.find_by_id", err);
-                        var now = new Date();
-
-                        build.fetching_finished_at = now;
-                        build.stage = STAGES_BY_NAME.PREPARING_ENVIRONMENT;
-
-                        redis.publish("Repository finished fetching", JSON.stringify({
-                            at: now,
-                            build:build.toBackbone(),
-                            instruction: self.toBackbone()
-                        }));
-                        build.save(function(err){
-                            logger.handleException("build(#"+build.__id__+").save", err);
-                            callback(null, self);
-                        });
-                    });
-                });
-            },
-            abort_if_requested,
-            function update_builds_author(self, callback){
-                child_process.exec('git log --format=full HEAD...HEAD^', {cwd: repository_full_path}, function(error, stdout, stderr){
-                    var lines = _.map(stdout.split('\n'), function(x){return x.trim()});
-                    var author_data = /(Author|Commit)[:] ([^<]+)[<]([^>]+)[>]/i.exec(stdout);
-                    var commit_hash = /commit (\w{40})/.exec(lines[0]);
-                    var commit_message = (stdout.split('\n').splice(4).join('\n')).trim();
-
-                    Build.fetch_by_id(current_build.__id__, function(err, build) {
-                        if (author_data) {
-                            build.author_name = author_data[2].trim();
-                            build.author_email = author_data[3].trim();
-                        }
-                        if (commit_hash) {
-                            build.commit = commit_hash[1];
-                        }
-                        if (commit_message.length > 0) {
-                            build.message = commit_message;
-                        }
-
-                        build.save(function(err){
-                            callback(err, self);
-                        });
-
-                    });
-                });
-            },
-            abort_if_requested,
-            function write_build_script(self, callback){
-                var now = new Date();
-                logger.debug('writting build script at ' + script_path);
-                var parts = ["#!/bin/bash"];
-                self.build_script.split(/[\n\r\t\s]*$/gm).forEach(function(line){
-                    parts.push(line.trim() + ' || exit $? || printf "\\n\\n\\n";');
-                });
-                var content = parts.join("\n\n###############################################################################\n\n");
-                fs.writeFile(script_path, content, function(err){
-                    callback(err, self);
-                });
-            },
-            abort_if_requested,
-            function make_it_writtable(self, callback){
-                logger.debug('adding execution permission on the build script');
-                fs.chmod(script_path, 0755, function(err){
-                    callback(err, self);
-                });
-            },
-            abort_if_requested,
-            function spawn_build_script(self, callback){
-                logger.info('spawning build script');
-                var args = [script_path];
-                var command = child_process.spawn("bash", args, {cwd: repository_full_path});
-                Build.fetch_by_id(current_build.__id__, function(err, build) {
-                    build.build_started_at = new Date();
-                    build.running_pid = command.pid;
-                    build.save(function(err){
-                        callback(err, self, command, args);
-                    });
-                });
-            },
-            abort_if_requested,
-            function capture_build_stdout (self, command, args, callback){
-                logger.debug('capturing build script stdout');
-                command.stdout.on('data', function (data) {
-                    Build.fetch_by_id(current_build.__id__, function(err, build) {
-                        var b = filter_output(data.toString());
-                        var already_there = (build.output.indexOf(b.trim()) > 0);
-                        if (already_there){return;}
-                        build.output = build.output + b;
-                        build.stage = STAGES_BY_NAME.RUNNING;
-                        build.save(function(err, key, build) {
-                            redis.publish("Build stdout", JSON.stringify({meta: build.toBackbone(), current: b, full:build.output, instruction: self.toBackbone()}));
-                            logger.debug('persisting "'+b+'" to Build#'+build.__id__+'\'s "output" field');
-                        });
-                    });
-                });
-                callback(null, self, command, args);
-            },
-            abort_if_requested,
-            function capture_build_stderr (self, command, args, callback){
-                logger.debug('capturing build script stderr');
-                command.stderr.on('data', function (data) {
-                    var b = filter_output(data.toString());
-                    Build.fetch_by_id(current_build.__id__, function(err, build) {
-                        var already_there = (build.error.indexOf(b) > 0);
-                        if (already_there) {return;}
-
-                        build.error = build.error + b;
-                        build.stage = STAGES_BY_NAME.RUNNING;
-
-                        redis.publish("Build stderr", JSON.stringify({meta: build.toBackbone(), current: b, full:build.error, instruction: self.toBackbone()}));
-                        build.save(function(err, key, build) {
-                            logger.debug('persisting "'+b+'" to Build#'+build.__id__+'\'s "error" field');
-                        });
-                    });
-                });
-                callback(null, self, command, args);
-            },
-            abort_if_requested,
-            function handle_the_exit_of_build(self, command, args, callback) {
-                var now = new Date();
-                logger.debug('emerald will handle the exit of the command');
-
-                command.on('exit', function (code, signal) {
-                    logger.debug('finished running the build script, code: ' + code + ', signal: ' + signal);
-                    Build.fetch_by_id(current_build.__id__, function(err, build) {
-                        build.status = code;
-                        build.signal = signal;
-                        build.build_finished_at = now;
-                        build.stage = build.succeeded ? STAGES_BY_NAME.SUCCEEDED : STAGES_BY_NAME.FAILED;
-
-                        build.save(function(){
-                            redis.publish("Build finished", JSON.stringify({
-                                at: now,
-                                build: build.toBackbone(),
-                                instruction: self.toBackbone()
-                            }));
-                            callback(null, self, build);
-                        });
-                    });
-                });
-            },
-            abort_if_requested,
-            function associate_build_to_instruction(self, build, callback){
-                /* the unix timestamp is always the score, so that we can fetch it ordered by date*/
-                var unix_timestamp = (new Date()).getTime();
-
-                redis.zadd(self.keys.all_builds, unix_timestamp, self.keys.for_build_id(current_build.__id__), function(){
-                    callback(null, self, build, unix_timestamp);
-                })
-            },
-            abort_if_requested,
-            function associate_build_to_proper_list(self, build, unix_timestamp, callback){
-                var exit_code_zero = parseInt(build.status || 0) == 0;
-                var was_not_killed = build.signal === "null";
-
-                var build_succeeded = exit_code_zero && was_not_killed;
-                var key = build_succeeded ? self.keys.succeeded_builds : self.keys.failed_builds;
-                var name = build_succeeded ? 'succeeded' : 'failed';
-
-                redis.zadd(key, unix_timestamp, self.keys.for_build_id(build.__id__), function(){
-                    logger.info(['adding Build #' + build.__id__, 'to Instruction #' + self.__id__ + "'s", name, 'builds list'])
-                    callback(null, self, build);
-                });
-            }
-        ], function(err){
-            if (err) {
-                redis.publish('Build aborted', JSON.stringify({build: current_build.toBackbone(), instruction: self.toBackbone(), error: err}));
-                logger.fail(err.toString());
-                logger.fail(err.stack.toString());
-            }
-            lock.release(function(){
-                logger.success(['the build lock was released', err && 'due an error'.red || 'successfully'.green.bold]);
-            })
-
-        });
+        var Runner = require('./actors/buildrunner').BuildRunner;
+        var r = new Runner(current_build, self);
+        r.start();
+        // var runner = child_process.fork(__dirname + '/actors/buildrunner.js');
+        // current_build.pid = runner.pid;
+        // current_build.save(function(err){
+        //     if (err) {
+        //         logger.handleException(err);
+        //         logger.fail(err.stack);
+        //         return lock.release();
+        //     }
+        //     runner.send({
+        //         action: 'run',
+        //         build_id: current_build.__id__,
+        //         instruction_id: self.__id__
+        //     });
+        // });
     });
 });
 
