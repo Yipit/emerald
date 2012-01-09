@@ -4,7 +4,7 @@ var vows = require('vows')
 , _ = require('underscore')._;
 require('colors');
 
-var lib = require('../../app/server/queueconsumer');
+var lib = require('../../app/server/actors/queueconsumer');
 lib.logger.level = 0;
 
 vows.describe('A *Lock* for QueueConsumer'.cyan).addBatch({
