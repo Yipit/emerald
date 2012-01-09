@@ -11,7 +11,7 @@ vows.describe('A *Lock* for QueueConsumer'.cyan).addBatch({
     'Takes a key string as 1st parameter redis instance as *2nd*, then:': {
         topic: function(){
             var redis_mock = {};
-            var lock = new lib.PollerLock("some-key", redis_mock);
+            var lock = new lib.Lock("some-key", redis_mock);
 
             this.callback(lock, redis_mock);
         },
@@ -33,7 +33,7 @@ vows.describe('A *Lock* for QueueConsumer'.cyan).addBatch({
                 callback(null, "0");
             }
         }
-        var lock = new lib.PollerLock("damn#key", redis_mock);
+        var lock = new lib.Lock("damn#key", redis_mock);
         var called = false;
         lock.release(function(){
             called = true;
@@ -47,7 +47,7 @@ vows.describe('A *Lock* for QueueConsumer'.cyan).addBatch({
                 callback(new Error("LOLOLOLOL"), "0");
             }
         }
-        var lock = new lib.PollerLock("damn#key", redis_mock);
+        var lock = new lib.Lock("damn#key", redis_mock);
         var called = false;
         lock.release(function(){
             called = true;
@@ -61,7 +61,7 @@ vows.describe('A *Lock* for QueueConsumer'.cyan).addBatch({
                 callback(null, "1");
             }
         }
-        var lock = new lib.PollerLock("damn#key", redis_mock);
+        var lock = new lib.Lock("damn#key", redis_mock);
         var called = false;
         lock.release(function(when){
             called = true;
@@ -77,7 +77,7 @@ vows.describe('A *Lock* for QueueConsumer'.cyan).addBatch({
                     callback(null, {});
                 }
             }
-            var lock = new lib.PollerLock("nice#key", redis_mock);
+            var lock = new lib.Lock("nice#key", redis_mock);
 
             this.callback(lock, redis_mock);
         },
@@ -100,7 +100,7 @@ vows.describe('A *Lock* for QueueConsumer'.cyan).addBatch({
                     callback(null);
                 }
             }
-            var lock = new lib.PollerLock("other#key", redis_mock);
+            var lock = new lib.Lock("other#key", redis_mock);
 
             this.callback(lock, redis_mock);
         },
@@ -151,7 +151,7 @@ vows.describe('A *Lock* for QueueConsumer'.cyan).addBatch({
                 },
                 del: function(){}
             }
-            var lock = new lib.PollerLock("other#key", redis_mock);
+            var lock = new lib.Lock("other#key", redis_mock);
             this.callback(lock, redis_mock);
         },
         'Then calling *handle.lock* will not call the callback': function(lock, redis){

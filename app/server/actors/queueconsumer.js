@@ -2,14 +2,16 @@ var logger = new (require('../logger').Logger)("[QUEUE CONSUMER]".blue.bold);
 var settings = require('../../../settings');
 
 exports.entities = require('../models');
+var Lock = require('../lock').Lock;
 
 function QueueConsumer(redis) {
     this.interval = settings.GIT_POLL_INTERVAL;
     this.redis = redis;
     this.loop = null;
-    this.lock = new PollerLock(settings.REDIS_KEYS.current_build, redis);
+    this.lock = new Lock(settings.REDIS_KEYS.current_build, redis);
     this.lifecycle = new Lifecycle(settings.REDIS_KEYS.build_queue, this.lock);
 }
+
 QueueConsumer.prototype.stop = function(){
     /* stopping the interval */
     this.loop && clearInterval(this.loop);
@@ -40,56 +42,6 @@ QueueConsumer.prototype.start = function(){
     }, self.interval);
 }
 
-function PollerLock(key, redis){
-    this.key = key;
-    this.redis = redis;
-    this.locked = false;
-    this.handle = new LockHandle(this);
-}
-
-PollerLock.prototype.acquire = function(callback){
-    var self = this;
-    self.redis.get(this.key, function(err, current_build){
-        logger.handleException("redis.get", err);
-        logger.debug(["redis.get('"+settings.REDIS_KEYS.current_build+"')", arguments]);
-
-        /* if not building, let's quit and wait for the next interval */
-        if (current_build) {
-            exports.entities.Build.fetch_by_id(current_build, function(err, build){
-                logger.debug("already building:", JSON.stringify(current_build));
-                self.redis.publish('Build running', JSON.stringify({
-                    build: build.toBackbone(),
-                    instruction: build.instruction.toBackbone()
-                }));
-            });
-            return;
-        }
-        return callback(self.handle);
-    });
-}
-
-PollerLock.prototype.release = function(callback){
-    var self = this;
-    this.redis.del(this.key, function(err, num){
-        logger.handleException("redis.del(" + self.key + ")", err);
-        if (err || (parseInt(num) < 1)) {return;}
-        callback && callback(new Date());
-    });
-}
-function LockHandle (lock) {
-    this.__lock__ = lock;
-    this.release = function(){
-        lock.release.apply(lock, arguments);
-    }
-}
-LockHandle.prototype.lock = function(value, callback){
-    var self = this;
-    this.__lock__.redis.set(this.__lock__.key, value, function(err){
-        if (err) {return self.__lock__.release();}
-        callback();
-    });
-}
-
 function Lifecycle (key_for_build_queue, lock) {
     this.lock = lock;
     this.key_for_build_queue = key_for_build_queue;
@@ -107,6 +59,12 @@ Lifecycle.prototype.consume_build_queue = function(callback){
             logger.info("consuming the build queue: found an item to build");
             return callback(items.first, handle);
         });
+    }, function(err, build){
+        logger.debug("already building:", build.__id__);
+        self.lock.redis.publish('Build running', JSON.stringify({
+            build: build.toBackbone(),
+            instruction: build.instruction.toBackbone()
+        }));
     });
 }
 Lifecycle.prototype.create_build_from_instruction = function(instruction_id_to_get, handle, callback) {
@@ -140,8 +98,6 @@ Lifecycle.prototype.run_a_instruction = function(instruction, build, handle, cal
 
 exports.logger = logger;
 exports.QueueConsumer = QueueConsumer;
-exports.LockHandle = LockHandle;
-exports.PollerLock = PollerLock;
 exports.Lifecycle = Lifecycle;
 exports.use = function (redis) {
     return new exports.QueueConsumer(redis).start();
