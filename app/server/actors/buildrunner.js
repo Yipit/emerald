@@ -1,9 +1,6 @@
 var _ = require('underscore')._;
 var crypto = require('crypto');
-var moment = require('moment');
-var mkdirp = require('mkdirp');
 var async = require('async');
-var moment = require('moment');
 var path = require('path');
 var fs = require('fs');
 var child_process = require('child_process');
@@ -14,32 +11,6 @@ var entity = require('../models');
 var Build = entity.Build;
 var BuildInstruction = entity.BuildInstruction;
 var Lock = require('../lock').Lock;
-
-process.on('message', function(info){
-    if (info.action !== 'run') {
-        return logger.fail(['unrecognized action: "' + info.action + '"']);
-    }
-
-    async.waterfall([
-        function fetch_build (callback){
-            Build.fetch_by_id(info.build_id, callback);
-        },
-        function fetch_instruction (build, callback) {
-            BuildInstruction.fetch_by_id(info.instruction_id, function(err, instruction){
-                callback(err, build, instruction);
-            });
-        }
-    ], function(err, build, instruction){
-        if (err) {
-            logger.fail('could not run the build for instruction #' + info.instruction);
-            logger.handleException(err);
-            return
-        }
-
-        var runner = new BuildRunner(build, instruction);
-        runner.start();
-    });
-});
 
 function filter_output (text) {
     return text.replace(/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/g, '');
@@ -80,10 +51,10 @@ BuildRunner.prototype.start = function(){
 
     var redis = self.redis;
     /* TODO: extract the repo name and check if already exists e*/
-    var repository_folder_name = (instruction.repository_address + instruction.name)
+    var repository_folder_name = [instruction.repository_address, instruction.name].join('-')
         .replace(/\W+/g, '-')
         .toLowerCase()
-        .replace(/[-]?\bgit\b[-]?/g, '');
+        .replace(/[-]?\bgit\b[-]?/g, '-');
     var repository_full_path = path.join(settings.SANDBOX_PATH, repository_folder_name);
     var repository_bare_path = path.join(repository_full_path, '.git');
 
@@ -121,7 +92,6 @@ BuildRunner.prototype.start = function(){
 
             current_build.fetching_started_at = now;
             current_build.stage = entity.STAGES_BY_NAME.FETCHING;
-
             current_build.save(function(err, key, build){
                 redis.publish('Repository started fetching', JSON.stringify({
                     at: now,
