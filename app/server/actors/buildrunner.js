@@ -54,7 +54,8 @@ BuildRunner.prototype.start = function(){
     var repository_folder_name = [instruction.repository_address, instruction.name].join('-')
         .replace(/\W+/g, '-')
         .toLowerCase()
-        .replace(/[-]?\bgit\b[-]?/g, '-');
+        .replace(/[-]?\bgit\b[-]?/g, '')
+
     var repository_full_path = path.join(settings.SANDBOX_PATH, repository_folder_name);
     var repository_bare_path = path.join(repository_full_path, '.git');
 
@@ -238,7 +239,7 @@ BuildRunner.prototype.start = function(){
                 build.build_finished_at = now;
                 build.stage = build.succeeded ? entity.STAGES_BY_NAME.SUCCEEDED : entity.STAGES_BY_NAME.FAILED;
 
-                build.save(function(){
+                build.save(function() {
                     redis.publish("Build finished", JSON.stringify({
                         at: now,
                         build: build.toBackbone(),
@@ -272,7 +273,6 @@ BuildRunner.prototype.start = function(){
         }
     ], function(err){
         if (err) {
-            redis.publish('Build aborted', JSON.stringify({build: current_build.toBackbone(), instruction: instruction.toBackbone(), error: err}));
             logger.fail(err.toString());
             logger.fail(err.stack.toString());
         }
