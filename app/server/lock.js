@@ -23,7 +23,7 @@ function Lock(key, redis){
     this.handle = new LockHandle(this);
 }
 
-Lock.prototype.acquire = function(acquired_callback, busy_callback){
+Lock.prototype.acquire = function(acquired_callback){
     var self = this;
     self.redis.get(this.key, function(err, current_build_id){
         logger.handleException("redis.get", err);
@@ -31,11 +31,9 @@ Lock.prototype.acquire = function(acquired_callback, busy_callback){
 
         /* if not building, let's quit and wait for the next interval */
         if (current_build_id) {
-            return Build.fetch_by_id(current_build_id, busy_callback || function(err, build) {
-                logger.debug('there is someone using the lock already');
-            });
+            var err = new Error("the build #" + current_build_id + " is already running");
         }
-        return acquired_callback(self.handle);
+        return acquired_callback(err, self.handle);
     });
 }
 

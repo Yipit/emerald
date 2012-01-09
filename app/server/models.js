@@ -348,25 +348,47 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             callback(err, self);
         });
     });
-    it.has.method('run', function(current_build, lock) {
+    it.has.method('run', function(lock, callback) {
         var self = this;
-        var Runner = require('./actors/buildrunner').BuildRunner;
-        var r = new Runner(current_build, self);
-        r.start();
-        // var runner = child_process.fork(__dirname + '/actors/buildrunner.js');
-        // current_build.pid = runner.pid;
-        // current_build.save(function(err){
-        //     if (err) {
-        //         logger.handleException(err);
-        //         logger.fail(err.stack);
-        //         return lock.release();
-        //     }
-        //     runner.send({
-        //         action: 'run',
-        //         build_id: current_build.__id__,
-        //         instruction_id: self.__id__
-        //     });
-        // });
+
+        var redis = self._meta.storage.connection;
+
+        Build.create({
+            error: "",
+            output: "",
+            signal: 'SIGKILL',
+            status: 1,
+            stage: STAGES_BY_NAME.BEGINNING,
+            build_started_at: new Date(),
+            instruction_id: self.__id__
+        }, function(err, key, build) {
+            var runner = child_process.spawn(settings.SCRIPT_PATH, ['build', self.__id__]);
+            runner.stdout.on('data', function(data) {
+                process.stdout.write(data);
+            });
+
+            runner.stderr.on('data', function(data) {
+                process.stderr.write(data);
+            });
+
+            build.pid = runner.pid;
+            build.save(function(err, key, build) {
+                redis.publish('Build running', JSON.stringify({
+                    build: build.toBackbone(),
+                    instruction: self.toBackbone()
+                }));
+            });
+
+            runner.on('exit', function(code, signal) {
+                if (signal) {
+                    build.stage = STAGES_BY_NAME.ABORTED;
+                    build.signal = signal;
+                } else if (parseInt(code, 10) !== 0) {
+                    build.stage = STAGES_BY_NAME.FAILED;
+                }
+                build.save();
+            });
+        });
     });
 });
 

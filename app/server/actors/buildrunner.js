@@ -16,10 +16,10 @@ function filter_output (text) {
     return text.replace(/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/g, '');
 }
 
-function BuildRunner (current_build, instruction){
+function BuildRunner (current_build){
     this.current_build = current_build;
-    this.instruction = instruction;
-    this.redis = instruction._meta.storage.connection;
+    this.instruction = current_build.instruction;
+    this.redis = current_build._meta.storage.connection;
     this.lock = new Lock(settings.REDIS_KEYS.current_build, this.redis);
 }
 
