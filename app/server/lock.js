@@ -31,10 +31,9 @@ Lock.prototype.acquire = function(acquired_callback, busy_callback){
 
         /* if not building, let's quit and wait for the next interval */
         if (current_build_id) {
-            Build.fetch_by_id(current_build_id, busy_callback || function(err, build) {
+            return Build.fetch_by_id(current_build_id, busy_callback || function(err, build) {
                 logger.debug('there is someone using the lock already');
-                return;
-            })
+            });
         }
         return acquired_callback(self.handle);
     });
@@ -51,3 +50,4 @@ Lock.prototype.release = function(callback){
 
 exports.Lock = Lock;
 exports.LockHandle = LockHandle;
+exports.logger = logger;
