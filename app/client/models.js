@@ -35,34 +35,34 @@
         __name__: 'instruction',
         initialize: function(){
             var self = this;
-            window.socket.on('Build started' , function(data){
+            window.socket.on('Build started', function(data){
                 if (data.instruction.id == self.get('id')) {
                     self.trigger('build_started', data.build, data.instruction);
                 }
             });
-            window.socket.on('Build finished' , function(data){
+            window.socket.on('Build finished', function(data){
                 if (data.instruction.id == self.get('id')) {
                     self.trigger('build_finished', data.build, data.instruction);
                 }
             });
-            window.socket.on('Build aborted' , function(data){
+            window.socket.on('Build aborted', function(data){
                 if (data.instruction.id == self.get('id')) {
                     self.trigger('build_aborted', data.build, data.instruction);
                 }
             });
 
-            window.socket.on('Build stdout' , function(data){
+            window.socket.on('Build stdout', function(data){
                 if (data.instruction.id == self.get('id')) {
                     self.trigger('build_stdout', data);
                 }
             });
-            window.socket.on('Build stderr' , function(data){
+            window.socket.on('Build stderr', function(data){
                 if (data.instruction.id == self.get('id')) {
                     self.trigger('build_stderr', data);
                 }
             });
 
-            window.socket.on('Repository being fetched' , function(data){
+            window.socket.on('Repository being fetched', function(data){
                 if (data.instruction.id == self.get('id')) {
                     self.trigger('fetching_repository', data);
                 }
