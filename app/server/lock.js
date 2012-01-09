@@ -27,7 +27,7 @@ Lock.prototype.acquire = function(acquired_callback, busy_callback){
     var self = this;
     self.redis.get(this.key, function(err, current_build_id){
         logger.handleException("redis.get", err);
-        logger.debug(["redis.get('"+settings.REDIS_KEYS.current_build_id+"')", arguments]);
+        logger.debug(["redis.get('"+self.key+"')", arguments]);
 
         /* if not building, let's quit and wait for the next interval */
         if (current_build_id) {
