@@ -48,7 +48,7 @@ function Logger (prefix) {
     };
     this.handleException = function(where, exc){
         if (exc) {
-            this.fail(["@", where, exc]);
+            this.fail(["@", where, exc, '\n', exc.stack + ""]);
         }
     }
     this.timestamp = function(){
