@@ -380,9 +380,14 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             });
 
             runner.on('exit', function(code, signal) {
-                if (signal) {
+                if ((code !== 0) && signal) {
                     build.stage = STAGES_BY_NAME.ABORTED;
                     build.signal = signal;
+                    redis.publish('Build aborted', JSON.stringify({
+                        build: build.toBackbone(),
+                        instruction: build.instruction.toBackbone(),
+                        error: err
+                    }));
                 } else if (parseInt(code, 10) !== 0) {
                     build.stage = STAGES_BY_NAME.FAILED;
                 }
