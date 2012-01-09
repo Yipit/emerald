@@ -362,7 +362,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             build_started_at: new Date(),
             instruction_id: self.__id__
         }, function(err, key, build) {
-            var runner = child_process.spawn(settings.SCRIPT_PATH, ['build', self.__id__]);
+            var runner = child_process.spawn(settings.SCRIPT_PATH, ['build', build.__id__]);
             runner.stdout.on('data', function(data) {
                 process.stdout.write(data);
             });
