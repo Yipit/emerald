@@ -12,7 +12,6 @@ exports.work_on = function(redis, io) {
     io.sockets.on('connection', function (socket) {
         socket.emit('connected');
 
-        require('./actors/orchestrator').use(redis, socket);
         socket.on('abort Build', function (data) {
             entity.Build.fetch_by_id(data.id, function(err, build){
                 if (err) {
