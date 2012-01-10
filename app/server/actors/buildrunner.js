@@ -227,38 +227,33 @@ BuildRunner.prototype.start = function(){
             });
             callback(null, build, instruction, command, args);
         },
-        function handle_the_exit_of_build(build, instruction, command, args, callback) {
+        function handle_the_exit_of_build(old_build, instruction, command, args, callback) {
             var now = new Date();
             logger.debug('emerald will handle the exit of the command');
 
             command.on('exit', function (code, signal) {
                 logger.debug('finished running the build script, code: ' + code + ', signal: ' + signal);
+                Build.fetch_by_id(old_build.__id__, function(err, build) {
+                    build.status = code;
+                    build.signal = signal;
+                    build.build_finished_at = now;
+                    build.stage = build.succeeded ? entity.STAGES_BY_NAME.SUCCEEDED : entity.STAGES_BY_NAME.FAILED;
 
-                build.status = code;
-                build.signal = signal;
-                build.build_finished_at = now;
-                build.stage = build.succeeded ? entity.STAGES_BY_NAME.SUCCEEDED : entity.STAGES_BY_NAME.FAILED;
-
-                build.save(function() {
-                    redis.publish("Build finished", JSON.stringify({
-                        at: now,
-                        build: build.toBackbone(),
-                        instruction: instruction.toBackbone()
-                    }));
-                    callback(null, instruction, build);
+                    build.save(function(err, key, build) {
+                        callback(null, build, instruction);
+                    });
                 });
-
             });
         },
-        function associate_build_to_instruction(instruction, build, callback){
+        function associate_build_to_instruction(build, instruction, callback){
             /* the unix timestamp is always the score, so that we can fetch it ordered by date*/
             var unix_timestamp = (new Date()).getTime();
 
             redis.zadd(instruction.keys.all_builds, unix_timestamp, instruction.keys.for_build_id(current_build.__id__), function(){
-                callback(null, instruction, build, unix_timestamp);
+                callback(null, build, instruction, unix_timestamp);
             })
         },
-        function associate_build_to_proper_list(instruction, build, unix_timestamp, callback){
+        function associate_build_to_proper_list(build, instruction, unix_timestamp, callback){
             var exit_code_zero = parseInt(build.status || 0) == 0;
             var was_not_killed = build.signal === "null";
 
@@ -268,14 +263,21 @@ BuildRunner.prototype.start = function(){
 
             redis.zadd(key, unix_timestamp, instruction.keys.for_build_id(build.__id__), function(){
                 logger.info(['adding Build #' + build.__id__, 'to Instruction #' + instruction.__id__ + "'s", name, 'builds list'])
-                callback(null, instruction, build);
+                callback(null, build, instruction);
             });
         }
-    ], function(err){
+    ], function(err, build, instruction){
         if (err) {
             logger.fail(err.toString());
             logger.fail(err.stack.toString());
+        } else {
+            logger.success('the instruction "'+instruction.name+'" has finished running its build #' + build.index);
         }
+        redis.publish("Build finished", JSON.stringify({
+            build: build.toBackbone(),
+            instruction: instruction.toBackbone()
+        }));
+
         self.lock.release(function(){
             logger.success(['the build lock was released', err && 'due an error'.red || 'successfully'.green.bold]);
         })
