@@ -75,7 +75,7 @@
     });
 
     window.BuildListView = EmeraldView.extend({
-        template_name: 'instruction-list',
+        template_name: 'list-instructions',
         render: function(){
             var $instructions,
               collection = this.collection;
@@ -286,6 +286,6 @@
     });
 
     window.InstructionManagementView = EmeraldView.extend({
-        template_name: 'instruction-management'
+        template_name: 'manage-instructions'
     });
 })(jQuery);
