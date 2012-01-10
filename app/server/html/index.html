@@ -6,6 +6,12 @@
 
   {% for template in templates %}<script type="text/template" id="template-{{ template.name }}">{{ template.html|raw }}</script>{% endfor %}
 
+  <div id="connection-lost-dialog" title="Connection Lost">
+    <h1>Emerald lost the connection with the mothership</h1>
+    <h2>please try refreshing the page or check if the server is up</h2>
+    <p style="font-size:120px;color: #666;padding: 50px;">:(</p>
+  </div>
+
   <header>
     <div class="container">
       <div class="row">
