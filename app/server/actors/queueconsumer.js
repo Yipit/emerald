@@ -31,7 +31,7 @@ QueueConsumer.prototype.start = function(){
     /* lets start the loop and save the handler for later*/
     self.loop = setInterval(function(){
         async.waterfall([
-            function acquire_lock(callback){
+            function acquire_lock(callback) {
                 logger.debug("attempting to acquire the lock");
                 self.lock.acquire(callback);
             },

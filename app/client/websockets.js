@@ -31,4 +31,20 @@
             image: window.emerald.domain + "/images/control_double_down.png"
         });
     });
+
+    window.socket.on('Repository being fetched', function(data){
+        var title = [
+            "Fetching changes for",
+            data.instruction.name,
+            "-", data.phase, ":",
+            data.percentage
+        ].join(" ");
+
+        $("title").text(title);
+    });
+
+    window.socket.on('Repository finished fetching', function(data){
+        $("title").text("Emerald - Continuous Integration");
+    });
+
 })(jQuery);

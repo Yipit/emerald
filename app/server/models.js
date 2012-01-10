@@ -31,6 +31,7 @@ var STAGES_BY_NAME = {
 }
 
 var Build = models.declare("Build", function(it, kind) {
+    it.has.field("index", kind.numeric);
     it.has.field("status", kind.string);
     it.has.field("signal", kind.string);
     it.has.field("error", kind.string);
@@ -58,8 +59,11 @@ var Build = models.declare("Build", function(it, kind) {
                 redis.hget(key, name, callback);
             },
             function update(current, callback) {
-                var full = current + value;
+                var full = current + value + '\n';
                 redis.hset(key, name, full, function(err){
+
+                    logger.debug(['updating build #'+self.__id__+"'s", name, "with: ", value, "its old value was just: ", current]);
+
                     callback(err, full, current, value);
                 });
             }
@@ -353,15 +357,32 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
 
         var redis = self._meta.storage.connection;
 
-        Build.create({
-            error: "",
-            output: "",
-            signal: 'SIGKILL',
-            status: 1,
-            stage: STAGES_BY_NAME.BEGINNING,
-            build_started_at: new Date(),
-            instruction_id: self.__id__
-        }, function(err, key, build) {
+        async.waterfall([
+            function get_next_build_index(callback) {
+                redis.zcard(self.keys.all_builds, callback);
+            },
+            function increment_index(total, callback){
+                var index = parseInt(total, 10) + 1;
+                callback(null, index);
+            },
+            function create_an_empty_build (index, callback) {
+                Build.create({
+                    error: "",
+                    output: "",
+                    signal: 'SIGKILL',
+                    status: 1,
+                    stage: STAGES_BY_NAME.BEGINNING,
+                    build_started_at: new Date(),
+                    instruction_id: self.__id__,
+                    index: index
+                }, callback);
+            }
+        ], function(err, key, build) {
+            if (err) {
+                logger.fail('an error happened while creating a build for the instruction "'+self.name+'"')
+                logger.handleException(err);
+                return;
+            }
             var runner = child_process.spawn(settings.SCRIPT_PATH, ['build', build.__id__]);
             runner.stdout.on('data', function(data) {
                 process.stdout.write(data);

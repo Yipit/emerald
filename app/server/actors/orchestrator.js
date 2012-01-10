@@ -42,11 +42,6 @@ module.exports.use = function(redis, socket) {
             case "Build aborted":
             logger.debug("The Build #"+parsed.build.__id__+" was aborted");
                 break;
-
         }
-    });
-
-    socket.on('disconnect', function() {
-        subscribe.quit();
     });
 }
