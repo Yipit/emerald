@@ -1,6 +1,6 @@
 var logger = new (require('../logger').Logger)("[ ORCHESTRATOR ]".red.bold);
 
-module.exports.use = function(redis, socket) {
+module.exports.make = function(io) {
     const subscribe = require('redis').createClient();
     subscribe.subscribe("BuildInstruction enqueued");
 
@@ -15,33 +15,35 @@ module.exports.use = function(redis, socket) {
     subscribe.subscribe("Build stderr");
     subscribe.subscribe("Build running");
 
-    subscribe.on("message", function(channel, message) {
-        var parsed;
-        try {
-            parsed = JSON.parse(message);
-        } catch (e) {
-            parsed = message;
-        }
-        socket.emit(channel, parsed);
-        switch (channel) {
-            case "BuildInstruction enqueued":
-            logger.debug("The BuildInstruction #"+parsed.id+" was successfully enqueued");
-                break;
-            case "Repository started fetching":
-            logger.debug("The Build #"+parsed.build.__id__+" started fetching changes from the repository");
-                break;
-            case "Repository finished fetched":
-            logger.debug("The Build #"+parsed.build.__id__+" finished fetching changes from the repository");
-                break;
-            case "Build started":
-            logger.debug("The Build #"+parsed.build.__id__+" has started running");
-                break;
-            case "Build finished":
-            logger.debug("The Build #"+parsed.build.__id__+" has finished running");
-                break;
-            case "Build aborted":
-            logger.debug("The Build #"+parsed.build.__id__+" was aborted");
-                break;
-        }
+    io.sockets.on("connection", function(socket) {
+        subscribe.on("message", function(channel, message) {
+            var parsed;
+            try {
+                parsed = JSON.parse(message);
+            } catch (e) {
+                parsed = message;
+            }
+            socket.emit(channel, parsed);
+            switch (channel) {
+                case "BuildInstruction enqueued":
+                logger.debug("The BuildInstruction #"+parsed.id+" was successfully enqueued");
+                    break;
+                case "Repository started fetching":
+                logger.debug("The Build #"+parsed.build.__id__+" started fetching changes from the repository");
+                    break;
+                case "Repository finished fetched":
+                logger.debug("The Build #"+parsed.build.__id__+" finished fetching changes from the repository");
+                    break;
+                case "Build started":
+                logger.debug("The Build #"+parsed.build.__id__+" has started running");
+                    break;
+                case "Build finished":
+                logger.debug("The Build #"+parsed.build.__id__+" has finished running");
+                    break;
+                case "Build aborted":
+                logger.debug("The Build #"+parsed.build.__id__+" was aborted");
+                    break;
+            }
+        });
     });
 }

@@ -13,6 +13,7 @@
 
     /* importing some emerald actors */
     queueconsumer = require('./server/actors/queueconsumer'),
+    orchestrator = require('./server/actors/orchestrator'),
     websockets = require('./server/websockets'),
     controllers = require('./server/controllers');
 
@@ -73,6 +74,7 @@
     boot.now(app, io, redis, settings, function(cwd){
         app.listen(parseInt(process.env.PORT || 3000));
         queueconsumer.use(redis);
+        orchestrator.make(io);
         websockets.work_on(redis, io);
         controllers.map(app, redis);
     });
