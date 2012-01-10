@@ -20,10 +20,14 @@
     };
 
     function truncate(string, amount){
-        amount = amount || 45;
-        if (string.length > amount) {
-            return string.substr(0, amount) + ' ...';
-        } else {
+        var amount = amount || 45;
+        try {
+            if (string.length > amount) {
+                return string.substr(0, amount) + ' ...';
+            } else {
+                return string;
+            }
+        } catch (e) {
             return string;
         }
     }
@@ -37,8 +41,9 @@
     }
 
     window.EmeraldView = Backbone.View.extend({
+        className: 'row',
         initialize: function(){
-            _.bindAll(this, 'render');
+            _.bindAll(this, 'render', 'customize');
             if (this.model) {
                 this.model.bind('change', this.render);
             }
@@ -48,6 +53,7 @@
             if (this.template_name) {
                 this.template = get_template(this.template_name);
             }
+            this.customize();
         },
         render: function(){
             var data = {};
@@ -63,15 +69,28 @@
             this.trigger('post-render', this);
             return this;
         },
-        className: 'row'
+        customize: function(){
+            /* empty function to be overwritten by the child views in
+             * order to take custom actions in the very beginning */
+        }
     });
 
     window.ErrorView = EmeraldView.extend({
-        template_name: 'error'
+        template_name: 'error',
+        customize: function(){
+            _.bindAll(this, 'prepare_connection_lost_dialog');
+        },
+        prepare_connection_lost_dialog: function() {
+            setTimeout(function() {
+                $("#connection-lost-dialog").dialog({
+                    modal: true
+                });
+            }, 2000);
+        }
     });
 
     window.ConnectionLostView = EmeraldView.extend({
-        template_name: 'connection-lost'
+        template_name: 'connection-lost',
     });
 
     window.BuildListView = EmeraldView.extend({
@@ -108,6 +127,7 @@
             _.bindAll(
                 this,
                 'render',
+                'customize',
                 'expand_box',
                 'update_latest_build',
                 'update_toolbar',
@@ -139,19 +159,25 @@
             extra = extra || '';
             return ['<a class="btn small ' + classes + '" ' + extra + ' href="#">' + title + '</a>'].join('"');
         },
-        update_toolbar: function(build, instruction){
+        update_toolbar: function(data){
             var self = this;
+
+            var build = data.build;
+            var instruction = data.instruction;
+
             this.refresh_widgets();
             var buttons = [
                 this.make_toolbar_button('Add to the queue', 'do-schedule'),
                 this.make_toolbar_button('STDOUT', 'info show-output'),
                 this.make_toolbar_button('STDERR', 'error show-error')
             ];
+
             switch (STAGES_BY_INDEX[build.stage]) {
             case 'BEGINNING':
             case 'FETCHING':
             case 'PREPARING_ENVIRONMENT':
             case 'RUNNING':
+                console.log(instruction.name, "build", build.index, STAGES_BY_INDEX[build.stage]);
                 buttons = [this.make_abort_button(build)];
                 break;
             case 'ABORTED':
@@ -187,7 +213,7 @@
             return [
                 '<li class="' + build.style_name + '" id="clay:Build:id:'+build.__id__+'">',
                 '  <a href="'+build.permalink+'">',
-                '    <strong class="id">#' + build.__id__ + '</strong>',
+                '    <strong class="id">#' + build.index + '</strong>',
                 '    <span class="message">' + truncate(build.message) + '</span>',
                 '  </a>',
                 '</li>'
@@ -211,8 +237,12 @@
 		value: value
             });
         },
-        expand_box: function(build, instruction){
+        expand_box: function(data){
             var self = this;
+
+            var build = data.build;
+            var instruction = data.instruction;
+
             self.refresh_widgets();
             var total_builds = self.$('.buildlog li').length;
             /* make the widget look busy */
@@ -235,15 +265,31 @@
             }, function(){
                 self.$body.removeClass('hidden');
 
-                /* add an abort button */
-                self.$toolbar.empty().append(self.make_abort_button(build));
+                /* refresh the toolbar */
+                self.update_toolbar(data);
 
-                /* although the build object still incomplete, let's add
-                 * the current build to the log */
-                self.$('.buildlog').append(self.make_build_li(build));
+                /* although the build object still incomplete, let's
+                 * add the current build to the log. But only if it is
+                 * not there yet */
+
+                /* getting an array of Build ids that are already in
+                 * the log. */
+                var current_builds = _.uniq($(".buildlog li").map(function(i){
+                    return parseInt(/\d+$/.exec($(this).attr("id")), 10);
+                }));
+
+                /* only add a build to the log if it's not there yet. */
+                if (!_.include(current_builds, build.__id__)){
+                    self.$('.buildlog').append(self.make_build_li(build));
+                }
             });
         },
-        update_latest_build: function(build, instruction){
+        update_latest_build: function(data){
+            var self = this;
+
+            var build = data.build;
+            var instruction = data.instruction;
+
             this.refresh_widgets();
             /* make the widget look like is done */
             this.$widget

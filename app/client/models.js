@@ -37,17 +37,17 @@
             var self = this;
             window.socket.on('Build started', function(data){
                 if (data.instruction.id == self.get('id')) {
-                    self.trigger('build_started', data.build, data.instruction);
+                    self.trigger('build_started', data);
                 }
             });
             window.socket.on('Build finished', function(data){
                 if (data.instruction.id == self.get('id')) {
-                    self.trigger('build_finished', data.build, data.instruction);
+                    self.trigger('build_finished', data);
                 }
             });
             window.socket.on('Build aborted', function(data){
                 if (data.instruction.id == self.get('id')) {
-                    self.trigger('build_aborted', data.build, data.instruction);
+                    self.trigger('build_aborted', data);
                 }
             });
 
