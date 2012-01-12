@@ -132,6 +132,7 @@
                 'update_latest_build',
                 'update_toolbar',
                 'show_progress',
+                'render_builds',
                 'prepare_progress'
             );
             this.model.bind('change', this.render);
@@ -151,6 +152,7 @@
 
             this.template = get_template('instruction');
             this.bind('post-render', this.prepare_progress);
+            this.bind('post-render', this.render_builds);
 
             this.refresh_widgets();
         },
@@ -195,29 +197,36 @@
             });
         },
         refresh_widgets: function(){
-            this.$widget = this.$("article.instruction > div");
+            this.$widget =     this.$("article.instruction > div");
 
-            this.$header = this.$widget.find(".instruction-header");
-            this.$body =   this.$widget.find(".instruction-body");
-            this.$footer = this.$widget.find(".instruction-footer");
+            this.$header =     this.$widget.find(".instruction-header");
+            this.$body =       this.$widget.find(".instruction-body");
+            this.$footer =     this.$widget.find(".instruction-footer");
 
             this.$last_build = this.$header.find(".last-build");
-            this.$avatar = this.$header.find(".avatar");
-            this.$img = this.$avatar.find('img');
-            this.$toolbar = this.$footer.find(".toolbar");
+            this.$avatar =     this.$header.find(".avatar");
+            this.$img =        this.$avatar.find('img');
+            this.$toolbar =    this.$footer.find(".toolbar");
+        },
+        render_builds: function() {
+            var self = this;
+
+            var $buildlog = this.$(".buildlog");
+
+            self.refresh_widgets();
+
+            _.each(this.model.get('all_builds'), function(raw_build_data) {
+                var build = new Build(raw_build_data);
+                var subview = new InstructionBuildListItemView({
+                    model: build
+                });
+                var rendered = subview.render().el;
+                console.log(rendered);
+                $buildlog.append(rendered);
+            });
         },
         make_abort_button: function(build){
             return this.make_toolbar_button('Abort', 'error do-abort', 'rel="' + build.__id__ + '"');
-        },
-        make_build_li: function(build){
-            return [
-                '<li class="' + build.style_name + '" id="clay:Build:id:'+build.__id__+'">',
-                '  <a href="'+build.permalink+'">',
-                '    <strong class="id">#' + build.index + '</strong>',
-                '    <span class="message">' + truncate(build.message) + '</span>',
-                '  </a>',
-                '</li>'
-            ].join('\n');
         },
         make_last_build: function(build){
             return [
@@ -240,8 +249,7 @@
         expand_box: function(data){
             var self = this;
 
-            var build = data.build;
-            var instruction = data.instruction;
+            var build = new Build(data.build);
 
             self.refresh_widgets();
             var total_builds = self.$('.buildlog li').length;
@@ -279,8 +287,9 @@
                 }));
 
                 /* only add a build to the log if it's not there yet. */
-                if (!_.include(current_builds, build.__id__)){
-                    self.$('.buildlog').append(self.make_build_li(build));
+                if (!_.include(current_builds, build.get('__id__'))) {
+                    var subview = new InstructionBuildListItemView({model: build});
+                    self.$('.buildlog').append(subview.render().el);
                 }
             });
         },
@@ -323,6 +332,20 @@
             window.socket.emit('abort Build', {id: id});
             this.$toolbar.fadeOut();
             return e.preventDefault();
+        }
+    });
+
+    window.InstructionBuildListItemView = EmeraldView.extend({
+        template_name: 'subview-build-item-for-instruction',
+        tagName: 'li',
+        className: 'build-link',
+        customize: function(){
+            _.bindAll(this, 'fill_attributes');
+            this.bind('post-render', this.fill_attributes);
+        },
+        fill_attributes: function(){
+            $(this.el).addClass(this.model.get('style_name'));
+            $(this.el).attr("id", 'clay:Build:id:' + this.model.get('__id__'));
         }
     });
 

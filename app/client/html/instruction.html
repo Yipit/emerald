@@ -36,15 +36,7 @@
 	<div class="bar"></div>
       </div>
 
-      <ol class="buildlog">
-	<% _.each(all_builds, function(build) { %>
-	<li class="build-link <%= build.style_name %>" id="clay:Build:id:<%= build.__id__ %>">
-	  <a href="<%= build.permalink %>">
-	    <strong class="number">#<%= build.index %></strong>
-	    <span class="message"><%= truncate(build.message) %></a></span>
-	</li>
-	<% }); %>
-      </ol>
+      <ol class="buildlog"></ol>
     </div>
 
     <ul class="instruction-footer ui-widget ui-corner-all">

@@ -273,6 +273,7 @@ BuildRunner.prototype.start = function(){
         } else {
             logger.success('the instruction "'+instruction.name+'" has finished running its build #' + build.index);
         }
+
         redis.publish("Build finished", JSON.stringify({
             build: build.toBackbone(),
             instruction: instruction.toBackbone()
