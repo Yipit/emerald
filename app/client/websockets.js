@@ -24,6 +24,14 @@
         });
     });
 
+    window.socket.on('Build finished', function(data){
+        $.gritter.add({
+            title: '"' + data.instruction.name + '" has finished',
+            text: "The build instruction #" + data.instruction.id + " has finished",
+            image: window.emerald.domain + "/images/ico_success.png"
+        });
+    });
+
     window.socket.on('BuildInstruction created', function(data){
         $.gritter.add({
             title: "An instruction was created",
