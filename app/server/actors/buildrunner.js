@@ -179,7 +179,7 @@ BuildRunner.prototype.start = function(){
                         if (commit_message.length > 0) {
                             build.set("message", commit_message, callback);
                         } else {
-                            callback(null, "commit", null, build);
+                            callback(null, "message", null, build);
                         }
                     }
 

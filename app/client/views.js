@@ -139,8 +139,9 @@
             this.model.bind('build_stdout', this.expand_box);
             this.model.bind('build_stderr', this.expand_box);
             this.model.bind('build_running', this.expand_box);
-
             this.model.bind('build_started', this.expand_box);
+            this.model.bind('build_finished', this.expand_box);
+
             this.model.bind('build_finished', this.update_latest_build);
             this.model.bind('build_aborted', this.update_latest_build);
 
@@ -179,7 +180,6 @@
             case 'FETCHING':
             case 'PREPARING_ENVIRONMENT':
             case 'RUNNING':
-                console.log(instruction.name, "build", build.index, STAGES_BY_INDEX[build.stage]);
                 buttons = [this.make_abort_button(build)];
                 break;
             case 'ABORTED':
@@ -207,22 +207,33 @@
             this.$avatar =     this.$header.find(".avatar");
             this.$img =        this.$avatar.find('img');
             this.$toolbar =    this.$footer.find(".toolbar");
+            this.$buildlog =   this.$body.find(".buildlog");
+
         },
-        render_builds: function() {
+        render_builds: function(data) {
             var self = this;
-
-            var $buildlog = this.$(".buildlog");
-
             self.refresh_widgets();
 
-            _.each(this.model.get('all_builds'), function(raw_build_data) {
+            if (data.instruction) {
+                var all_builds = data.instruction.all_builds;
+            } else {
+                var all_builds = this.model.get('all_builds');
+            }
+
+            if (data && data.build) {
+                all_builds.unshift(data.build);
+            }
+            self.$buildlog.empty();
+            _.each(all_builds, function(raw_build_data) {
+                console.log(raw_build_data);
                 var build = new Build(raw_build_data);
-                var subview = new InstructionBuildListItemView({
+                var params = {
                     model: build
-                });
+                };
+
+                var subview = new InstructionBuildListItemView(params);
                 var rendered = subview.render().el;
-                console.log(rendered);
-                $buildlog.append(rendered);
+                self.$buildlog.append(rendered);
             });
         },
         make_abort_button: function(build){
@@ -252,7 +263,6 @@
             var build = new Build(data.build);
 
             self.refresh_widgets();
-            var total_builds = self.$('.buildlog li').length;
             /* make the widget look busy */
             self.$widget.addClass('ui-state-default');
 
@@ -276,21 +286,7 @@
                 /* refresh the toolbar */
                 self.update_toolbar(data);
 
-                /* although the build object still incomplete, let's
-                 * add the current build to the log. But only if it is
-                 * not there yet */
-
-                /* getting an array of Build ids that are already in
-                 * the log. */
-                var current_builds = _.uniq($(".buildlog li").map(function(i){
-                    return parseInt(/\d+$/.exec($(this).attr("id")), 10);
-                }));
-
-                /* only add a build to the log if it's not there yet. */
-                if (!_.include(current_builds, build.get('__id__'))) {
-                    var subview = new InstructionBuildListItemView({model: build});
-                    self.$('.buildlog').append(subview.render().el);
-                }
+                self.render_builds(data);
             });
         },
         update_latest_build: function(data){

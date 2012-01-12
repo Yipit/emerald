@@ -181,6 +181,7 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.method('toBackbone', function() {
         var data = this.__data__;
         data.id = data.__id__;
+
         data.gravatars = {
             "50": this.gravatar_of_size(50),
             "75": this.gravatar_of_size(75),
@@ -214,6 +215,7 @@ var Build = models.declare("Build", function(it, kind) {
         if (_.isObject(this.instruction) && _.isFunction(this.instruction.toBackbone)) {
             data.instruction = this.instruction.toBackbone();
         }
+        data.has_message = _.isString(data.message);
         return data;
     });
 });

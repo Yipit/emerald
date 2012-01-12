@@ -54,5 +54,4 @@
     window.socket.on('Repository finished fetching', function(data){
         $("title").text("Emerald - Continuous Integration");
     });
-
 })(jQuery);
