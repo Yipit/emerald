@@ -151,18 +151,39 @@ BuildRunner.prototype.start = function(){
                 var commit_hash = /commit (\w{40})/.exec(lines[0]);
                 var commit_message = (stdout.split('\n').splice(4).join('\n')).trim();
 
-                if (author_data) {
-                    build.author_name = author_data[2].trim();
-                    build.author_email = author_data[3].trim();
-                }
-                if (commit_hash) {
-                    build.commit = commit_hash[1];
-                }
-                if (commit_message.length > 0) {
-                    build.message = commit_message;
-                }
+                async.waterfall([
+                    function set_author_name (callback){
+                        if (author_data) {
+                            var parsed_name = author_data[2].trim();
+                            build.set("author_name", parsed_name, callback);
+                        } else {
+                            callback(null, "author_name", null, build);
+                        }
+                    },
+                    function set_author_email (name, value, build, callback){
+                        if (author_data) {
+                            var parsed_email = author_data[3].trim();
+                            build.set("author_email", parsed_email, callback);
+                        } else {
+                            callback(null, "author_email", null, build);
+                        }
+                    },
+                    function set_commit_hash (name, value, build, callback){
+                        if (commit_hash) {
+                            build.set("commit", commit_hash[1], callback);
+                        } else {
+                            callback(null, "commit", null, build);
+                        }
+                    },
+                    function set_commit_message (name, value, build, callback){
+                        if (commit_message.length > 0) {
+                            build.set("message", commit_message, callback);
+                        } else {
+                            callback(null, "commit", null, build);
+                        }
+                    }
 
-                build.save(function(err, key, build){
+                ], function(err, name, value, build){
                     callback(err, build, instruction);
                 });
 

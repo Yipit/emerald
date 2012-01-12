@@ -48,6 +48,18 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.field("fetching_finished_at", kind.string);
     it.has.field("instruction_id", kind.numeric);
 
+    it.has.method('set', function(name, value, callback){
+        var self = this;
+
+        var key = "clay:Build:id:" + self.__id__;
+        var redis = self._meta.storage.connection;
+        redis.hset(key, name, value, function(err){
+            logger.debug(['assigning the value', value, 'to Build #'+self.__id__+"'s", name, "field"]);
+            self[name] = value;
+            callback(err, name, value, self);
+        });
+    });
+
     it.has.method('increment_field', function(name, value, callback){
         var self = this;
 
@@ -60,8 +72,7 @@ var Build = models.declare("Build", function(it, kind) {
             },
             function update(current, callback) {
                 var full = current + value + '\n';
-                redis.hset(key, name, full, function(err){
-
+                self.set(name, full, function(err) {
                     logger.debug(['updating build #'+self.__id__+"'s", name, "with: ", value, "its old value was just: ", current]);
 
                     callback(err, full, current, value);
@@ -87,7 +98,7 @@ var Build = models.declare("Build", function(it, kind) {
         return ((parseInt(this.status || 0) == 0) && this.signal === 'null');
     });
     it.has.getter('stage_name', function() {
-        return (STAGES_BY_NAME[this.stage] || 'running').toLowerCase();
+        return (STAGES_BY_INDEX[this.stage]).toLowerCase();
     });
 
     it.has.getter('duration', function() {
@@ -185,7 +196,6 @@ var Build = models.declare("Build", function(it, kind) {
             data.style_name = 'failure';
         } else {
             data.style_name = this.stage_name.toLowerCase();
-            data.message = data.style_name + " ...";
         }
         data.succeeded = JSON.parse(this.succeeded);
         data.stage_name = this.stage_name;
