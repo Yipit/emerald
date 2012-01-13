@@ -54,6 +54,11 @@
                     self.trigger('fetching_repository', data);
                 }
             });
+            window.socket.on('Repository finished fetching', function(data){
+                if (data.instruction.id == self.get('id')) {
+                    self.trigger('repository_fetched', data);
+                }
+            });
 
         }
     });

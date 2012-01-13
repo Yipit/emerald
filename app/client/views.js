@@ -155,6 +155,7 @@
                 'update_latest_build',
                 'update_toolbar',
                 'show_progress',
+                'hide_progress',
                 'render_builds',
                 'prepare_progress'
             );
@@ -173,6 +174,7 @@
             this.model.bind('build_aborted', this.update_toolbar);
 
             this.model.bind('fetching_repository', this.show_progress);
+            this.model.bind('repository_fetched', this.hide_progress);
 
             this.template = get_template('instruction');
             this.bind('post-render', this.prepare_progress);
@@ -272,13 +274,24 @@
         },
         /* event reactions */
         prepare_progress: function(data){
-            this.$(".ui-progress-bar").progressbar({value: 0});
+            this.$(".progress").progressbar({value: 0}).hide();
         },
         show_progress: function(data){
-            var value = (parseInt(/\d+/.exec(data.percentage), 10))[0];
-            this.$(".ui-progress-bar").progressbar({
-		value: value
-            });
+            var $pbar = this.$(".progress");
+            var parsed_value = /\d+/.exec(data.percentage)[0];
+
+            var value = parseInt(parsed_value, 10);
+            var label = [data.phase, data.percentage].join(': ');
+
+            $pbar
+                .show()
+                .find(".text").text(label);
+
+            $pbar.progressbar("value", value);
+
+        },
+        hide_progress: function(data){
+            this.$(".progress").hide();
         },
         expand_box: function(data){
             var self = this;
