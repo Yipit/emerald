@@ -21,6 +21,11 @@
             var console = this.consoleView.render().el;
             this.$body.prepend(console);
 
+            $("#show-main-console").click(function(e){
+                $("#terminal").show();
+                return e.preventDefault();
+            });
+
             window.socket.on('disconnect', this.connection_lost);
         },
         dashboard: function(){

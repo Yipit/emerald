@@ -51,7 +51,7 @@
         ].join('\n'),
         initialize: function() {
             _.bindAll(this, 'render', 'hide_terminal');
-            this.model.bind('change', this.increment_code);
+            this.model.bind('change', this.render);
         },
         hide_terminal: function(e){
             $("#terminal").hide();

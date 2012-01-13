@@ -41,35 +41,7 @@
 	{% endblock %}
 </head>
 <body>
-  {% block body %}
-  <a id="fork_me_on_github" target="_blank" href="https://github.com/Yipit/emerald">
-    <span>Fork me on GitHub!</span>
-  </a><!--github ribbon-->
-
-  {% for template in templates %}<script type="text/template" id="template-{{ template.name }}">{{ template.html|raw }}</script>{% endfor %}
-
-  <header>
-    <div class="container">
-      <div class="row">
-	<div class="span13">
-	  <h1 class="title"><a href="#">Emerald</a></h1>
-	</div><!-- .span13 -->
-      </div><!-- .row -->
-      <div class="row">
-	<div class="span8">
-	  <p></p>
-	</div>
-	<div class="span8">
-	  <menu class="main">
-	    <li class="dashboard"><a href="#dashboard">dashboard</a></li>
-	    <li class="instructions"><a href="#instructions">instructions</a></li>
-	  </menu>
-	</div>
-      </div>
-    </div>
-  </header>
-  <div id="app" class="container"></div>
-  {% endblock %}
+  {% block body %}{% endblock %}
   <div id="connection-lost-dialog" title="Connection Lost">
     <h1>Emerald has lost the connection to the server</h1>
     <h3>please consider refreshing the page or check if the server is still down</h3>
