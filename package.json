@@ -2,7 +2,7 @@
     "name": "emerald"
   , "version": "0.0.1-alpha"
   , "preferGlobal": "true"
-  , "description": "real-time C.I written in node.js by Yipit.com. in unstable alpha (DON'T USE IT YET)"
+  , "description": "real-time C.I written in node.js by Yipit.com. in unstable alpha"
   , "keywords": ["continous", "integration", "CI", "build"]
   , "homepage": "http://github.com/Yipit/emerald"
   , "bugs": "http://github.com/Yipit/emerald/issues"
@@ -42,7 +42,7 @@
       }
   ]
   , "scripts": {
-      "start": "rm -rf ~/.emerald; npm install && make data && NODE_PATH=$NODE_PATH:`pwd` node ./app/emerald.js"
+      "start": "rm -rf ~/.emerald; npm install && make data && ./app/terminal/main.js run"
     , "test": "NODE_PATH=$NODE_PATH:`pwd` make unit && make functional"
   }
   , "keywords": [
@@ -57,8 +57,8 @@
   ]
   , "licenses": [
       {
-          "type": "MIT"
-        , "url": "http://www.opensource.org/licenses/mit-license.php"
+          "type": "AGPL3"
+        , "url": "http://www.gnu.org/licenses/agpl.html"
       }
   ]
   , "engines": {
