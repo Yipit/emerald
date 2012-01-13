@@ -1,5 +1,5 @@
 (function($){
-    var STAGES_BY_INDEX = {
+    const STAGES_BY_INDEX = {
         0: 'BEGINNING',
         1: 'FETCHING',
         2: 'PREPARING_ENVIRONMENT',
@@ -9,7 +9,7 @@
         6: 'SUCCEEDED'
     };
 
-    var STAGE_TO_UI = {
+    const STAGE_TO_UI = {
         0: 'ui-state-default',
         1: 'ui-state-default',
         2: 'ui-state-highlight',
@@ -40,6 +40,29 @@
         return _.template(raw);
     }
 
+    window.ConsoleView = Backbone.View.extend({
+        id: 'terminal',
+        events: {
+            'click #hide-main-terminal': 'hide_terminal'
+        },
+        template: [
+            '<pre id="live-code" class="terminal"></pre>',
+            '<button class="btn large small" id="hide-main-terminal" href="#">Hide terminal</button>'
+        ].join('\n'),
+        initialize: function() {
+            _.bindAll(this, 'render', 'hide_terminal');
+            this.model.bind('change', this.increment_code);
+        },
+        hide_terminal: function(e){
+            $("#terminal").hide();
+            return e.preventDefault();
+        },
+        render: function() {
+            $(this.el).html(this.template);
+            this.$("#live-code").html(this.model.get('full'));
+            return this;
+        }
+    });
     window.EmeraldView = Backbone.View.extend({
         className: 'row',
         initialize: function(){

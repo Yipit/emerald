@@ -431,6 +431,33 @@ a, a:hover{
   display: none;
 }
 
+#terminal {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: black;
+  z-index: 99999999;
+  display: none;
+
+  button {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+  }
+
+  #live-code {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: @darkest_aluminum;
+    .raw-box-shadow(inset 0 4px 200px #000);
+    font-size: 16px;
+    color: white;
+  }
+}
+
 .ui-state-error {
   .title, .last-build, .author {
     color: @lightest_aluminum;

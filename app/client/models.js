@@ -1,6 +1,9 @@
 (function($){
     window.UIError = Backbone.Model.extend({});
 
+    window.ConsoleSource = Backbone.Model.extend({
+    });
+
     window.EmeraldModel = Backbone.Model.extend({
         url: function(){
             return [

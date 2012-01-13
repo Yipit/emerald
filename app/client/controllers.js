@@ -7,6 +7,7 @@
             'instructions': 'manage_instructions'
         },
         initialize: function(){
+            this.$body = $("body");
             this.$app = $("#app");
             _.bindAll(this,
                       'dashboard',
@@ -15,11 +16,16 @@
                       'connection_lost');
 
             this.dashboardView = new BuildListView({collection: instructions});
+
+            this.consoleView = new ConsoleView({model: main_console});
+            var console = this.consoleView.render().el;
+            this.$body.prepend(console);
+
             window.socket.on('disconnect', this.connection_lost);
         },
         dashboard: function(){
-            var element = this.dashboardView.render().el;
-            this.$app.empty().append(element);
+            var dashboard = this.dashboardView.render().el;
+            this.$app.empty().append(dashboard);
             instructions.fetch();
         },
         build: function(id) {
