@@ -54,6 +54,9 @@ exports.now = function(app, io, redis, settings, callback) {
         process.stdout.write('\r  \n');
         console.log(['EMERALD'.green, 'caught a'.white, 'CONTROL-C'.red.bold, unicode_heart].join(' ').green.bold);
 
+        if (!redis.connected) {
+            process.reallyExit(1);
+        }
         process.stdout.write('Cleaning up redis... ');
         async.waterfall(
             [
