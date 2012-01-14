@@ -146,7 +146,7 @@ var Build = models.declare("Build", function(it, kind) {
             if (self.pid) {
                 logger.info([logging_prefix, 'killing build (pid: ' + self.pid + ')']);
                 try {
-                    process.kill(self.fetching_pid, signal);
+                    process.kill(self.pid, signal);
                 } catch (e){
                     logger.fail([logging_prefix, 'PID'.yellow.bold, self.pid, e.toString()]);
                     logger.fail(e.stack.toString());
@@ -434,15 +434,18 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
                 if ((code !== 0) && signal) {
                     build.stage = STAGES_BY_NAME.ABORTED;
                     build.signal = signal;
-                    redis.publish('Build aborted', JSON.stringify({
-                        build: build.toBackbone(),
-                        instruction: build.instruction.toBackbone(),
-                        error: err
-                    }));
                 } else if (parseInt(code, 10) !== 0) {
                     build.stage = STAGES_BY_NAME.FAILED;
                 }
-                build.save();
+                build.save(function(err, key, build){
+                    Build.fetch_by_id(build.__id__, function(err, build){
+                        redis.publish('Build aborted', JSON.stringify({
+                            build: build.toBackbone(),
+                            instruction: build.instruction.toBackbone(),
+                            error: err
+                        }));
+                    });
+                });
             });
         });
     });
