@@ -55,11 +55,15 @@
         connection_lost: function() {
             var view = new ConnectionLostView();
             this.$app.empty().append(view.render().el);
-            // setTimeout(function(){
-            //     if (!window.socket.socket.connected) {
-            //         $('#connection-lost-dialog').dialog('open');
-            //     }
-            // }, 1000);
+            setTimeout(function(){
+                if (!window.socket.socket.connected) {
+                    $('#connection-lost-dialog').dialog({
+                        resizable: false,
+                        modal: true,
+                        width: 500
+                    });
+                }
+            }, 1000);
         }
     });
 });})(jQuery);
