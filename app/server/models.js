@@ -52,7 +52,8 @@ var Build = models.declare("Build", function(it, kind) {
     it.has.field("index", kind.numeric);
     it.has.field("status", kind.string);
     it.has.field("signal", kind.string);
-    it.has.field("error", kind.string);
+    it.has.field("stderr", kind.string);
+    it.has.field("stdout", kind.string);
     it.has.field("output", kind.string);
     it.has.field("pid", kind.numeric);
     it.has.field("stage", kind.numeric);
@@ -100,12 +101,29 @@ var Build = models.declare("Build", function(it, kind) {
     });
 
     it.has.method('increment_stdout', function(value, callback){
-        return this.increment_field("output", value, callback);
+        var self = this;
+        async.waterfall([
+            function(callback){
+                self.increment_field("stdout", value, callback);
+            },
+            function(full, current, wrong_value, callback){
+                self.increment_field("output", value, callback);
+            }
+        ], callback);
+    });
+    it.has.method('increment_stderr', function(value, callback){
+        var self = this;
+        async.waterfall([
+            function(callback){
+                self.increment_field("stderr", value, callback);
+            },
+            function(full, current, wrong_value, callback){
+                self.increment_field("output", value, callback);
+            }
+        ], callback);
     });
 
-    it.has.method('increment_stderr', function(value, callback){
-        return this.increment_field("error", value, callback);
-    });
+
 
     it.has.method('gravatar_of_size', function(size){
         var hash = crypto.createHash('md5');
@@ -397,7 +415,8 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             },
             function create_an_empty_build (index, callback) {
                 Build.create({
-                    error: "",
+                    stderr: "",
+                    stdout: "",
                     output: "",
                     signal: 'SIGKILL',
                     status: 1,

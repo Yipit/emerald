@@ -160,8 +160,7 @@
                 'prepare_progress'
             );
             this.model.bind('change', this.render);
-            this.model.bind('build_stdout', this.expand_box);
-            this.model.bind('build_stderr', this.expand_box);
+            this.model.bind('build_output', this.expand_box);
             this.model.bind('build_running', this.expand_box);
             this.model.bind('build_started', this.expand_box);
             this.model.bind('build_finished', this.expand_box);
@@ -250,7 +249,6 @@
             }
             self.$buildlog.empty();
             _.each(all_builds, function(raw_build_data) {
-                console.log(raw_build_data);
                 var build = new Build(raw_build_data);
                 var params = {
                     model: build

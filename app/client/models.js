@@ -2,6 +2,12 @@
     window.UIError = Backbone.Model.extend({});
 
     window.ConsoleSource = Backbone.Model.extend({
+        initialize: function(){
+            var self = this;
+            window.socket.on('Build stdout', function(data){
+                self.set(data);
+            });
+        }
     });
 
     window.EmeraldModel = Backbone.Model.extend({
@@ -38,14 +44,9 @@
                 }
             });
 
-            window.socket.on('Build stdout', function(data){
+            window.socket.on('Build output', function(data){
                 if (data.instruction.id == self.get('id')) {
-                    self.trigger('build_stdout', data);
-                }
-            });
-            window.socket.on('Build stderr', function(data){
-                if (data.instruction.id == self.get('id')) {
-                    self.trigger('build_stderr', data);
+                    self.trigger('build_output', data);
                 }
             });
 

@@ -219,13 +219,15 @@ BuildRunner.prototype.start = function(){
                     if (err) {
                         logger.warning(msg);
                     }
-                    redis.publish("Build stdout", JSON.stringify({
+                    var envelope = JSON.stringify({
                         build: current_build.toBackbone(),
                         instruction: instruction.toBackbone(),
                         current: current,
                         full: full,
                         appended: appended,
-                    }));
+                    });
+                    redis.publish("Build stdout", envelope);
+                    redis.publish("Build output", envelope);
                 });
             });
             callback(null, build, instruction, command, args);
@@ -237,13 +239,15 @@ BuildRunner.prototype.start = function(){
                     if (err) {
                         logger.warning(msg);
                     }
-                    redis.publish("Build stderr", JSON.stringify({
+                    var envelope = JSON.stringify({
                         build: current_build.toBackbone(),
                         instruction: instruction.toBackbone(),
                         current: current,
                         full: full,
                         appended: appended,
-                    }));
+                    });
+                    redis.publish("Build stderr", envelope);
+                    redis.publish("Build output", envelope);
                 });
             });
             callback(null, build, instruction, command, args);
