@@ -18,6 +18,9 @@ var BACKBONE_VIEW_PATH = path.join(CLIENT_PATH, 'html');
 var VIEW_PATH          = LOCAL_FILE('app', 'server', 'html');
 var ASSETS_PATH        = LOCAL_FILE('public');
 var CSS_PATH           = path.join(ASSETS_PATH, 'public');
+var PID_PATH           = '/tmp/emerald.pid'
+var STDOUT_PATH        = '/tmp/emerald.stdout.log'
+var STDERR_PATH        = '/tmp/emerald.stderr.log'
 
 module.exports = {
     LOG_LEVEL: 3,
@@ -37,5 +40,8 @@ module.exports = {
     ASSETS_PATH: ASSETS_PATH,
     CLIENT_PATH: CLIENT_PATH,
     BACKBONE_VIEW_PATH: BACKBONE_VIEW_PATH,
-    SCRIPT_PATH: LOCAL_FILE('app', 'terminal', 'main.js')
+    SCRIPT_PATH: LOCAL_FILE('app', 'terminal', 'main.js'),
+    PID_PATH: PID_PATH,
+    STDOUT_PATH: STDOUT_PATH,
+    STDERR_PATH: STDERR_PATH
 }

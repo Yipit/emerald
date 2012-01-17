@@ -16,11 +16,17 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ***************************************************************************/
-
-var program = require('commander');
+***************************************************************************/
+require("colors");
 var async = require('async');
+var program = require('commander');
+var daemon = require('daemon');
+var path = require('path');
+var fs = require('fs');
+
 var meta = require("../../package");
+var settings = require("../../settings");
+
 
 program
     .version(meta.version);
@@ -45,10 +51,61 @@ program
 
 program
     .command('run')
+    .option('-d, --daemon', 'run as a daemon')
     .description('runs emerald')
-    .action(function(build_id) {
-        var emerald = require('../server/main')
-        emerald.run()
+    .action(function(options) {
+        if (options.daemon) {
+            process.stdout.write(["Preparing to run", 'emerald'.green, 'as a daemon... '].join(" "));
+            async.waterfall([
+                function check_if_already_running (callback){
+                    path.exists(settings.PID_PATH, function(is_there){
+                        return callback(null, is_there);
+                    });
+                },
+                function open_if_already_exists(is_there, callback){
+                    if (is_there) {
+                        fs.readFile(settings.PID_PATH, callback);
+                    } else {
+                        callback(null, null);
+                    }
+                },
+                function kill_aggressively_if_necessary(_pid, callback) {
+                    var pid = parseInt(_pid, 10);
+
+                    try {
+                        process.kill(pid, 'SIGKILL');
+                    } catch (e){
+                    }
+
+                    callback(null);
+                },
+                function daemonize_the_process (callback) {
+                    daemon.daemonize({
+                        stdout: settings.STDOUT_PATH,
+                        stderr: settings.STDERR_PATH
+                    }, settings.PID_PATH, callback);
+                }
+            ], function (err, pid){
+                /* this callback is within the daemon's context, it
+                 * means all the code here will run daemonized */
+                if (err) {
+                    console.log('Error starting daemon: ' + err.toString());
+                    console.log(err.stack);
+                    process.reallyExit(6);
+                }
+                var emerald = require('../server/main')
+                emerald.run();
+            });
+
+            console.log("OK".yellow.bold, "\n");
+            console.log("PID file at:", settings.PID_PATH.yellow.bold);
+            console.log("STDOUT at:", settings.STDOUT_PATH.yellow.bold);
+            console.log("STDERR at:", settings.STDERR_PATH.yellow.bold);
+        } else {
+            console.log(["Running", 'emerald'.green, '... '].join(" "));
+            var emerald = require('../server/main')
+            emerald.run();
+        }
     });
 
 program.parse(process.argv);
