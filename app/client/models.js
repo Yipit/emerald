@@ -28,39 +28,24 @@
         __name__: 'instruction',
         initialize: function(){
             var self = this;
-            window.socket.on('Build started', function(data){
-                if (data.instruction.id == self.get('id')) {
-                    self.trigger('build_started', data);
-                }
-            });
-            window.socket.on('Build finished', function(data){
-                if (data.instruction.id == self.get('id')) {
-                    self.trigger('build_finished', data);
-                }
-            });
-            window.socket.on('Build aborted', function(data){
-                if (data.instruction.id == self.get('id')) {
-                    self.trigger('build_aborted', data);
-                }
-            });
 
-            window.socket.on('Build output', function(data){
-                if (data.instruction.id == self.get('id')) {
-                    self.trigger('build_output', data);
+            function bypass_signal (server_name, client_name) {
+                var myid = self.get('id');
+                return function (data) {
+                    if (data.instruction.id == myid) {
+                        self.set(data.instruction);
+                        data.event_name = server_name;
+                        self.trigger(client_name, data);
+                    }
                 }
-            });
+            }
+            window.socket.on('Build started',                bypass_signal("Build started",                "build_started"));
+            window.socket.on('Build finished',               bypass_signal("Build finished",               "build_finished"));
+            window.socket.on('Build aborted',                bypass_signal("Build aborted",                "build_aborted"));
+            window.socket.on('Build output',                 bypass_signal("Build output",                 "build_output"));
 
-            window.socket.on('Repository being fetched', function(data){
-                if (data.instruction.id == self.get('id')) {
-                    self.trigger('fetching_repository', data);
-                }
-            });
-            window.socket.on('Repository finished fetching', function(data){
-                if (data.instruction.id == self.get('id')) {
-                    self.trigger('repository_fetched', data);
-                }
-            });
-
+            window.socket.on('Repository being fetched',     bypass_signal("Repository being fetched",     "fetching_repository"));
+            window.socket.on('Repository finished fetching', bypass_signal("Repository finished fetching", "fetching_repository"));
         }
     });
 

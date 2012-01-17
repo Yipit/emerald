@@ -164,6 +164,7 @@
             this.model.bind('build_running', this.expand_box);
             this.model.bind('build_started', this.expand_box);
             this.model.bind('build_finished', this.expand_box);
+            this.model.bind('fetching_repository', this.expand_box);
 
             this.model.bind('build_finished', this.update_latest_build);
             this.model.bind('build_aborted', this.update_latest_build);
@@ -238,17 +239,14 @@
             var self = this;
             self.refresh_widgets();
 
-            if (data.instruction) {
-                var all_builds = data.instruction.all_builds;
-            } else {
-                var all_builds = this.model.get('all_builds');
-            }
+            var all_builds = _.uniq(this.model.get('all_builds'));
 
             if (data && data.build) {
                 all_builds.unshift(data.build);
             }
             self.$buildlog.empty();
             _.each(all_builds, function(raw_build_data) {
+                console.log("all_builds:", all_builds);
                 var build = new Build(raw_build_data);
                 var params = {
                     model: build
