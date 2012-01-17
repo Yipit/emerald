@@ -73,8 +73,11 @@ program
                     var pid = parseInt(_pid, 10);
 
                     try {
-                        process.kill(pid, 'SIGKILL');
+                        if (pid !== process.pid) {
+                            process.kill(pid, 'SIGKILL');
+                        }
                     } catch (e){
+
                     }
 
                     callback(null);
