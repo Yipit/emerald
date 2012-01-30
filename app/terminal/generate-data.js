@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require("colors");
 
 var entity = require('../server/models');
-var settings = require('../../settings');
+GLOBAL.settings = require('../../settings');
 
 process.stdout.write("Populating the database... ".white.bold);
 console.time("Finished within");

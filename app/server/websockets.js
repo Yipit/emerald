@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***************************************************************************/
 var async = require('async');
 var entity = require('./models');
-var settings = require('../../settings');
 
 var logger = new (require('./logger').Logger)("[WEBSOCKET]".magenta.bold);
 

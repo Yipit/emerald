@@ -26,7 +26,6 @@ var moment = require('moment');
 var path = require('path');
 var fs = require('fs');
 var child_process = require('child_process');
-var settings = require('../../settings');
 var logger = new (require('./logger').Logger)("[ MODELS / RUNNER ]".green.bold);
 
 var STAGES_BY_INDEX = {

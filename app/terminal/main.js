@@ -18,6 +18,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ***************************************************************************/
 require("colors");
+var _ = require('underscore')._;
 var async = require('async');
 var program = require('commander');
 var daemon = require('daemon');
@@ -25,11 +26,20 @@ var path = require('path');
 var fs = require('fs');
 
 var meta = require("../../package");
-var settings = require("../../settings");
-
+GLOBAL.settings = require("../../settings");
 
 program
-    .version(meta.version);
+    .version(meta.version)
+    .option('-s, --settings <path>', 'set the path for settings', function(settings_path){
+        if (!path.existsSync(settings_path)){
+            console.log('the option', '-s/--settings'.yellow.bold, 'requires an existing path pointing to a valid settings file');
+            process.exit(1);
+        }
+
+        settings_path = path.resolve(process.cwd(), settings_path).replace(/[.](json|js)/, '');
+        var newsettings = require(settings_path);
+        GLOBAL.settings = _.extend(settings, newsettings);
+    })
 
 program
     .command('build <build-id>')

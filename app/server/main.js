@@ -22,7 +22,6 @@ var logger = new (require('./logger').Logger)("[MAIN]".white.bold);
 var _ = require('underscore')._,
 async = require('async'),
 swig = require('swig'),
-settings = require('../../settings'),
 
 boot = require('./boot'),
 

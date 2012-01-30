@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***************************************************************************/
 require('colors');
 var _ = require('underscore')._;
-var settings = require('../../settings');
 var loglevel = {
     DEBUG: 4,
     SUCCESS: 3,
@@ -30,46 +29,45 @@ var loglevel = {
 function Logger (prefix) {
     var self = this;
 
-    this.level = settings.LOG_LEVEL || loglevel.SUCCESS;
+    self.level = settings.LOG_LEVEL || loglevel.SUCCESS;
 
-    this.prefix = "   [EMERALD] ".green + prefix;
-    this.log = function(prefix, parts){
-        var msg = [this.prefix, prefix];
+    self.prefix = "   [EMERALD] ".green + prefix;
+    self.log = function(prefix, parts){
+        var msg = [self.prefix, prefix];
         if (parts instanceof Array) {
             _.each(parts, function(x) {msg.push(x);});
         } else {
             msg.push(parts);
         }
-        msg.push(this.timestamp());
+        msg.push(self.timestamp());
         console.log.apply(console, msg);
     }
 
-    this.info = function(parts) {
-        if (self.level < 2) return;
-        this.log("INFO:".cyan.bold, parts);
-    };
-    this.debug =  function(parts) {
-        if (self.level < 4) return;
-        this.log("DEBUG:".yellow.bold, parts);
-    };
-    this.success =  function(parts) {
-        if (self.level < 3) return;
-        this.log("SUCCESS:".green.bold, parts);
-    };
-    this.fail = function(parts) {
-        if (self.level < 1) return;
-        this.log("FAILURE:".red, parts);
-    };
-    this.warn = this.warning = function(parts) {
-        if (self.level < 1) return;
-        this.log("WARNING:".red.bold, parts);
-    };
-    this.handleException = function(where, exc){
+    function action(minimum_level, fn){
+        if (self.level < minimum_level) return function(){};
+        return fn;
+    }
+    self.info = action(loglevel.INFO, function(parts) {
+        self.log("INFO:".cyan.bold, parts);
+    });
+    self.debug = action(loglevel.DEBUG, function(parts) {
+        self.log("DEBUG:".yellow.bold, parts);
+    });
+    self.success = action(loglevel.SUCCESS, function(parts) {
+        self.log("SUCCESS:".green.bold, parts);
+    });
+    self.fail = action(loglevel.FAIL, function(parts) {
+        self.log("FAILURE:".red, parts);
+    });
+    self.warn = self.warning = action(loglevel.FAIL, function(parts) {
+        self.log("WARNING:".red.bold, parts);
+    });
+    self.handleException = function(where, exc){
         if (exc) {
-            this.fail(["@", where, exc, '\n', exc.stack + ""]);
+            self.fail(["@", where, exc, '\n', exc.stack + ""]);
         }
     }
-    this.timestamp = function(){
+    self.timestamp = function(){
         return ("@"+(new Date()).toTimeString()).white.bold;
     };
 }

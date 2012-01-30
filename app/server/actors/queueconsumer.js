@@ -1,6 +1,5 @@
 var async = require('async');
 var logger = new (require('../logger').Logger)("[QUEUE CONSUMER]".blue.bold);
-var settings = require('../../../settings');
 
 exports.entities = require('../models');
 var Lock = require('../lock').Lock;
