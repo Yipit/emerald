@@ -1,11 +1,11 @@
 all: unit functional data
 
-export VOWS_BIN:=$(PWD)/node_modules/vows/bin/vows
-export VOWS_CMD:=$(VOWS_BIN) --spec spec/kind/*.js
+export MOCHA_BIN:=$(PWD)/node_modules/mocha/bin/mocha
+export MOCHA_CMD:=$(MOCHA_BIN) -b -u bdd -r should -R spec test/kind/test.*.js
 
 init:
-	@echo "installing vows (if necessary)..."
-	@test -e `which vows` || test -e $$VOWS_BIN || npm install -g vows
+	@echo "installing mocha (if necessary)..."
+	@test -e $$MOCHA_BIN || npm install -g mocha
 	@echo "installing other dependencies..."
 	@npm install
 
@@ -15,7 +15,7 @@ unit:
 
 functional: init clean
 	@echo "Running functional tests ..."
-	@`(echo $$VOWS_CMD | sed "s,kind,functional,g")`
+	@`(echo $$MOCHA_CMD | sed "s,kind,functional,g")`
 
 clean:
 	@printf "Cleaning up files that are already in .gitignore... "

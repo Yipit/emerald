@@ -27,8 +27,9 @@
     , "daemon": ">= 0.4.1"
   }
   , "devDependencies": {
-      "vows": "0.5.13"
+      "mocha": "0.10.2"
     , "should": ">= 0.3.2"
+    , "request": ">= 2.9.100"
   }
   , "maintainers": [
       {
@@ -44,7 +45,7 @@
   ]
   , "scripts": {
       "start": "rm -rf ~/.emerald; npm install && make data && ./app/terminal/main.js run"
-    , "test": "NODE_PATH=$NODE_PATH:`pwd` make unit && make functional"
+    , "test": "NODE_PATH=$NODE_PATH:`pwd` make unit functional"
   }
   , "keywords": [
       "continuous integration"

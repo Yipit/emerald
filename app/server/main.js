@@ -91,8 +91,8 @@ exports.run = function(){
         'logger': websockets.logger
     });
     /* start up the emerald actors */
-    boot.now(app, io, redis, settings, function(cwd) {
-        app.listen(parseInt(process.env.PORT || 3000));
+    boot.now(app, io, redis, function(cwd) {
+        app.listen(parseInt(process.env.PORT || settings.EMERALD_PORT));
         queueconsumer.use(redis);
         orchestrator.make(io);
         websockets.work_on(redis, io);

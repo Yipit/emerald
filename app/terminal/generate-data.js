@@ -33,6 +33,7 @@ entity.clear_keys(["emerald*","clay*","sess*"], function(err, keys){
     var entities = [
         new entity.BuildInstruction({
             name: "This passes",
+            slug: "emerald-unit-tests",
             description: "green and fast :)",
             repository_address: "file://" + settings.LOCAL_FILE('.git'),
             branch: "master",
@@ -41,6 +42,7 @@ entity.clear_keys(["emerald*","clay*","sess*"], function(err, keys){
         }),
         new entity.BuildInstruction({
             name: "Fails miserably",
+            slug: "emerald-functional-tests",
             description: "red and fast :(",
             repository_address: "file://" + settings.LOCAL_FILE('.git'),
             branch: "master",
@@ -50,6 +52,7 @@ entity.clear_keys(["emerald*","clay*","sess*"], function(err, keys){
 
         new entity.BuildInstruction({
             name: "Yipit Unit Tests",
+            slug: "emerald-acceptance-tests",
             description: "Tests emerald against redis",
             repository_address: "git@github.com:Yipit/yipit.git",
             branch: "master",

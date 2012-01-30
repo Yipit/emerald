@@ -27,7 +27,7 @@ function mkdirIfNotExist(target, mode, callback){
         exists ? callback(null) : mkdirp(target, mode, callback);
     });
 }
-exports.now = function(app, io, redis, settings, callback) {
+exports.now = function(app, io, redis, callback) {
     var logger = new (require('./logger').Logger)("[STARTUP]".yellow.bold);
     async.reject([settings.EMERALD_PATH, settings.SANDBOX_PATH], path.exists, function(folders_to_create) {
         async.forEach(folders_to_create, function(folder, cb) {

@@ -257,10 +257,13 @@ var Build = models.declare("Build", function(it, kind) {
 
 var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
     it.has.field("name", kind.string);
+    it.has.field("slug", kind.string);
     it.has.field("description", kind.string);
     it.has.field("repository_address", kind.string);
     it.has.field("branch", kind.string);
     it.has.field("build_script", kind.string);
+
+    it.has.index("slug");
 
     it.has.getter('last_build', function() {
         return this.all_builds[0];

@@ -1,0 +1,91 @@
+{
+  "after": "f883e773a00847ef248d397c63f5d8c31be61373",
+  "before": "67c1f0f27672d82f324b9f75544e8fbaf35a9c5b",
+  "commits": [
+    {
+      "added": [],
+      "author": {
+        "email": "henry@yipit.com",
+        "name": "Henry Xie",
+        "username": "xie1989"
+      },
+      "distinct": false,
+      "id": "2c77640d90ba9745972428153e1572e90c065857",
+      "message": "Merge pull request #75 from Yipit\/hotfix\/curator_superuser_check\n\nhotfix\/curator_superuser_check",
+      "modified": [
+        "apps\/deal\/dealuserwrapper.py"
+      ],
+      "removed": [],
+      "timestamp": "2012-01-28T15:15:21-08:00",
+      "url": "https:\/\/github.com\/Yipit\/yipit\/commit\/2c77640d90ba9745972428153e1572e90c065857"
+    },
+    {
+      "added": [],
+      "author": {
+        "email": "henry@yipit.com",
+        "name": "Henry Xie",
+        "username": "xie1989"
+      },
+      "distinct": false,
+      "id": "c818112750271cc8508ca61ed2296a9cc1b30fad",
+      "message": "fixing supertrending",
+      "modified": [
+        "apps\/deal\/mongo_querysets.py",
+        "apps\/deal\/recengine.py"
+      ],
+      "removed": [],
+      "timestamp": "2012-01-30T08:16:37-08:00",
+      "url": "https:\/\/github.com\/Yipit\/yipit\/commit\/c818112750271cc8508ca61ed2296a9cc1b30fad"
+    },
+    {
+      "added": [],
+      "author": {
+        "email": "henry@yipit.com",
+        "name": "Henry Xie",
+        "username": "xie1989"
+      },
+      "distinct": true,
+      "id": "f883e773a00847ef248d397c63f5d8c31be61373",
+      "message": "Merge pull request #77 from Yipit\/hotfix\/fix_super_trending\n\nhotfix\/fix_super_trending",
+      "modified": [
+        "apps\/deal\/mongo_querysets.py",
+        "apps\/deal\/recengine.py"
+      ],
+      "removed": [],
+      "timestamp": "2012-01-30T08:18:02-08:00",
+      "url": "https:\/\/github.com\/Yipit\/yipit\/commit\/f883e773a00847ef248d397c63f5d8c31be61373"
+    }
+  ],
+  "compare": "https:\/\/github.com\/Yipit\/yipit\/compare\/67c1f0f...f883e77",
+  "created": false,
+  "deleted": false,
+  "forced": false,
+  "pusher": {
+    "name": "none"
+  },
+  "ref": "refs\/heads\/master",
+  "repository": {
+    "created_at": "2010\/07\/01 07:48:50 -0700",
+    "description": "yipit",
+    "fork": false,
+    "forks": 1,
+    "has_downloads": true,
+    "has_issues": false,
+    "has_wiki": true,
+    "homepage": "yipit.com",
+    "language": "Python",
+    "master_branch": "dev",
+    "name": "yipit",
+    "open_issues": 0,
+    "organization": "Yipit",
+    "owner": {
+      "email": "zach@yipit.com",
+      "name": "Yipit"
+    },
+    "private": true,
+    "pushed_at": "2012\/01\/30 08:18:03 -0800",
+    "size": 536,
+    "url": "https:\/\/github.com\/Yipit\/yipit",
+    "watchers": 5
+  }
+}
