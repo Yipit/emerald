@@ -4,12 +4,28 @@
 
 could it be simpler ?
 
-## `$ brew install redis`
-## `$ npm install -g emerald`
+## install redis
 
-# running
+### MacOSX
 
-## `$ emerald run`
+`$ brew install redis`
+
+### Ubuntu and other Debian-ish GNU/Linux distros
+
+`$ sudo apt-get install redis-server`
+
+### Windows
+
+Forget it, bro. This CI server is cool, so it will NOT run on
+windows. Sorry about that :)
+
+## install emerald
+
+`$ npm install -g emerald`
+
+# running it
+
+`$ emerald run`
 
 ## other options
 
