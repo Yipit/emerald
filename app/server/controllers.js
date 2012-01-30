@@ -75,6 +75,10 @@ exports.map = function(app, redis){
         return response.render('design', context)
     }));
 
+    app.post('/hooks/github/:project_slug', function(request, response){
+
+        return response.send('text', { 'Content-Type': 'application/json' }, 201);
+    });
 
     app.get('/api/instructions.json', function(request, response){
         entity.BuildInstruction.get_latest_with_builds(function(err, instructions){
