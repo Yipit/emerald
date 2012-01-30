@@ -39,7 +39,6 @@ redis = require('redis').createClient();
 
 /* preparing the http server and the socket.io */
 var app = express.createServer();
-var io = require('socket.io').listen(app);
 
 /* configuring the express app */
 app.configure(function(){
@@ -87,8 +86,12 @@ app.configure('production', function(){
 
 
 exports.run = function(){
+    var io = require('socket.io').listen(app, {
+        'log level': settings.LOG_LEVEL,
+        'logger': websockets.logger
+    });
     /* start up the emerald actors */
-    boot.now(app, io, redis, settings, function(cwd){
+    boot.now(app, io, redis, settings, function(cwd) {
         app.listen(parseInt(process.env.PORT || 3000));
         queueconsumer.use(redis);
         orchestrator.make(io);
