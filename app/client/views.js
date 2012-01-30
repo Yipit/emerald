@@ -1,5 +1,5 @@
 (function($){
-    const STAGES_BY_INDEX = {
+    window.STAGES_BY_INDEX = {
         0: 'BEGINNING',
         1: 'FETCHING',
         2: 'PREPARING_ENVIRONMENT',
@@ -9,7 +9,7 @@
         6: 'SUCCEEDED'
     };
 
-    const STAGE_TO_UI = {
+    window.STAGE_TO_UI = {
         0: 'ui-state-default',
         1: 'ui-state-default',
         2: 'ui-state-highlight',
@@ -20,7 +20,7 @@
     };
 
     function truncate(string, amount){
-        var amount = amount || 45;
+        amount = amount || 45;
         try {
             if (string.length > amount) {
                 return string.substr(0, amount) + ' ...';
@@ -37,7 +37,7 @@
         if (raw.length === 0){
             throw new Error('The template "'+name+'" could not be found.');
         }
-        return _.template(raw);
+        return swig.compile(raw, {filename: name});
     }
 
     window.ConsoleView = Backbone.View.extend({
@@ -82,8 +82,9 @@
             var data = {};
             if (this.model) {
                 data = this.model.toJSON();
+            } else if (this.collection){
+                data.collection = this.collection.toJSON();
             }
-            this.trigger('pre-render', {redefine:data});
             var rendered = this.template(_.extend(data, {
                 STAGE_TO_UI: STAGE_TO_UI,
                 truncate: truncate
@@ -113,14 +114,14 @@
     });
 
     window.ConnectionLostView = EmeraldView.extend({
-        template_name: 'connection-lost',
+        template_name: 'connection-lost'
     });
 
     window.BuildListView = EmeraldView.extend({
         template_name: 'list-instructions',
         render: function(){
             var $instructions,
-              collection = this.collection;
+            collection = this.collection;
 
             $(this.el).html(this.template({}));
             $instructions = this.$("#builds");
@@ -154,8 +155,9 @@
                 'expand_box',
                 'update_latest_build',
                 'update_toolbar',
-                'show_progress',
-                'hide_progress',
+                'determine_progress',
+                '_show_progress',
+                '_hide_progress',
                 'render_builds',
                 'prepare_progress'
             );
@@ -173,8 +175,9 @@
             this.model.bind('build_finished', this.update_toolbar);
             this.model.bind('build_aborted', this.update_toolbar);
 
-            this.model.bind('fetching_repository', this.show_progress);
-            this.model.bind('repository_fetched', this.hide_progress);
+            this.model.bind('fetching_repository', this.determine_progress);
+            this.model.bind('repository_fetched', this.determine_progress);
+            this.model.bind('build_aborted', this.determine_progress);
 
             this.template = get_template('instruction');
             this.bind('post-render', this.prepare_progress);
@@ -246,7 +249,6 @@
             }
             self.$buildlog.empty();
             _.each(all_builds, function(raw_build_data) {
-                console.log("all_builds:", all_builds);
                 var build = new Build(raw_build_data);
                 var params = {
                     model: build
@@ -272,26 +274,32 @@
         prepare_progress: function(data){
             this.$(".progress").progressbar({value: 0}).hide();
         },
-        show_progress: function(data){
+        determine_progress: function(data){
+            if (data.percentage) {
+                this._show_progress(data);
+            } else {
+                this._hide_progress(data);
+            }
+        },
+        _show_progress: function(data){
             var $pbar = this.$(".progress");
             var parsed_value = /\d+/.exec(data.percentage)[0];
+            if (parsed_value >= 0) {
+                var value = parseInt(parsed_value, 10);
+                var label = [data.phase, data.percentage].join(': ');
 
-            var value = parseInt(parsed_value, 10);
-            var label = [data.phase, data.percentage].join(': ');
+                $pbar
+                    .show()
+                    .find(".text").text(label);
 
-            $pbar
-                .show()
-                .find(".text").text(label);
-
-            $pbar.progressbar("value", value);
-
+                $pbar.progressbar("value", value);
+            }
         },
-        hide_progress: function(data){
+        _hide_progress: function(data){
             this.$(".progress").hide();
         },
         expand_box: function(data){
             var self = this;
-
             var build = new Build(data.build);
 
             self.refresh_widgets();
@@ -336,7 +344,12 @@
             /* expand the body the body title */
             this.$body.removeClass('hidden');
 
-            this.$avatar.addClass('picture').find("img").attr('src', build.gravatars['100']);
+            var $avatar_img = this.$avatar.addClass('picture').find("img");
+            if (STAGES_BY_INDEX[build.stage] != 'ABORTED') {
+                $avatar_img.attr('src', build.gravatars['100']);
+            } else {
+                $avatar_img.attr('src', 'images/aborted.png');
+            }
 
             var $li = this.$body.find("li[id='clay:Build:id:" + build.__id__ + "']");
             this.$last_build.html(this.make_last_build(build));
@@ -383,6 +396,20 @@
     });
 
     window.InstructionManagementView = EmeraldView.extend({
-        template_name: 'manage-instructions'
+        template_name: 'manage-instructions',
+        render: function(){
+            var data = {
+                instructions: this.collection.toJSON()
+            };
+
+            var rendered = this.template(_.extend(data, {
+                STAGE_TO_UI: STAGE_TO_UI
+            }));
+
+            $(this.el).html(rendered);
+            this.trigger('post-render', this);
+            return this;
+        }
+
     });
 })(jQuery);

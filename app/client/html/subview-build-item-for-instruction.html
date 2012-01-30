@@ -1,7 +1,8 @@
 <a href="<%= permalink %>">
   <strong class="number">#<%= index %></strong>
-  <% if (has_message) { %>
-    <span class="message"><%= truncate(message) %></a><% if (humanized.finished_at) { %> - <%= humanized.finished_at %> <%}%></span>
-  <% } else { %>
+  {% if has_message %}
+    <span class="message">{{ message|truncate }}</a>{% if humanized.finished_at %} - {{ humanized.finished_at }} {% endif %}</span>
+  {% else %}
     <span class="running">running...</span>
-  <%}%>
+  {% endif %}
+</a>

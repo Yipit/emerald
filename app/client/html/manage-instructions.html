@@ -3,4 +3,12 @@
     <h2>Manage Instructions</h2>
   </div>
 </div>
+{% for instruction in instructions %}
+<div class="row">
+  <div class="span16">
+    <strong>{{ instruction.name }}</strong>
+  </div>
+</div>
+
+{% endfor %}
 

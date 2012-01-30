@@ -292,6 +292,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
         ['all_builds', 'succeeded_builds', 'failed_builds'].forEach(function(attribute){
             data[attribute] = self[attribute].map(function(b){ return b.toBackbone() });
         });
+        data.last_build = self.all_builds.length > 0 ? self.all_builds[0] : null;
         data.is_building = self.is_building || false;
         data.current_build = self.current_build || null;
 

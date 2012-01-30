@@ -49,7 +49,8 @@
             });
         },
         manage_instructions: function() {
-            var view = new InstructionManagementView();
+            var view = new InstructionManagementView({collection: instructions});
+            instructions.fetch();
             this.$app.empty().append(view.render().el);
         },
         connection_lost: function() {

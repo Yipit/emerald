@@ -1,36 +1,35 @@
-<% var last_build = _.first(all_builds); %>
-<article class="instruction" data-instruction-id="<%= __id__ %>">
-  <div class="ui-widget <%= last_build ? STAGE_TO_UI[last_build.stage] : 'ui-state-default' %>">
+<article class="instruction" data-instruction-id="{{ __id__ }}">
+  <div class="ui-widget {% if last_build %} {{ STAGE_TO_UI[last_build.stage]  }} {% else %} ui-state-default {% endif %}">
     <ul class="instruction-header ui-widget ui-corner-all">
-      <li class="avatar ui-widget ui-corner-all ui-state-default <%= last_build ? 'picture': '' %>">
-	<% if (last_build) { %>
-	<img src="<%= last_build.gravatars['100'] %>" width="100" height="100" class="ui-widget ui-corner-all ui-state-default"/>
-	<% } else { %>
+      <li class="avatar ui-widget ui-corner-all ui-state-default {% if last_build %}picture{% endif %}">
+	{% if last_build %}
+	<img src="{{ last_build.gravatars['100'] }}" width="100" height="100" class="ui-widget ui-corner-all ui-state-default"/>
+	{% else %}
 	<img src="/images/blank_avatar.jpg" width="100" height="100" class="ui-widget ui-corner-all ui-state-default"/>
-	<% } %>
+	{% endif %}
       </li>
       <li class="title">
-	<h1 class="title"><%= name %></h1>
+	<h1 class="title">{{ name }}</h1>
       </li>
       <li class="last-build">
 	<span>last build:</span>
-	<% if (last_build) { %>
-	<strong class="status-color <%= last_build.style_name %>">
-	  <a href="<%= last_build.permalink %>"><%= truncate(last_build.message) %></a>
+	{% if last_build %}
+	<strong class="status-color {{ last_build.style_name }}">
+	  <a href="{{ last_build.permalink }}">{{ last_build.message|truncate }}</a>
 	</strong>
-	<% } else { %>
+	{% else %}
 	<strong> Never :(</strong>
-	<% } /* endif */ %>
+	{% endif %}
       </li>
-      <% if (last_build && last_build.author_name) { %>
+      {% if last_build && last_build.author_name %}
       <li class="author">
 	<span>by</span>
-	<span class="name"><%= last_build.author_name %></span>
+	<span class="name">{{ last_build.author_name }}</span>
       </li>
-      <% } /* endif */ %>
+      {% endif %}
     </ul>
 
-    <div class="instruction-body <%= (last_build) ? '': 'hidden' %>">
+    <div class="instruction-body {% if not last_build %}hidden{% endif %}">
       <h4 class="title">latest builds</h4>
       <div class="progress">
 	<div class="text">text</div>
@@ -40,17 +39,17 @@
     </div>
 
     <ul class="instruction-footer ui-widget ui-corner-all">
-      <% if (last_build) { %>
+      {% if last_build %}
       <li class="toolbar">
 	<button class="btn small do-schedule" href="#">Add to the queue</button>
 	<button class="btn small info show-output" href="#">STDOUT</button>
 	<button class="btn small error show-error" href="#">STDERR</button>
       </li>
-      <% } else { %>
+      {% else %}
       <li class="toolbar">
 	<button class="btn small success do-schedule" href="#">Build now</button>
       </li>
-      <% } %>
+      {% endif %}
     </ul>
   </div>
 </article>

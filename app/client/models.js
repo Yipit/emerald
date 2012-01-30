@@ -30,6 +30,9 @@
             var self = this;
 
             function bypass_signal (server_name, client_name) {
+                /* takes a signal broadcasted by redis, match the
+                 * instruction id and cascade the signal town into
+                 * backbone signals */
                 var myid = self.get('id');
                 return function (data) {
                     if (data.instruction.id == myid) {

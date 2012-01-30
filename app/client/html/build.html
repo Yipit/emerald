@@ -1,31 +1,31 @@
-<div class="build row <%= style_name %> <%= stage_name %>">
+<div class="build row {{ style_name }} {{ stage_name }}">
   <div class="span16">
-    <h1><%= instruction.name %>'s build #<%= index %></h1>
-    <img class="gravatar" src="<%= gravatars['150'] %>" width="150" height="150" />
+    <h1><{{ instruction.name }}'s build #{{ index }}</h1>
+    <img class="gravatar" src="{{ gravatars['150'] }}" width="150" height="150" />
     <p class="title">
-      <strong>by <%= author_name %> &lt;<%= author_email %>&gt;</strong>
+      <strong>by {{ author_name }} &lt;{{ author_email }}&gt;</strong>
     </p>
-    <p class="message"><%= message%></p>
+    <p class="message">{{ message }}</p>
     <!--
     <h2>Timing:</h2>
-    <p><code>started fetching <%= humanized.fetching_started %></code></p>
-    <p><code>finished fetching <%= humanized.fetching_finished %></code></p>
-    <p><code>started building <%= humanized.build_started %></code></p>
-    <p><code>finished building <%= humanized.build_finished %></code></p>
+    <p><code>started fetching {{ humanized.fetching_started }}</code></p>
+    <p><code>finished fetching {{ humanized.fetching_finished }}</code></p>
+    <p><code>started building {{ humanized.build_started }}</code></p>
+    <p><code>finished building {{ humanized.build_finished }}</code></p>
     -->
     <p>
       <strong>STDOUT</strong>
-      <pre class="terminal"><%= stdout.replace('\n', '<br />') %></pre>
+      <pre class="terminal">{{ stdout|replace('\n', '<br />') }}</pre>
     </p>
     <p>
       <strong>STDERR</strong>
-      <pre class="terminal"><%= stderr.replace('\n', '<br />') %></pre>
+      <pre class="terminal">{{ stderr|replace('\n', '<br />') }}</pre>
     </p>
     <p>
       <strong>exit status</strong>
-      <pre><%= status %></pre>
+      <pre>{{ status }}</pre>
       <strong>signal</strong>
-      <pre><%= signal %></pre>
+      <pre>{{ signal }}</pre>
     </p>
   </div>
 </div>
