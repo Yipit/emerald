@@ -1,4 +1,51 @@
-## this is a build server made to be real-time, fast and dead simple to use
+## this is a build server made to be real-time, fast and dead simple to use. In other words, this was made to be cool :)
+
+# installation
+
+could it be simpler ?
+
+## `$ brew install redis`
+## `$ npm install -g emerald`
+
+# running
+
+## `$ emerald run`
+
+## other options
+
+you can pass the `-s` or `--settings` parameter to the `emerald` command line parameter, this will cause emerald to import the settings from the file and merge them over the [default settings](https://github.com/Yipit/emerald/blob/master/settings.js)
+
+below is a full description of all the options, if you want to write
+your own settings file, you can pretty much copy and paste the code
+below and add your own fine tune:
+
+please consider `$EMERALD_ROOT$` as the path that [npm](http://npmjs.org/) installed emerald for you when you ran `npm install -g emerald`
+
+```javascript
+module.exports = {
+    LOG_LEVEL: 3, /* refer to log levels in the README */
+    SHUT_UP: false, /* when true emerald will produce absolutely NO logging output. It is used internally when emerald needs to run functional tests against the builtin server */
+    GIT_POLL_INTERVAL: 3000, /* 60.000 miliseconds = 1 second */
+    EMERALD_PORT: 3000,
+    EMERALD_HOSTNAME: 'localhost',
+    EMERALD_DOMAIN: 'http://localhost:3000', /* used internally to prefix links */
+    REDIS_KEYS: {
+        current_build: "emerald:current-build", /* the key that will hold the current build */
+        build_queue: "emerald:build-queue" /* the key that will hold the build queue */
+    },
+    EMERALD_PATH: "~/.emerald", /* where emerald will store builds and metadata */
+    SANDBOX_PATH: "~/.emerald/builds", /* the folder where emerald will store its builds, it can be set through the environment variable EMERALD_SANDBOX_PATH */
+    ASSETS_PATH: "$EMERALD_ROOT$/public"
+    LOCAL_FILE: function(...){}, /* please NEVER overwrite this function, it is used internally and you don't wanna mess up with that. Word. */
+    VIEW_PATH: "$EMERALD_ROOT$/public/app/server/html", /* where emerald will search for swig templates */
+    CLIENT_PATH: "$EMERALD_ROOT$/app/client", /* the path where the backbone part of emerald is implemented */
+    BACKBONE_VIEW_PATH: "$EMERALD_ROOT$/app/client/html", /* where emerald will search for backbone view templates */
+    SCRIPT_PATH: "$EMERALD_ROOT$/app/terminal/main.js", /* the path for the emerald CLI, you won't need to change it. Please don't even try :) */
+    PID_PATH: PID_PATH, /* fullpath for the PIDFILE that emerald will use when running as a daemon */
+    STDOUT_PATH: STDOUT_PATH, /* fullpath for the STDOUT file that emerald will write when running as a daemon */
+    STDERR_PATH: STDERR_PATH  /* fullpath for the STDERR file that emerald will write when running as a daemon */
+}
+```
 
 
 # "hands on" hack guide
