@@ -403,7 +403,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             callback(err, self);
         });
     });
-    it.has.method('run', function(lock, callback) {
+    it.has.method('run', function() {
         var self = this;
 
         var redis = self._meta.storage.connection;

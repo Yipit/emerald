@@ -85,7 +85,9 @@ exports.map = function(app, redis){
             if (err) {
                 return response.send(JSON.stringify({error: err.toString()}), headers, 404);
             }
-            return response.send(JSON.stringify(found[0].toBackbone()), { 'Content-Type': 'application/json' }, 201);
+            var instruction = found[0];
+            instruction.run();
+            return response.send(JSON.stringify(instruction.toBackbone()), { 'Content-Type': 'application/json' }, 201);
         });
     });
 
