@@ -24,3 +24,6 @@ clean:
 
 data:
 	@node $$PWD/app/terminal/generate-data.js
+
+curl:
+	curl -v --data "$(cat test/functional/github-payload.json)" --header "Content-Type: application/json"   http://localhost:3000/hooks/github/emerald-unit-tests

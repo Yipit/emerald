@@ -1,6 +1,7 @@
 var path = require('path');
 var cp = require('child_process');
 var request = require('request');
+var should = require('should');
 var server = null;
 
 payload = require('./github-payload.json');
@@ -32,6 +33,9 @@ describe('Emerald Webserver', function(){
             }, function(error, response, body){
                 if (error) {return done(error);}
                 response.statusCode.should.equal(201, 'response should be "201 Created"');
+
+                var data = JSON.parse(body);
+                data.slug.should.equal('emerald-unit-tests');
                 done();
             });
         })

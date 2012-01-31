@@ -76,8 +76,17 @@ exports.map = function(app, redis){
     }));
 
     app.post('/hooks/github/:project_slug', function(request, response){
+        var headers = {
+            'Content-Type': 'application/json'
+        };
 
-        return response.send('text', { 'Content-Type': 'application/json' }, 201);
+        var slug = request.param('project_slug');
+        return entity.BuildInstruction.find_by_slug(slug, function(err, found){
+            if (err) {
+                return response.send(JSON.stringify({error: err.toString()}), headers, 404);
+            }
+            return response.send(JSON.stringify(found[0].toBackbone()), { 'Content-Type': 'application/json' }, 201);
+        });
     });
 
     app.get('/api/instructions.json', function(request, response){
