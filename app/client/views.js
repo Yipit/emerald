@@ -175,6 +175,7 @@
 
             this.model.bind('fetching_repository', this.show_progress);
             this.model.bind('repository_fetched', this.hide_progress);
+            this.model.bind('build_finished', this.hide_progress);
 
             this.template = get_template('instruction');
             this.bind('post-render', this.prepare_progress);
@@ -192,7 +193,9 @@
 
             var build = data.build;
             var instruction = data.instruction;
-
+            /* if (console) {
+                console.log('phase', STAGES_BY_INDEX[build.stage], data);
+            } */
             this.refresh_widgets();
             var buttons = [
                 this.make_toolbar_button('Add to the queue', 'do-schedule'),
@@ -246,7 +249,6 @@
             }
             self.$buildlog.empty();
             _.each(all_builds, function(raw_build_data) {
-                console.log("all_builds:", all_builds);
                 var build = new Build(raw_build_data);
                 var params = {
                     model: build
@@ -274,6 +276,7 @@
         },
         show_progress: function(data){
             var $pbar = this.$(".progress");
+            if (!data.phase && !data.percentage) {return;}
             var parsed_value = /\d+/.exec(data.percentage)[0];
 
             var value = parseInt(parsed_value, 10);
