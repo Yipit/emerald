@@ -159,7 +159,7 @@
                 'render_builds',
                 'prepare_progress'
             );
-            this.model.bind('change', this.render);
+            //this.model.bind('change', this.render);
             this.model.bind('build_output', this.expand_box);
             this.model.bind('build_running', this.expand_box);
             this.model.bind('build_started', this.expand_box);
@@ -193,9 +193,7 @@
 
             var build = data.build;
             var instruction = data.instruction;
-            /* if (console) {
-                console.log('phase', STAGES_BY_INDEX[build.stage], data);
-            } */
+
             this.refresh_widgets();
             var buttons = [
                 this.make_toolbar_button('Add to the queue', 'do-schedule'),
@@ -263,12 +261,14 @@
             return this.make_toolbar_button('Abort', 'error do-abort', 'rel="' + build.__id__ + '"');
         },
         make_last_build: function(build){
-            return [
+            var html = [
                 '<span>last build:</span>',
                 ('<strong class="status-color ' + build.style_name + '">'),
                 ('<a href="'+build.permalink+'">' + truncate(build.message) + '</a>'),
                 '</strong>'
             ].join('\n');
+
+            return html;
         },
         /* event reactions */
         prepare_progress: function(data){
@@ -342,9 +342,13 @@
             this.$avatar.addClass('picture').find("img").attr('src', build.gravatars['100']);
 
             var $li = this.$body.find("li[id='clay:Build:id:" + build.__id__ + "']");
-            this.$last_build.html(this.make_last_build(build));
+
             $li.attr('class', build.style_name);
             $li.find('a').text(truncate(build.message));
+
+            /* updating the very last build (located on top)*/
+            this.$last_build.html(this.make_last_build(build));
+
         },
         /* user actions */
         show_output: function(e){
