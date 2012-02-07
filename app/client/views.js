@@ -196,9 +196,9 @@
 
             this.refresh_widgets();
             var buttons = [
-                this.make_toolbar_button('Add to the queue', 'do-schedule'),
-                this.make_toolbar_button('STDOUT', 'info show-output'),
-                this.make_toolbar_button('STDERR', 'error show-error')
+                this.make_toolbar_button('Add to the queue', 'btn-warning do-schedule'),
+                this.make_toolbar_button('STDOUT', 'btn-info show-output'),
+                this.make_toolbar_button('STDERR', 'btn-danger show-error')
             ];
 
             switch (STAGES_BY_INDEX[build.stage]) {
@@ -212,9 +212,9 @@
             case 'FAILED':
             case 'SUCCEEDED':
                 buttons = [
-                    this.make_toolbar_button('Run again', 'info do-schedule'),
-                    this.make_toolbar_button('STDOUT', 'success show-output'),
-                    this.make_toolbar_button('STDERR', 'error show-error')
+                    this.make_toolbar_button('Run again', 'btn-info do-schedule'),
+                    this.make_toolbar_button('STDOUT', 'btn-success show-output'),
+                    this.make_toolbar_button('STDERR', 'btn-danger show-error')
                 ];
             }
 
@@ -258,7 +258,7 @@
             });
         },
         make_abort_button: function(build){
-            return this.make_toolbar_button('Abort', 'error do-abort', 'rel="' + build.__id__ + '"');
+            return this.make_toolbar_button('Abort', 'btn-danger do-abort', 'rel="' + build.__id__ + '"');
         },
         make_last_build: function(build){
             var html = [
