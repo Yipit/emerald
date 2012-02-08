@@ -25,7 +25,7 @@
     });
 
     function validateRepositoryAddress(str) {
-        var regex = new RegExp('^((file|git|ssh|https?|ftps?|rsync)[:][\/]{2})?([\w_-.]+[@])?[\/:].*');
+        var regex = new RegExp('^((file|git|ssh|https?|ftps?|rsync)[:][/]{2})?([\\w_-.]+[@])?[/:].*');
         return regex.test(str) ? null : 'Invalid repository address';
     }
     window.BuildInstruction = EmeraldModel.extend({
@@ -35,7 +35,7 @@
             description: { type: 'Text'},
             repository_address: { type: 'Text', validators: ['required', validateRepositoryAddress]},
             branch: { type: 'Text'},
-            build_script: { type: 'Text'},
+            build_script: { type: 'Text'}
         },
         initialize: function(){
             var self = this;
@@ -48,7 +48,7 @@
                         data.event_name = server_name;
                         self.trigger(client_name, data);
                     }
-                }
+                };
             }
             window.socket.on('Build started',                bypass_signal("Build started",                "build_started"));
             window.socket.on('Build running',                bypass_signal("Build running",                "build_running"));

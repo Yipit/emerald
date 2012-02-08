@@ -1,5 +1,5 @@
 (function($){
-    const STAGES_BY_INDEX = {
+    var STAGES_BY_INDEX = {
         0: 'BEGINNING',
         1: 'FETCHING',
         2: 'PREPARING_ENVIRONMENT',
@@ -9,7 +9,7 @@
         6: 'SUCCEEDED'
     };
 
-    const STAGE_TO_UI = {
+    var STAGE_TO_UI = {
         0: 'ui-state-default',
         1: 'ui-state-default',
         2: 'ui-state-highlight',
@@ -20,7 +20,7 @@
     };
 
     function truncate(string, amount){
-        var amount = amount || 45;
+        amount = amount || 45;
         try {
             if (string.length > amount) {
                 return string.substr(0, amount) + ' ...';
@@ -113,14 +113,13 @@
     });
 
     window.ConnectionLostView = EmeraldView.extend({
-        template_name: 'connection-lost',
+        template_name: 'connection-lost'
     });
 
     window.BuildListView = EmeraldView.extend({
         template_name: 'list-instructions',
         render: function(){
-            var $instructions,
-              collection = this.collection;
+            var collection = this.collection;
 
             this.$el.html(this.template({}));
             $instructions = this.$("#builds");
@@ -129,7 +128,7 @@
                     model: instruction,
                     collection: collection
                 });
-                $instructions.append(view.render().$el);
+                $instructions.append(view.render().el);
             });
             return this;
         }
@@ -184,9 +183,10 @@
             this.refresh_widgets();
         },
         /* utility functions */
-        make_toolbar_button: function(title, classes, extra){
+        make_toolbar_button: function(title, classes, extra, icon){
             extra = extra || '';
-            return ['<a class="btn small ' + classes + '" ' + extra + ' href="#">' + title + '</a>'].join('"');
+            var ico = icon ? '<i class="'+icon+' icon-white"></i>' : '';
+            return ['<a class="btn small ' + classes + '" ' + extra + ' href="#">' + ico + title + '</a>'].join('"');
         },
         update_toolbar: function(data){
             var self = this;
@@ -196,9 +196,9 @@
 
             this.refresh_widgets();
             var buttons = [
-                this.make_toolbar_button('Add to the queue', 'btn-warning do-schedule'),
-                this.make_toolbar_button('STDOUT', 'btn-info show-output'),
-                this.make_toolbar_button('STDERR', 'btn-danger show-error')
+                this.make_toolbar_button('Add to the queue', 'btn-warning do-schedule', '', 'icon-share'),
+                this.make_toolbar_button('STDOUT', 'btn-info show-output', '', 'icon-leaf'),
+                this.make_toolbar_button('STDERR', 'btn-danger show-error', '', 'icon-fire')
             ];
 
             switch (STAGES_BY_INDEX[build.stage]) {
@@ -212,9 +212,9 @@
             case 'FAILED':
             case 'SUCCEEDED':
                 buttons = [
-                    this.make_toolbar_button('Run again', 'btn-info do-schedule'),
-                    this.make_toolbar_button('STDOUT', 'btn-success show-output'),
-                    this.make_toolbar_button('STDERR', 'btn-danger show-error')
+                    this.make_toolbar_button('Run again', 'btn-info do-schedule', '', 'icon-retweet'),
+                    this.make_toolbar_button('STDOUT', 'btn-success show-output', '', 'icon-leaf'),
+                    this.make_toolbar_button('STDERR', 'btn-danger show-error', '', 'icon-fire')
                 ];
             }
 
@@ -258,7 +258,7 @@
             });
         },
         make_abort_button: function(build){
-            return this.make_toolbar_button('Abort', 'btn-danger do-abort', 'rel="' + build.__id__ + '"');
+            return this.make_toolbar_button('Abort', 'btn-danger do-abort', 'rel="' + build.__id__ + '"', 'icon-eject');
         },
         make_last_build: function(build){
             var html = [
@@ -390,30 +390,40 @@
     });
 
     window.SingleManagedInstruction = EmeraldView.extend({
-        template_name: 'manage-instructions',
+        events: {
+            'click a.schedule-build': 'run'
+        },
+        template_name: 'single-managed-instruction',
         render: function(){
-            var $instructions,
-              collection = this.collection;
-
             this.$el.html(this.template({
-                instructions: collection.toJSON()
+                instruction: this.model.toJSON()
             }));
-            console.log(collection.toJSON());
-
+            this.delegateEvents();
             return this;
-        }
+        },
+        customize: function(){
+            _.bindAll(this, 'run');
+        },
+        run: function(e){
+            window.socket.emit('run BuildInstruction', {id: this.model.get('__id__')});
+            return e.preventDefault();
+        },
     });
 
     window.InstructionManagementView = EmeraldView.extend({
         template_name: 'manage-instructions',
         render: function(){
-            var $instructions,
-              collection = this.collection;
+            var model = this.model;
+            var collection = this.collection;
 
-            this.$el.html(this.template({
-                instructions: collection.toJSON()
-            }));
-            console.log(collection.toJSON());
+            this.$el.html(this.template({}));
+
+            var $list = this.$el.find("#instruction-list")
+
+            collection.each(function(instruction){
+                var subView = new SingleManagedInstruction({model: instruction});
+                $list.append(subView.render().el);
+            })
 
             return this;
         }
