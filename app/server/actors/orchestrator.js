@@ -2,6 +2,7 @@ var logger = new (require('../logger').Logger)("[ ORCHESTRATOR ]".red.bold);
 
 module.exports.make = function(io) {
     const subscribe = require('redis').createClient();
+    subscribe.setMaxListeners(1000);
     subscribe.subscribe("BuildInstruction enqueued");
 
     subscribe.subscribe("Repository started fetching");
