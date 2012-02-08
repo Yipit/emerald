@@ -42,13 +42,25 @@
     <ul class="instruction-footer ui-widget ui-corner-all">
       <% if (last_build) { %>
       <li class="toolbar">
-	<button class="btn small btn-warning do-schedule" href="#">Add to the queue</button>
-	<button class="btn small btn-info show-output" href="#">STDOUT</button>
-	<button class="btn small btn-danger show-error" href="#">STDERR</button>
+	<button class="btn small btn-warning do-schedule" href="#">
+	  <i class="icon-share icon-white"></i>
+	  Add to the queue
+	</button>
+	<button class="btn small btn-info show-output" href="#">
+	  <i class="icon-leaf icon-white"></i>
+	  STDOUT
+	</button>
+	<button class="btn small btn-danger show-error" href="#">
+	  <i class="icon-fire icon-white"></i>
+	  STDERR
+	</button>
       </li>
       <% } else { %>
       <li class="toolbar">
-	<button class="btn small btn-success do-schedule" href="#">Build now</button>
+	<button class="btn small btn-success do-schedule" href="#">
+	  <i class="icon-play-circle icon-white"></i>
+	  Build now
+	</button>
       </li>
       <% } %>
     </ul>
