@@ -58,7 +58,7 @@
             return e.preventDefault();
         },
         render: function() {
-            $(this.el).html(this.template);
+            this.$el.html(this.template);
             this.$("#live-code").html(this.model.get('full'));
             return this;
         }
@@ -88,7 +88,7 @@
                 STAGE_TO_UI: STAGE_TO_UI,
                 truncate: truncate
             }));
-            $(this.el).html(rendered);
+            this.$el.html(rendered);
             this.trigger('post-render', this);
             return this;
         },
@@ -122,14 +122,14 @@
             var $instructions,
               collection = this.collection;
 
-            $(this.el).html(this.template({}));
+            this.$el.html(this.template({}));
             $instructions = this.$("#builds");
             collection.each(function(instruction) {
                 var view = new InstructionView({
                     model: instruction,
                     collection: collection
                 });
-                $instructions.append(view.render().el);
+                $instructions.append(view.render().$el);
             });
             return this;
         }
@@ -253,7 +253,7 @@
                 };
 
                 var subview = new InstructionBuildListItemView(params);
-                var rendered = subview.render().el;
+                var rendered = subview.render().$el;
                 self.$buildlog.append(rendered);
             });
         },
@@ -379,8 +379,8 @@
             this.bind('post-render', this.fill_attributes);
         },
         fill_attributes: function(){
-            $(this.el).addClass(this.model.get('style_name'));
-            $(this.el).attr("id", 'clay:Build:id:' + this.model.get('__id__'));
+            this.$el.addClass(this.model.get('style_name'));
+            this.$el.attr("id", 'clay:Build:id:' + this.model.get('__id__'));
         }
     });
 
@@ -389,7 +389,54 @@
         className: 'build'
     });
 
-    window.InstructionManagementView = EmeraldView.extend({
-        template_name: 'manage-instructions'
+    window.SingleManagedInstruction = EmeraldView.extend({
+        template_name: 'manage-instructions',
+        render: function(){
+            var $instructions,
+              collection = this.collection;
+
+            this.$el.html(this.template({
+                instructions: collection.toJSON()
+            }));
+            console.log(collection.toJSON());
+
+            return this;
+        }
     });
+
+    window.InstructionManagementView = EmeraldView.extend({
+        template_name: 'manage-instructions',
+        render: function(){
+            var $instructions,
+              collection = this.collection;
+
+            this.$el.html(this.template({
+                instructions: collection.toJSON()
+            }));
+            console.log(collection.toJSON());
+
+            return this;
+        }
+    });
+
+    window.InstructionCRUDView = EmeraldView.extend({
+        template_name: 'instructions-crud',
+        render: function(){
+            var form = new Backbone.Form({
+                model: this.model,
+                fieldsets: [
+                    ['email', 'tel', 'number', 'checkbox', 'radio', 'checkboxes'],
+                    { legend: 'jQuery UI editors', fields: ['date', 'datetime', 'list'] }
+                ]
+            }).render();
+
+            this.$el.html(this.template({
+                form: $(form.el).html(),
+                instruction: this.model.toJSON()
+            }));
+
+            return this;
+        }
+    });
+
 })(jQuery);

@@ -24,8 +24,19 @@
         __name__: "build"
     });
 
+    function validateRepositoryAddress(str) {
+        var regex = new RegExp('^((file|git|ssh|https?|ftps?|rsync)[:][\/]{2})?([\w_-.]+[@])?[\/:].*');
+        return regex.test(str) ? null : 'Invalid repository address';
+    }
     window.BuildInstruction = EmeraldModel.extend({
         __name__: 'instruction',
+        schema: {
+            name:        { validators: ['required'] },
+            description: { type: 'Text'},
+            repository_address: { type: 'Text', validators: ['required', validateRepositoryAddress]},
+            branch: { type: 'Text'},
+            build_script: { type: 'Text'},
+        },
         initialize: function(){
             var self = this;
 
