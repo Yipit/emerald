@@ -41,6 +41,10 @@
     }
 
     window.ConsoleView = Backbone.View.extend({
+        /*
+          this is the fullscreen terminal that shows live output from
+          the current running build
+         */
         id: 'terminal',
         events: {
             'click #hide-main-terminal': 'hide_terminal'
@@ -64,6 +68,9 @@
         }
     });
     window.EmeraldView = Backbone.View.extend({
+        /*
+          base class for all the views, be careful with this thing
+         */
         className: 'row',
         initialize: function(){
             _.bindAll(this, 'render', 'customize');
@@ -99,6 +106,10 @@
     });
 
     window.ErrorView = EmeraldView.extend({
+        /*
+          whenever backbone goes to any URL of /api and gets a status
+          code that is 4xx or 5xx, this ErrorView will be rendered
+         */
         template_name: 'error',
         customize: function(){
             _.bindAll(this, 'prepare_connection_lost_dialog');
@@ -113,10 +124,20 @@
     });
 
     window.ConnectionLostView = EmeraldView.extend({
+        /*
+          this view is primarily that "loading..." screen shown when
+          the page is refreshed, but in case it takes more than 2
+          minutes to load, it assumes the connection was lost and how
+          a modal dialog
+         */
         template_name: 'connection-lost'
     });
 
     window.BuildListView = EmeraldView.extend({
+        /*
+          this is actually the dashboard view, bad naming maybe?!
+          Well anyways I don't wanna refactor that now, get over it :P
+         */
         template_name: 'list-instructions',
         render: function(){
             var collection = this.collection;
@@ -135,6 +156,10 @@
     });
 
     window.InstructionView = EmeraldView.extend({
+        /*
+          each instruction rendered on the dashboard is an instance of
+          this view
+         */
         tagName: 'li',
         className: 'instruction',
         events: {
@@ -371,6 +396,10 @@
     });
 
     window.InstructionBuildListItemView = EmeraldView.extend({
+        /*
+          subview for the small list of builds for each instruction
+          rendered at #dashboard
+         */
         template_name: 'subview-build-item-for-instruction',
         tagName: 'li',
         className: 'build-link',
@@ -385,11 +414,20 @@
     });
 
     window.DetailedBuildView = EmeraldView.extend({
+        /*
+          the view rendered when a user goes to #build/:id
+        */
         template_name: 'build',
         className: 'build'
     });
 
     window.SingleManagedInstruction = EmeraldView.extend({
+        /*
+           each of the instructions rendered at #instructions is an instance of
+           this view
+
+           this is basically a subview of InstructionManagementView
+        */
         events: {
             'click a.schedule-build': 'run'
         },
@@ -398,6 +436,7 @@
             this.$el.html(this.template({
                 instruction: this.model.toJSON()
             }));
+
             this.delegateEvents();
             return this;
         },
@@ -411,6 +450,7 @@
     });
 
     window.InstructionManagementView = EmeraldView.extend({
+        /* the view that is shown when a user goes to #instructions*/
         template_name: 'manage-instructions',
         render: function(){
             var model = this.model;
@@ -418,7 +458,7 @@
 
             this.$el.html(this.template({}));
 
-            var $list = this.$el.find("#instruction-list")
+            var $list = this.$el.find("#instruction-list");
 
             collection.each(function(instruction){
                 var subView = new SingleManagedInstruction({model: instruction});
