@@ -18,8 +18,8 @@
             this.dashboardView = new BuildListView({collection: instructions});
 
             this.consoleView = new ConsoleView({model: main_console});
-            var console = this.consoleView.render().el;
-            this.$body.prepend(console);
+            var consoleElement = this.consoleView.render().el;
+            this.$body.prepend(consoleElement);
 
             $("#show-main-console").click(function(e){
                 $("#terminal").show();
@@ -49,7 +49,8 @@
             });
         },
         manage_instructions: function() {
-            var view = new InstructionManagementView();
+            var view = new InstructionManagementView({collection: instructions});
+            instructions.fetch();
             this.$app.empty().append(view.render().el);
         },
         connection_lost: function() {
