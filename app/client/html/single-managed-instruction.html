@@ -1,0 +1,22 @@
+<div class="row alert managed-instruction">
+  <div class="span12">
+    <h2><%= instruction.name %></h2>
+  </div>
+  <div class="btn-group actions">
+    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+      <i class="icon-list-alt"></i>
+      Actions
+      <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+      <li>
+	<a href="#instruction/<%= instruction.__id__ %>/edit">Edit</a>
+	<a href="#">Delete</a>
+	<a href="#">Schedule a build</a>
+      </li>
+    </ul>
+  </div>
+</div>
+<div class="row">
+  <br />
+</div>
