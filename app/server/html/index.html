@@ -19,16 +19,25 @@
 	  <h1 class="title"><a href="#">Emerald</a></h1>
 	</div><!-- .span13 -->
       </div><!-- .row -->
-      <div class="row">
-	<div class="span8">
-	  <p></p>
-	</div>
-	<div class="span8">
-	  <menu class="main">
-	    <li class="dashboard"><a href="#dashboard">dashboard</a></li>
-	    <li class="instructions"><a href="#instructions">instructions</a></li>
+    </div><!-- .container -->
+    <div class="navbar">
+      <div class="navbar-inner">
+	<div class="container">
+	  <ul class="nav">
+	    {# notice that some of the following "li" elements have the
+	    "id" attribute set to "controller:some_name"
+
+	    this is used internally in the backbone app: there is a
+	    listener to the signal (Backbone.history.bind("route"))
+
+	    that takes the name of the controller resposible to render
+	    the new view, and prepend with "controller-", so that it
+	    can change the state of the navigation items bellow to
+	    "active" when suitable. #}
+	    <li id="controller-dashboard" class="dashboard"><a href="#dashboard">dashboard</a></li>
+	    <li id="controller-manage_instructions" class="instructions"><a href="#instructions">instructions</a></li>
 	    <li id="show-main-console" class="console"><a href="#console">main console</a></li>
-	  </menu>
+	  </ul>
 	</div>
       </div>
     </div>

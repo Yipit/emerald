@@ -16,21 +16,27 @@
 	{% block css %}
 	<link rel="stylesheet" href="/stylesheets/jquery.gritter.css" type="text/css" />
 	<link rel="stylesheet" href="/stylesheets/bootstrap.min.css" type="text/css" />
+	<link rel="stylesheet" href="/stylesheets/backbone-forms.css" type="text/css" />
 	<link rel="stylesheet" href="/stylesheets/jquery-ui-bootstrap.css" type="text/css" />
 	<link rel="stylesheet" href="/stylesheets/general.css" type="text/css" />
+	<link rel="stylesheet" href="/prettify/prettify.css" type="text/css" />
+
 	{% endblock %}
 	{% block js %}
 	<script type="text/javascript">
 	  (function(window){window.emerald = {{ emerald_json|raw }};})(window)
 	</script>
+	<script type="text/javascript" src="/prettify/prettify.js"></script>
 	<script type="text/javascript" src="/javascripts/modernizr-2.0.6.min.js"></script>
 	<script type="text/javascript" src="/javascripts/json2.js"></script>
 	<script type="text/javascript" src="/javascripts/underscore.min.js"></script>
 	<script type="text/javascript" src="/javascripts/jquery-1.7.1.min.js"></script>
 	<script type="text/javascript" src="/javascripts/jquery-ui-1.8.16.custom.min.js"></script>
 	<script type="text/javascript" src="/javascripts/backbone.min.js"></script>
+	<script type="text/javascript" src="/javascripts/backbone-forms.js"></script>
 	<script type="text/javascript" src="/javascripts/bootstrap.min.js"></script>
 	<script type="text/javascript" src="/javascripts/jquery.gritter.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery-ui-editors.js"></script>
 	<script type="text/javascript" src="/socket.io/socket.io.js"></script>
 	{% endblock %}
 	{% block js_app %}
@@ -41,6 +47,6 @@
 	<script type="text/javascript" src="/app.js"></script>
 	{% endblock %}
 </head>
-<body>
+<body onload="prettyPrint()">
   {% block body %}{% endblock %}
 </body>
