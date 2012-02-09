@@ -23,3 +23,5 @@ for kind in "${all_kinds[@]l}"; do
 done;
 echo "-------"
 printf "\033[1;37mAlright, we are good to go.\033[0;31m\xe2\x9d\xa4\033[0m\n"
+echo
+echo
