@@ -1,0 +1,36 @@
+#!/bin/bash
+printf 'Looking for errors on the client...'
+ERRORS_ON_CLIENT=`find app/client -name '*.js' | xargs jshint`
+if [ "$?" != "0" ]; then
+    printf '\033[1;31m \xe2\x9c\x98\n\033[0m'; # failed
+    echo
+    echo "output below:\n"
+    echo $ERRORS_ON_CLIENT
+    exit 1
+else
+    printf '\033[1;32m \xe2\x9c\x94\n\033[0m'; # passed
+fi;
+
+printf 'Looking for errors on the server...'
+ERRORS_ON_SERVER=`find app/server -name '*.js' | xargs jshint`
+if [ "$?" != "0" ]; then
+    printf '\033[1;31m \xe2\x9c\x98\n\033[0m'; # failed
+    echo
+    echo "output below:\n"
+    echo $ERRORS_ON_SERVER
+    exit 1
+else
+    printf '\033[1;32m \xe2\x9c\x94\n\033[0m'; # passed
+fi;
+
+printf 'Looking for errors on the terminal...'
+ERRORS_ON_TERMINAL=`find app/terminal -name '*.js' | xargs jshint`
+if [ "$?" != "0" ]; then
+    printf '\033[1;31m \xe2\x9c\x98\n\033[0m'; # failed
+    echo
+    echo "output below:\n"
+    echo $ERRORS_ON_TERMINAL
+    exit 1
+else
+    printf '\033[1;32m \xe2\x9c\x94\n\033[0m'; # passed
+fi;
