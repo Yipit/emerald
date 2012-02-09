@@ -2,7 +2,28 @@
 
 # installation
 
-could it be simpler ?
+## install node.js
+
+I recommend using the
+[node version manager](https://github.com/creationix/nvm) so that you
+can have as many node.js versions you want and switch among them
+pretty easily.
+
+### if you don't have node.js and npm installed already, run the commands below:
+
+```console
+git clone git://github.com/creationix/nvm.git ~/.nvm
+echo 'source $HOME/.nvm/nvm.sh' >> $HOME/.bash_profile
+. $HOME/.nvm/nvm.sh
+```
+
+the snippet above must be run only once, but the one below you can do as many times you want
+
+```console
+nvm install v0.6.10
+nvm use v0.6.10
+nvm alias default v0.6.10
+```
 
 ## install redis
 
@@ -68,51 +89,62 @@ module.exports = {
 
 ## install the dependencies
 
-### 1. node v0.4.12
-### 2. npm 1.0.103
+### 1. node v0.6.10
+### 2. npm 1.1.0-3
 ### 3. redis... just make sure it's running
 ### 4. global dependencies
 
-```
-npm install -g vows
+```console
+npm install -g vows jshint
 ```
 
 ### 5. local dependencies
 
 just run
 
-```
+```console
 npm install
 ```
 
 *and should be enough to install all the dependencies in `package.json`
 
+## set up the pre-commit hook:
+
+```console
+cd path/to/emerald
+ln -s .development/pre-commit-hook .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+```
+
+this is the result of activating the pre-commit hook:
+![your commits are gonna be pretty](http://f.cl.ly/items/1b162c0A1V0o2M0K1O1n/Screen%20Shot%202012-02-09%20at%205.58.43%20PM.png)
+
 ## run the tests!
 
 ### unit tests
-```
+```console
 make unit
 ```
 
 ### functional tests
-```
+```console
 make functional
 ```
 
 ### or... run them all together
-```
+```console
 npm test
 ```
 
 ## run the server!
 
-```
+```console
 npm start
 ```
 
 ## fixtures for testing locally
 
-```
+```console
 make data
 ```
 
