@@ -14,11 +14,13 @@ function QueueConsumer(redis) {
 
 QueueConsumer.prototype.stop = function(){
     /* stopping the interval */
-    this.loop && clearInterval(this.loop);
+    if (this.loop) {
+        clearInterval(this.loop);
+    }
     this.lock.release(function(){
         this.redis.publish("emerald:QueueConsumer:stop");
     });
-}
+};
 
 QueueConsumer.prototype.start = function(){
     var self = this;
@@ -37,7 +39,7 @@ QueueConsumer.prototype.start = function(){
             function consume_build_queue(handle, callback){
                 self.redis.zrange(self.key_for_build_queue, 0, 1, function(err, items) {
                     if (!err && items.length < 1) {
-                        var err = new Error('the build queue is empty');
+                        err = new Error('the build queue is empty');
                         return callback(err, handle);
                     }
                     logger.info("consuming the build queue: found an item to build");
@@ -70,11 +72,11 @@ QueueConsumer.prototype.start = function(){
             instruction.run(handle);
         });
     }, self.interval);
-}
+};
 
 exports.logger = logger;
 exports.QueueConsumer = QueueConsumer;
 exports.use = function (redis) {
     return new exports.QueueConsumer(redis).start();
-}
+};
 

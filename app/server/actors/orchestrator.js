@@ -1,7 +1,7 @@
 var logger = new (require('../logger').Logger)("[ ORCHESTRATOR ]".red.bold);
 
 module.exports.make = function(io) {
-    const subscribe = require('redis').createClient();
+    var subscribe = require('redis').createClient();
     subscribe.setMaxListeners(1000);
     subscribe.subscribe("BuildInstruction enqueued");
 
@@ -29,4 +29,4 @@ module.exports.make = function(io) {
             logger.debug(channel, message);
         });
     });
-}
+};

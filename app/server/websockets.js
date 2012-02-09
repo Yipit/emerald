@@ -39,7 +39,7 @@ exports.work_on = function(redis, io) {
         socket.on('run BuildInstruction', function (data) {
             var now = new Date();
 
-            var instruction_id = parseInt(data.id);
+            var instruction_id = parseInt(data.id, 10);
 
             async.waterfall([
                 function find_by_id(callback){
@@ -67,4 +67,4 @@ exports.work_on = function(redis, io) {
             });
         });
     });
-}
+};

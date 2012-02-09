@@ -33,9 +33,19 @@
 	    <li id="controller-dashboard" class="dashboard"><a href="#dashboard">
 		<i class="icon-white icon-th-large"></i>
 		dashboard</a></li>
-	    <li id="controller-manage_instructions" class="instructions"><a href="#instructions">
+	    <li id="controller-manage_instructions" class="instructions dropdown">
+	      <a href="#instructions" data-toggle="dropdown">
 		<i class="icon-white icon-th-list"></i>
-instructions</a></li>
+		instructions
+		<b class="caret"></b>
+	      </a>
+	      <ul class="dropdown-menu">
+		<li>
+		  <a href="#instruction/new">Create a new one</a>
+		  <a href="#instructions">Manage them all</a>
+		</li>
+	      </ul>
+	    </li>
 	    <li id="show-main-console" class="console"><a href="#console">
 		<i class="icon-white icon-resize-full"></i>
 		fullscreen live terminal</a></li>

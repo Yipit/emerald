@@ -24,7 +24,7 @@ var async = require('async');
 
 function mkdirIfNotExist(target, mode, callback){
     path.exists(target, function(exists){
-        exists ? callback(null) : mkdirp(target, mode, callback);
+        return exists ? callback(null) : mkdirp(target, mode, callback);
     });
 }
 exports.now = function(app, io, redis, callback) {
@@ -32,7 +32,7 @@ exports.now = function(app, io, redis, callback) {
     async.reject([settings.EMERALD_PATH, settings.SANDBOX_PATH], path.exists, function(folders_to_create) {
         async.forEach(folders_to_create, function(folder, cb) {
             logger.info(["creating", folder]);
-            mkdirp(folder, 0755, cb);
+            mkdirp(folder, parseIng('0755', 8), cb);
         }, function(err){
             if (err) {
                 logger.fail(err.toString());
@@ -112,6 +112,4 @@ exports.now = function(app, io, redis, callback) {
                 process.reallyExit(err && 1 || 0);
             });
     });
-
-
-}
+};

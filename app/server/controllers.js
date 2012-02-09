@@ -61,18 +61,18 @@ exports.map = function(app, redis){
                     err: err,
                     templates: templates,
                     emerald: emerald_meta,
-                    emerald_json: JSON.stringify(emerald_meta),
+                    emerald_json: JSON.stringify(emerald_meta)
                 };
                 return _callback_(err, context, request, response);
             });
-        }
+        };
     }
     app.get('/', controller(function(err, context, request, response){
-        return response.render('index', context)
+        return response.render('index', context);
     }));
 
     app.get('/_design', controller(function(err, context, request, response){
-        return response.render('design', context)
+        return response.render('design', context);
     }));
 
     app.post('/hooks/github/:project_slug', function(request, response){
@@ -103,7 +103,7 @@ exports.map = function(app, redis){
     }, function(Model, name){
         /* defining the controller responsible to fetch ONLY one instance */
         app.get('/api/' + name + '/:id.json', function(request, response){
-            Model.fetch_by_id(parseInt(request.param('id')), function(err, instance){
+            Model.fetch_by_id(parseInt(request.param('id'), 10), function(err, instance){
                 var status, raw;
                 var headers = {'Content-Type': 'application/json'};
                 if (err) {
@@ -120,4 +120,4 @@ exports.map = function(app, redis){
             });
         });
     });
-}
+};

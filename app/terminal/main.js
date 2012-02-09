@@ -39,7 +39,7 @@ program
         settings_path = path.resolve(process.cwd(), settings_path).replace(/[.](json|js)/, '');
         var newsettings = require(settings_path);
         GLOBAL.settings = _.extend(settings, newsettings);
-    })
+    });
 
 program
     .command('build <build-id>')
@@ -106,7 +106,7 @@ program
                     console.log(err.stack);
                     process.reallyExit(6);
                 }
-                var emerald = require('../server/main')
+                var emerald = require('../server/main');
                 emerald.run();
             });
 
@@ -116,7 +116,7 @@ program
             console.log("STDERR at:", settings.STDERR_PATH.yellow.bold);
         } else {
             console.log(["Running", 'emerald'.green, '... '].join(" "));
-            var emerald = require('../server/main')
+            var emerald = require('../server/main');
             emerald.run();
         }
     });

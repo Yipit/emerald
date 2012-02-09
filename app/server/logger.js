@@ -25,7 +25,7 @@ var loglevel = {
     INFO: 2,
     FAIL: 1,
     CRITICAL: 0
-}
+};
 
 function Logger (prefix) {
     var self = this;
@@ -46,7 +46,7 @@ function Logger (prefix) {
         }
         msg.push(this.timestamp());
         console.log.apply(console, msg);
-    }
+    };
 
     this.info = function(parts) {
         if (self.level < 2) return;
@@ -72,7 +72,7 @@ function Logger (prefix) {
         if (exc) {
             this.fail(["@", where, exc, '\n', exc.stack + ""]);
         }
-    }
+    };
     this.timestamp = function(){
         return ("@"+(new Date()).toTimeString()).white.bold;
     };

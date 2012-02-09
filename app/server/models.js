@@ -36,7 +36,7 @@ var STAGES_BY_INDEX = {
     4: 'ABORTED',
     5: 'FAILED',
     6: 'SUCCEEDED'
-}
+};
 var STAGES_BY_NAME = {
     BEGINNING: 0,
     FETCHING: 1,
@@ -45,7 +45,7 @@ var STAGES_BY_NAME = {
     ABORTED: 4,
     FAILED: 5,
     SUCCEEDED: 6
-}
+};
 
 var Build = models.declare("Build", function(it, kind) {
     it.has.field("index", kind.numeric);
@@ -130,7 +130,7 @@ var Build = models.declare("Build", function(it, kind) {
         return 'http://www.gravatar.com/avatar/' + hash.digest('hex') + '?s=' + size;
     });
     it.has.getter('succeeded', function() {
-        return ((parseInt(this.status || 0) == 0) && this.signal === 'null');
+        return ((parseInt(this.status || 0, 10) === 0) && this.signal === 'null');
     });
     it.has.getter('stage_name', function() {
         return (STAGES_BY_INDEX[this.stage]).toLowerCase();
@@ -138,7 +138,7 @@ var Build = models.declare("Build", function(it, kind) {
 
     it.has.getter('duration', function() {
         var finished = moment(this.finished_at);
-        return finished.fromNow()
+        return finished.fromNow();
     });
 
     it.has.getter('started_at', function() {
@@ -239,14 +239,14 @@ var Build = models.declare("Build", function(it, kind) {
         data.permalink = settings.EMERALD_DOMAIN + "#build/" + data.__id__;
         data.started_at = this.started_at;
         data.finished_at = this.finished_at;
-        data.is_building = parseInt(this.stage) < STAGES_BY_NAME.ABORTED;
+        data.is_building = parseInt(this.stage, 10) < STAGES_BY_NAME.ABORTED;
 
         data.humanized = {
             "build_started": moment(this.build_started_at).fromNow(),
             "build_finished": moment(this.build_finished_at).fromNow(),
             "fetching_started": moment(this.fetching_started_at).fromNow(),
             "fetching_finished": moment(this.fetching_finished_at).fromNow()
-        }
+        };
         if (_.isObject(this.instruction) && _.isFunction(this.instruction.toBackbone)) {
             data.instruction = this.instruction.toBackbone();
         }
@@ -293,7 +293,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
         data.id = data.__id__;
         ['all_builds', 'succeeded_builds', 'failed_builds'].forEach(function(attribute){
             if (!self[attribute]) {return;}
-            data[attribute] = self[attribute].map(function(b){ return b.toBackbone() });
+            data[attribute] = self[attribute].map(function(b){ return b.toBackbone(); });
         });
         data.is_building = self.is_building || false;
         data.current_build = self.current_build || null;
@@ -431,7 +431,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             }
         ], function(err, key, build) {
             if (err) {
-                logger.fail('an error happened while creating a build for the instruction "'+self.name+'"')
+                logger.fail('an error happened while creating a build for the instruction "'+self.name+'"');
                 logger.handleException(err);
                 return;
             }
@@ -501,4 +501,4 @@ module.exports = {
     },
     STAGES_BY_INDEX: STAGES_BY_INDEX,
     STAGES_BY_NAME: STAGES_BY_NAME
-}
+};

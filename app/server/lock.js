@@ -23,7 +23,7 @@ function LockHandle (lock) {
     this.__lock__ = lock;
     this.release = function(){
         lock.release.apply(lock, arguments);
-    }
+    };
 }
 LockHandle.prototype.lock = function(value, callback){
     var self = this;
@@ -31,7 +31,7 @@ LockHandle.prototype.lock = function(value, callback){
         if (err) {return self.__lock__.release();}
         callback();
     });
-}
+};
 
 function Lock(key, redis){
     this.key = key;
@@ -48,20 +48,20 @@ Lock.prototype.acquire = function(acquired_callback){
 
         /* if not building, let's quit and wait for the next interval */
         if (current_build_id) {
-            var err = new Error("the build #" + current_build_id + " is already running");
+            err = new Error("the build #" + current_build_id + " is already running");
         }
         return acquired_callback(err, self.handle);
     });
-}
+};
 
 Lock.prototype.release = function(callback){
     var self = this;
     this.redis.del(this.key, function(err, num){
         logger.handleException("redis.del(" + self.key + ")", err);
-        if (err || (parseInt(num) < 1)) {return;}
-        callback && callback(new Date());
+        if (err || (parseInt(num, 10) < 1)) {return;}
+        return callback && callback(new Date());
     });
-}
+};
 
 exports.Lock = Lock;
 exports.LockHandle = LockHandle;

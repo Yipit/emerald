@@ -34,7 +34,7 @@ websockets = require('./websockets'),
 controllers = require('./controllers');
 
 /* preparing redis */
-RedisStore = require('connect-redis')(express),
+var RedisStore = require('connect-redis')(express),
 redis = require('redis').createClient();
 
 /* preparing the http server and the socket.io */
@@ -92,10 +92,10 @@ exports.run = function(){
     });
     /* start up the emerald actors */
     boot.now(app, io, redis, function(cwd) {
-        app.listen(parseInt(process.env.PORT || settings.EMERALD_PORT));
+        app.listen(parseInt(process.env.PORT || settings.EMERALD_PORT, 10));
         queueconsumer.use(redis);
         orchestrator.make(io);
         websockets.work_on(redis, io);
         controllers.map(app, redis);
     });
-}
+};

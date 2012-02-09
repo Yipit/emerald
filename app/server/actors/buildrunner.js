@@ -32,7 +32,7 @@ BuildRunner.prototype.generate_script_name = function(){
     ].join("@"));
 
     return (hash.digest('hex') + '.sh');
-}
+};
 
 BuildRunner.prototype.get_script_contents = function(){
     var parts = ["#!/bin/bash"];
@@ -40,7 +40,7 @@ BuildRunner.prototype.get_script_contents = function(){
         parts.push(line.trim() + ' || exit $? || printf "\\n\\n\\n";');
     });
     return parts.join("\n\n###############################################################################\n\n");
-}
+};
 
 BuildRunner.prototype.start = function(){
     var self = this;
@@ -53,7 +53,7 @@ BuildRunner.prototype.start = function(){
     var repository_folder_name = [instruction.repository_address, instruction.name].join('-')
         .replace(/\W+/g, '-')
         .toLowerCase()
-        .replace(/[-]?\bgit\b[-]?/g, '')
+        .replace(/[\-]?\bgit\b[\-]?/g, '');
 
     var repository_full_path = path.join(settings.SANDBOX_PATH, repository_folder_name);
     var repository_bare_path = path.join(repository_full_path, '.git');
@@ -70,7 +70,7 @@ BuildRunner.prototype.start = function(){
     async.waterfall([
         function decide_whether_pull_or_clone (callback){
             logger.info('preparing to fetch data from "'+instruction.name+'" through "'+instruction.repository_address+'@'+branch_to_build+'" at ' + repository_full_path);
-            path.exists(repository_bare_path, function(exists){callback(null, instruction, exists)});
+            path.exists(repository_bare_path, function(exists){callback(null, instruction, exists);});
         },
         function assemble_the_command_line (instruction, exists, callback) {
             var args, options = {};
@@ -145,7 +145,7 @@ BuildRunner.prototype.start = function(){
         },
         function update_builds_author(build, instruction, callback){
             child_process.exec('git log --format=full HEAD...HEAD^', {cwd: repository_full_path}, function(error, stdout, stderr){
-                var lines = _.map(stdout.split('\n'), function(x){return x.trim()});
+                var lines = _.map(stdout.split('\n'), function(x){return x.trim();});
                 var author_data = /(Author|Commit)[:] ([^<]+)[<]([^>]+)[>]/i.exec(stdout);
                 var commit_hash = /commit (\w{40})/.exec(lines[0]);
                 var commit_message = (stdout.split('\n').splice(4).join('\n')).trim();
@@ -197,7 +197,7 @@ BuildRunner.prototype.start = function(){
         },
         function make_it_writtable(build, instruction, callback){
             logger.debug('adding execution permission on the build script');
-            fs.chmod(script_path, 0755, function(err){
+            fs.chmod(script_path, parseInt('0755', 8), function(err){
                 callback(err, build, instruction);
             });
         },
@@ -223,7 +223,7 @@ BuildRunner.prototype.start = function(){
                         instruction: instruction.toBackbone(),
                         current: current,
                         full: full,
-                        appended: appended,
+                        appended: appended
                     });
                     redis.publish("Build stdout", envelope);
                     redis.publish("Build output", envelope);
@@ -243,7 +243,7 @@ BuildRunner.prototype.start = function(){
                         instruction: instruction.toBackbone(),
                         current: current,
                         full: full,
-                        appended: appended,
+                        appended: appended
                     });
                     redis.publish("Build stderr", envelope);
                     redis.publish("Build output", envelope);
@@ -275,10 +275,10 @@ BuildRunner.prototype.start = function(){
 
             redis.zadd(instruction.keys.all_builds, unix_timestamp, instruction.keys.for_build_id(current_build.__id__), function(){
                 callback(null, build, instruction, unix_timestamp);
-            })
+            });
         },
         function associate_build_to_proper_list(build, instruction, unix_timestamp, callback){
-            var exit_code_zero = parseInt(build.status || 0) == 0;
+            var exit_code_zero = parseInt(build.status || 0, 10) === 0;
             var was_not_killed = build.signal === "null";
 
             var build_succeeded = exit_code_zero && was_not_killed;
@@ -286,7 +286,7 @@ BuildRunner.prototype.start = function(){
             var name = build_succeeded ? 'succeeded' : 'failed';
 
             redis.zadd(key, unix_timestamp, instruction.keys.for_build_id(build.__id__), function(){
-                logger.info(['adding Build #' + build.__id__, 'to Instruction #' + instruction.__id__ + "'s", name, 'builds list'])
+                logger.info(['adding Build #' + build.__id__, 'to Instruction #' + instruction.__id__ + "'s", name, 'builds list']);
                 callback(null, build, instruction);
             });
         }
@@ -305,8 +305,8 @@ BuildRunner.prototype.start = function(){
 
         self.lock.release(function(){
             logger.success(['the build lock was released', err && 'due an error'.red || 'successfully'.green.bold]);
-        })
+        });
 
     });
-}
+};
 exports.BuildRunner = BuildRunner;
