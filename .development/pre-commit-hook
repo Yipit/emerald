@@ -21,3 +21,5 @@ for kind in "${all_kinds[@]l}"; do
     fi;
 
 done;
+
+echo "Everything went well, commiting..."
