@@ -472,18 +472,18 @@
     window.InstructionCRUDView = EmeraldView.extend({
         template_name: 'instructions-crud',
         render: function(){
+            var instruction = new BuildInstruction();
+
             var form = new Backbone.Form({
-                model: this.model,
-                fieldsets: [
-                    ['email', 'tel', 'number', 'checkbox', 'radio', 'checkboxes'],
-                    { legend: 'jQuery UI editors', fields: ['date', 'datetime', 'list'] }
-                ]
+                model: instruction
             }).render();
 
             this.$el.html(this.template({
                 form: $(form.el).html(),
                 instruction: this.model.toJSON()
             }));
+
+            this.$el.find("#instruction-form").empty().append(form.el);
 
             return this;
         }
