@@ -446,7 +446,7 @@
         run: function(e){
             window.socket.emit('run BuildInstruction', {id: this.model.get('__id__')});
             return e.preventDefault();
-        },
+        }
     });
 
     window.InstructionManagementView = EmeraldView.extend({
@@ -463,27 +463,20 @@
             collection.each(function(instruction){
                 var subView = new SingleManagedInstruction({model: instruction});
                 $list.append(subView.render().el);
-            })
+            });
 
             return this;
         }
     });
 
     window.InstructionCRUDView = EmeraldView.extend({
-        template_name: 'instructions-crud',
+        template_name: 'instruction-crud',
         render: function(){
             var instruction = new BuildInstruction();
 
-            var form = new Backbone.Form({
-                model: instruction
-            }).render();
-
             this.$el.html(this.template({
-                form: $(form.el).html(),
-                instruction: this.model.toJSON()
+                instruction: instruction.toJSON()
             }));
-
-            this.$el.find("#instruction-form").empty().append(form.el);
 
             return this;
         }

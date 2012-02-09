@@ -72,8 +72,8 @@ app.configure(function(){
     app.use(express.compiler({src: settings.LOCAL_FILE('public'), enable: ['less'] }));
 
     app.use(app.router);
-    app.use(express.static(settings.ASSETS_PATH));
-    app.use(express.static(settings.CLIENT_PATH));
+    app.use(express['static'](settings.ASSETS_PATH));
+    app.use(express['static'](settings.CLIENT_PATH));
 });
 
 app.configure('development', function(){

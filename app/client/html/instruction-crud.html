@@ -1,0 +1,70 @@
+<div class="row">
+  <div class="span8">
+    <form class="form-horizontal">
+      <fieldset>
+	<% if (instruction.__id__) { %>
+	<legend>Editting <%= instruction.name %></legend>
+	<% } else { %>
+	<legend>Create a new build instruction</legend>
+	<% } %>
+        <div class="control-group">
+          <label for="name" class="control-label">Name</label>
+          <div class="controls">
+            <input type="text" value="" id="name" class="input-xlarge focused">
+	    <span class="help-inline">&#10038;</span>
+	    <p class="help-block">This will be the title of all the builds</p>
+          </div>
+        </div>
+        <div class="control-group">
+          <label for="description" class="control-label">Description</label>
+          <div class="controls">
+            <textarea class="input-xlarge focused"></textarea>
+	    <p class="help-block">a description of this build
+	    instruction, this is just for information purposes so that
+	    if a build fails an inexperienced developer can understand
+	    what is this instruction about</p>
+          </div>
+        </div>
+        <div class="control-group">
+          <label for="repository_address" class="control-label">git repository address</label>
+          <div class="controls">
+            <input type="text" value="" id="repository_address" class="input-xlarge focused">
+	    <span class="help-inline">&#10038;</span>
+	    <p class="help-block">any valid git urls, <strong>some examples:</strong>
+	      <ul class="unstyled examples">
+		<li><code>git@github.com:Yipit/emerald.git</code></li>
+		<li><code>git://github.com/gabrielfalcao/sure.git</code></li>
+		<li><code>git://github.com/visionmedia/express.git</code></li>
+	      </ul>
+	    </p>
+          </div>
+        </div>
+	<div class="control-group">
+          <label for="branch" class="control-label">branch to build</label>
+          <div class="controls">
+	    <div class="input-prepend">
+              <span class="add-on">@</span>
+              <input type="text" size="16" id="branch" class="span2" value="master">
+	      <span class="help-inline">&#10038;</span>
+            </div>
+	  </div>
+	</div>
+	<div class="control-group">
+          <label for="branch" class="control-label">build script</label>
+          <div class="controls">
+	    <div class="input-prepend">
+            <textarea name="build_script" class="input-xlarge focused"></textarea>
+	      <span class="help-inline">&#10038;</span>
+            </div>
+	  </div>
+	</div>
+	<span class="help-inline">&#10038; required fields</span>
+        <div class="form-actions">
+          <button class="btn btn-success">Create</button>
+          <button class="btn">Cancel</button>
+        </div>
+      </fieldset>
+    </form>
+  </div>
+</div>
+

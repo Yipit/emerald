@@ -30,13 +30,6 @@
     }
     window.BuildInstruction = EmeraldModel.extend({
         __name__: 'instruction',
-        schema: {
-            name:        { validators: ['required'] },
-            description: { type: 'Text'},
-            repository_address: { type: 'Text', validators: ['required', validateRepositoryAddress]},
-            branch: { type: 'Text'},
-            build_script: { type: 'Text'}
-        },
         initialize: function(){
             var self = this;
 

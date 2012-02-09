@@ -32,7 +32,7 @@ exports.now = function(app, io, redis, callback) {
     async.reject([settings.EMERALD_PATH, settings.SANDBOX_PATH], path.exists, function(folders_to_create) {
         async.forEach(folders_to_create, function(folder, cb) {
             logger.info(["creating", folder]);
-            mkdirp(folder, parseIng('0755', 8), cb);
+            mkdirp(folder, parseInt('0755', 8), cb);
         }, function(err){
             if (err) {
                 logger.fail(err.toString());

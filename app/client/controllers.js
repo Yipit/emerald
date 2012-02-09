@@ -4,18 +4,19 @@
             '': 'dashboard',
             'dashboard': 'dashboard',
             'build/:id': 'build',
-            'instructions': 'manage_instructions'
+            'instructions': 'manage_instructions',
+            'instruction/new': 'new_instruction'
         },
         initialize: function(){
             this.$body = $("body");
             this.$app = $("#app");
             _.bindAll(this,
+                      'render',
                       'dashboard',
                       'build',
                       'manage_instructions',
+                      'new_instruction',
                       'connection_lost');
-
-            this.dashboardView = new BuildListView({collection: instructions});
 
             this.consoleView = new ConsoleView({model: main_console});
             var consoleElement = this.consoleView.render().el;
@@ -28,34 +29,44 @@
 
             window.socket.on('disconnect', this.connection_lost);
         },
+        render: function(view_instance){
+            /* just a DRY helper for rendering backbone views in the
+             * main app */
+            return this.$app.empty().append(view_instance.render().el);
+        },
         dashboard: function(){
-            var dashboard = this.dashboardView.render().el;
-            this.$app.empty().append(dashboard);
+            dashboardView = new BuildListView({collection: instructions});
             instructions.fetch();
+            this.render(dashboardView);
         },
         build: function(id) {
-            var $app = this.$app.empty();
+            var self = this;
             var build = new Build({__id__: id});
             build.fetch({
                 success: function(){
                     var view = new DetailedBuildView({model: build});
-                    $app.append(view.render().el);
+                    self.render(view);
                 },
                 error: function(build, response){
                     var error = new UIError(JSON.parse(response.responseText));
                     var view = new ErrorView({model: error});
-                    $app.append(view.render().el);
+                    self.render(view);
                 }
             });
         },
         manage_instructions: function() {
             var view = new InstructionManagementView({collection: instructions});
             instructions.fetch();
-            this.$app.empty().append(view.render().el);
+            return this.render(view);
+        },
+        new_instruction: function() {
+            var view = new InstructionCRUDView({});
+            return this.render(view);
         },
         connection_lost: function() {
             var view = new ConnectionLostView();
-            this.$app.empty().append(view.render().el);
+            this.render(view);
+
             setTimeout(function(){
                 if (!window.socket.socket.connected) {
                     $('#connection-lost-dialog').dialog({
