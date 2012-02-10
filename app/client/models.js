@@ -43,15 +43,20 @@
                     }
                 };
             }
-            window.socket.on('Build started',                bypass_signal("Build started",                "build_started"));
-            window.socket.on('Build running',                bypass_signal("Build running",                "build_running"));
-            window.socket.on('Build finished',               bypass_signal("Build finished",               "build_finished"));
-            window.socket.on('Build aborted',                bypass_signal("Build aborted",                "build_aborted"));
-            window.socket.on('Build output',                 bypass_signal("Build output",                 "build_output"));
 
-            window.socket.on('Repository started fetching', bypass_signal("Repository started fetching", "repository_fetched"));
-            window.socket.on('Repository being fetched',     bypass_signal("Repository being fetched",     "fetching_repository"));
-            window.socket.on('Repository finished fetching', bypass_signal("Repository finished fetching", "repository_fetched"));
+            var mappings = {
+                "Build started": "build_started",
+                "Build running": "build_running",
+                "Build finished": "build_finished",
+                "Build aborted": "build_aborted",
+                "Build output": "build_output",
+                "Repository started fetching": "repository_fetched",
+                "Repository being fetched": "fetching_repository",
+                "Repository finished fetching": "repository_fetched"
+            };
+            _.each(mappings, function(method_name, signal_name){
+                window.socket.on(signal_name, bypass_signal(signal_name, method_name));
+            });
         }
     });
 
