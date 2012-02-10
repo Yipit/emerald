@@ -5,9 +5,10 @@
 
         window.App = new window.EmeraldRouter();
         Backbone.history.bind('route', function(router, controller_name){
-            var selector = "#controller-" + controller_name;
-            $(selector).siblings().removeClass("active");
-            $(selector).addClass("active");
+            var selector = 'a[rel~="' + controller_name + '"]';
+            var $item = $(selector).closest('li.navigation-item');
+            $item.siblings().removeClass("active");
+            $item.addClass("active");
         });
         Backbone.history.start();
     });

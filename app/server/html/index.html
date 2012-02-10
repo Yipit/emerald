@@ -20,20 +20,23 @@
 	    <div id="logo">Emerald</div>
 	  </a>
 	  <ul class="nav">
-	    {# notice that some of the following "li" elements have the
-	    "id" attribute set to "controller:some_name"
+	    {# notice that some of the following "a" elements have the
+	    "rel" attribute set to equivalent backbone controllers
+	    defined at "./app/client/controllers.js"
 
 	    this is used internally in the backbone app: there is a
 	    listener to the signal (Backbone.history.bind("route"))
 
 	    that takes the name of the controller resposible to render
-	    the new view, and prepend with "controller-", so that it
-	    can change the state of the navigation items bellow to
-	    "active" when suitable. #}
-	    <li id="controller-dashboard" class="dashboard"><a href="#dashboard">
+	    the new view, search for a link tag with the controller
+	    name in the "rel" attribute, traverse to the closest
+	    ancestor responding to the selector "li.navigation-item"
+	    and change the state of that to active, and its siblings
+	    state to inactive. #}
+	    <li class="navigation-item dashboard"><a href="#dashboard" rel="dashboard">
 		<i class="icon-white icon-th-large"></i>
 		dashboard</a></li>
-	    <li id="controller-manage_instructions" class="instructions dropdown">
+	    <li class="navigation-item instructions dropdown">
 	      <a href="#instructions" data-toggle="dropdown">
 		<i class="icon-white icon-th-list"></i>
 		instructions
@@ -41,11 +44,11 @@
 	      </a>
 	      <ul class="dropdown-menu">
 		<li>
-		  <a href="#instruction/new">
+		  <a href="#instruction/new" rel="new_instruction">
 		    <i class="icon-pencil"></i>
 		    Create a new one
 		  </a>
-		  <a href="#instructions">
+		  <a href="#instructions" rel="manage_instructions">
 		    <i class="icon-th"></i>
 		    Manage them all
 		  </a>
