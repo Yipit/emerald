@@ -188,6 +188,7 @@
             this.model.bind('build_running', this.expand_box);
             this.model.bind('build_started', this.expand_box);
             this.model.bind('build_finished', this.expand_box);
+            this.model.bind('build_finished', this.render_builds);
             this.model.bind('fetching_repository', this.expand_box);
 
             this.model.bind('build_finished', this.update_latest_build);
@@ -283,7 +284,7 @@
             });
         },
         make_abort_button: function(build){
-            return this.make_toolbar_button('Abort', 'btn-danger do-abort', 'rel="' + build.__id__ + '"', 'icon-eject');
+            return this.make_toolbar_button('Abort', 'btn-danger do-abort', 'rel="' + build.__id__ + '"', 'icon-off');
         },
         make_last_build: function(build){
             var html = [
@@ -332,22 +333,25 @@
                 this.$img.attr('src', this.avatar_loading_gif);
             }
 
-            /* expand the body */
-            self.$body.animate({
-                'padding-top': '10px',
-                'padding-bottom': '10px',
-                'padding-left': '30px',
-                'padding-right': '30px',
-                'margin-left': '-10px',
-                'margin-right': '-10px'
-            }, function(){
-                self.$body.removeClass('hidden');
+            /* only animate when the build stage is either BEGINNING or FETCHING */
+            if (_.include([0, 1], build.stage)) {
+                /* expand the body */
+                self.$body.animate({
+                    'padding-top': '10px',
+                    'padding-bottom': '10px',
+                    'padding-left': '30px',
+                    'padding-right': '30px',
+                    'margin-left': '-10px',
+                    'margin-right': '-10px'
+                }, function(){
+                    self.$body.removeClass('hidden');
 
-                /* refresh the toolbar */
-                self.update_toolbar(data);
+                    /* refresh the toolbar */
+                    self.update_toolbar(data);
 
-                self.render_builds(data);
-            });
+                    self.render_builds(data);
+                });
+            }
         },
         update_latest_build: function(data){
             var self = this;
@@ -402,14 +406,21 @@
          */
         template_name: 'subview-build-item-for-instruction',
         tagName: 'li',
-        className: 'build-link',
-        customize: function(){
-            _.bindAll(this, 'fill_attributes');
-            this.bind('post-render', this.fill_attributes);
-        },
-        fill_attributes: function(){
+        render: function(){
+            var data = this.model.toJSON();
+
+            var rendered = this.template(_.extend(data, {
+                STAGE_TO_UI: STAGE_TO_UI,
+                truncate: truncate
+            }));
+
+            this.$el.addClass('build-link');
             this.$el.addClass(this.model.get('style_name'));
             this.$el.attr("id", 'clay:Build:id:' + this.model.get('__id__'));
+
+            this.$el.html(rendered);
+
+            return this;
         }
     });
 
