@@ -471,6 +471,20 @@
 
     window.InstructionCRUDView = EmeraldView.extend({
         template_name: 'instruction-crud',
+        events: {
+            'click #save': 'save'
+        },
+        is_form_valid: false,
+        fields: [
+            {key: 'name', required: 'you need to provide a name so that emerald will use it to identify the different instructions'},
+            {key: 'decription', required: null},
+            {key: 'repository_address', required: "c'mon if you don't provide the repository address, how's emerald supposed to check that out for you?"},
+            {key: 'branch', required: "really? if please tell me which branch you wanna build, if you don't know what to do, just put \"master\""},
+            {key: 'build_script', required: "alright you gotta be kidding, without a build script how is emerald supposed to actually \"build\" the thing?"}
+        ],
+        customize: function(){
+            _.bindAll(this, 'save', 'get_field_value');
+        },
         render: function(){
             var instruction = new BuildInstruction();
 
@@ -479,6 +493,49 @@
             }));
 
             return this;
+        },
+        get_field_value: function(name, is_required){
+            var $field = this.$el.find("#" + name);
+            var $control_group = $field.closest(".control-group");
+            var value = $field.val();
+            var error_message = is_required;
+            $field.tooltip({
+                trigger: 'manual',
+                placement: 'right',
+                title: error_message
+            });
+
+            if (!is_required) {
+                return value;
+            } else {
+                if (/^\s*$/.test(value)) {
+                    if (this.is_form_valid) {
+                        $control_group.addClass("error");
+                        $field.tooltip('show');
+                        setTimeout(function(){
+                            $field.tooltip('hide');
+                        }, 3000);
+                    }
+                    this.is_form_valid = false;
+                    return null;
+                } else {
+                    $field.tooltip('hide');
+                    $control_group.removeClass("error");
+                    return value;
+                }
+            }
+        },
+        save: function(){
+            var self = this;
+            var data = {};
+            this.is_form_valid = true;
+            _.each(this.fields, function(item){
+                data[item.key] = self.get_field_value(item.key, item.required);
+            });
+
+            if (!this.is_form_valid) {
+
+            }
         }
     });
 
