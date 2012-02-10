@@ -2,9 +2,9 @@
     window.socket = io.connect();
     window.socket.on('BuildInstruction created', function(data){
         $.gritter.add({
-            title: "An instruction was created",
-            text: "#" + data.id,
-            image: window.emerald.domain + "/images/control_double_down.png"
+            title: 'A new build instruction was added to emerald',
+            text: 'Now you can run builds on "'+data.name+'"',
+            image: window.emerald.domain + "/images/ico_success.png"
         });
     });
 
@@ -29,14 +29,6 @@
             title: '"' + data.instruction.name + '" has finished',
             text: "The build instruction #" + data.instruction.id + " has finished",
             image: window.emerald.domain + "/images/ico_success.png"
-        });
-    });
-
-    window.socket.on('BuildInstruction created', function(data){
-        $.gritter.add({
-            title: "An instruction was created",
-            text: "#" + data.id,
-            image: window.emerald.domain + "/images/control_double_down.png"
         });
     });
 

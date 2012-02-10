@@ -472,9 +472,9 @@
     window.InstructionCRUDView = EmeraldView.extend({
         template_name: 'instruction-crud',
         events: {
-            'click #save': 'save'
+            'click #save': 'create'
         },
-        is_form_valid: false,
+        form_still_valid: false,
         fields: [
             {key: 'name', required: 'you need to provide a name so that emerald will use it to identify the different instructions'},
             {key: 'decription', required: null},
@@ -483,7 +483,7 @@
             {key: 'build_script', required: "alright you gotta be kidding, without a build script how is emerald supposed to actually \"build\" the thing?"}
         ],
         customize: function(){
-            _.bindAll(this, 'save', 'get_field_value');
+            _.bindAll(this, 'create', 'get_field_value');
         },
         render: function(){
             var instruction = new BuildInstruction();
@@ -506,17 +506,17 @@
             });
 
             if (!is_required) {
-                return value;
+                return value || "";
             } else {
                 if (/^\s*$/.test(value)) {
-                    if (this.is_form_valid) {
+                    if (this.form_still_valid) {
                         $control_group.addClass("error");
                         $field.tooltip('show');
                         setTimeout(function(){
                             $field.tooltip('hide');
-                        }, 3000);
+                        }, 10000);
                     }
-                    this.is_form_valid = false;
+                    this.form_still_valid = false;
                     return null;
                 } else {
                     $field.tooltip('hide');
@@ -525,16 +525,32 @@
                 }
             }
         },
-        save: function(){
+        create: function(){
             var self = this;
-            var data = {};
-            this.is_form_valid = true;
+            var data = {id: 'new'};
+            this.form_still_valid = true;
+            this.$el.find("#save").button('validating');
             _.each(this.fields, function(item){
                 data[item.key] = self.get_field_value(item.key, item.required);
             });
 
-            if (!this.is_form_valid) {
+            if (this.form_still_valid) {
+                this.model = new BuildInstruction();
+                this.model.url = '/api/instruction/new';
+                this.$el.find("#save").button('saving');
 
+                this.model.save(data, {
+                    success: function(model, data){
+                        self.$el.find("#save").button('reset');
+                        App.navigate('/instructions', {trigger: true});
+                    },
+                    error: function(){
+                        self.$el.find("#save").button('reset');
+                    }
+                });
+
+            } else {
+                self.$el.find("#save").button('retry');
             }
         }
     });

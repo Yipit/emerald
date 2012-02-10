@@ -113,11 +113,21 @@ exports.map = function(app, redis){
                     };
                     status = 404;
                 } else {
-                    raw = JSON.stringify(instance.toBackbone());
+                    raw = instance.toBackbone();
                     status = 200;
                 }
-                response.send(raw, headers, status);
+                response.json(raw, headers, status);
             });
+        });
+    });
+
+    app.put('/api/instruction/new', function(request, response){
+        var headers = {'Content-Type': 'application/json'};
+
+        entity.BuildInstruction.create(request.body, function(err, key, instruction){
+            var data = instruction.toBackbone();
+            redis.publish('BuildInstruction created', JSON.stringify(data));
+            response.json(data, 201);
         });
     });
 };
