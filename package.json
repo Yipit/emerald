@@ -1,6 +1,6 @@
 {
     "name": "emerald"
-  , "version": "0.0.1-alpha"
+  , "version": "0.0.2-alpha"
   , "preferGlobal": "true"
   , "description": "real-time C.I written in node.js by Yipit.com. in unstable alpha"
   , "keywords": ["continous", "integration", "CI", "build"]
@@ -11,7 +11,7 @@
       "emerald": "./app/terminal/main.js"
   }
   , "dependencies": {
-      "clay": ">= 1.2.2"
+      "clay": ">= 1.3.0"
     , "redis": ">= 0.7.1"
     , "express": ">= 2.5.0"
     , "socket.io": ">= 0.8.7"

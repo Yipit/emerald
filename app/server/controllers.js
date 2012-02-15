@@ -124,7 +124,9 @@ exports.map = function(app, redis){
     app.put('/api/instruction/new', function(request, response){
         var headers = {'Content-Type': 'application/json'};
 
-        entity.BuildInstruction.create(request.body, function(err, key, instruction){
+        var data = request.body;
+        data.slug = data.name;
+        entity.BuildInstruction.create(data, function(err, key, instruction){
             var data = instruction.toBackbone();
             redis.publish('BuildInstruction created', JSON.stringify(data));
             response.json(data, 201);
