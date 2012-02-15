@@ -69,7 +69,10 @@ QueueConsumer.prototype.start = function(){
                     }
                 });
             }
-            instruction.run(handle);
+            self.redis.save(function(){
+                logger.info("asking redis to dump its in-memory data to the disk");
+                instruction.run(handle);
+            });
         });
     }, self.interval);
 };

@@ -77,9 +77,11 @@ exports.now = function(app, io, redis, callback) {
                 } else {
                     process.stdout.write('OK\n\n'.green.bold);
                 }
-                process.reallyExit(1);
+                redis.save(function(){
+                    logger.info("asking redis to dump its in-memory data to the disk");
+                    process.reallyExit(1);
+                });
             });
-
     });
 
     process.on('uncaughtException', function (err) {
@@ -109,7 +111,10 @@ exports.now = function(app, io, redis, callback) {
 
                 logger.fail(['Original exception: ', original_exception.toString(), ''].join('"').red.bold);
                 console.log((original_exception.stack + "").yellow.bold);
-                process.reallyExit(err && 1 || 0);
+                redis.save(function(){
+                    logger.info("asking redis to dump its in-memory data to the disk");
+                    process.reallyExit(err && 1 || 0);
+                });
             });
     });
 };
