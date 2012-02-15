@@ -112,6 +112,8 @@ npm install
 
 ```console
 cd path/to/emerald
+```
+```console
 ln -s .development/pre-commit-hook .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
 ```
