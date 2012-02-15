@@ -79,7 +79,7 @@ BuildRunner.prototype.start = function(){
                 options.cwd = repository_full_path;
                 logger.info('found an existing git repo at "'+repository_bare_path+'", gonna use git-pull');
             } else {
-                args = ["clone", "--progress", instruction.repository_address, repository_folder_name];
+                args = ["clone", "--progress", instruction.repository_address, repository_full_path];
                 logger.info('local copy does not exist, will clone at "'+repository_full_path+'"');
                 options.cwd = settings.SANDBOX_PATH;
             }
