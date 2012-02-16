@@ -5,6 +5,7 @@ module.exports.make = function(io) {
     subscribe.setMaxListeners(1000);
     subscribe.subscribe("BuildInstruction created");
     subscribe.subscribe("BuildInstruction enqueued");
+    subscribe.subscribe("BuildInstruction deleted");
 
     subscribe.subscribe("Repository started fetching");
     subscribe.subscribe("Repository finished fetching");
@@ -17,6 +18,8 @@ module.exports.make = function(io) {
     subscribe.subscribe("Build stderr");
     subscribe.subscribe("Build output");
     subscribe.subscribe("Build running");
+
+    subscribe.subscribe("General error");
 
     io.sockets.on("connection", function(socket) {
         subscribe.on("message", function(channel, message) {

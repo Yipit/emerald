@@ -36,20 +36,36 @@ exports.work_on = function(redis, io) {
                 build.abort();
             });
         });
+        socket.on('delete BuildInstruction', function (data) {
+            function report_problem(error) {
+                return redis.publish('General error', JSON.stringify({
+                    title: 'Could not delete the instruction #' + data.id,
+                    text: error.toString()
+                }));
+            }
+            entity.BuildInstruction.find_by_id(data.id, function(err, instruction){
+                if (err){return report_problem(err);}
+                instruction.erase(function(err){
+                    if (err) {return report_problem(err);}
+                    redis.publish('BuildInstruction deleted', JSON.stringify({
+                        instruction: instruction.toBackbone()
+                    }));
+                });
+
+            });
+        });
         socket.on('run BuildInstruction', function (data) {
             var now = new Date();
 
-            var instruction_id = parseInt(data.id, 10);
-
             async.waterfall([
                 function find_by_id(callback){
-                    entity.BuildInstruction.find_by_id(instruction_id, callback);
+                    entity.BuildInstruction.find_by_id(data.id, callback);
                 },
                 function fetch_builds(instruction, callback){
                     entity.BuildInstruction.with_builds_from_data(instruction.__data__, callback);
                 },
                 function add_build_to_queue_raising_score(instruction, callback){
-                    redis.zincrby(settings.REDIS_KEYS.build_queue, 1, instruction_id, function(){
+                    redis.zincrby(settings.REDIS_KEYS.build_queue, 1, data.id, function(){
                         callback(null, instruction);
                     });
                 },

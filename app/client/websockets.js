@@ -16,10 +16,34 @@
         });
     });
 
+    window.socket.on('BuildInstruction deleted', function(data){
+        $.gritter.add({
+            title: 'Someone deleted the instruction "' + data.instruction.name + '"',
+            text: "Don't worry, any queued builds of that given instruction were aborted",
+            image: window.emerald.domain + "/images/ico_abort.png"
+        });
+    });
+
     window.socket.on('Build aborted', function(data){
         $.gritter.add({
             title: '"' + data.instruction.name + '" was aborted',
             text: "The build instruction #" + data.instruction.id + " has been successfully aborted",
+            image: window.emerald.domain + "/images/ico_abort.png"
+        });
+    });
+
+    window.socket.on('Build aborted', function(data){
+        $.gritter.add({
+            title: '"' + data.instruction.name + '" was aborted',
+            text: "The build instruction #" + data.instruction.id + " has been successfully aborted",
+            image: window.emerald.domain + "/images/ico_abort.png"
+        });
+    });
+
+    window.socket.on('General error', function(data){
+        $.gritter.add({
+            title: data.title || 'A general error happened',
+            text: data.text || 'the server did not send further information, please check the logs',
             image: window.emerald.domain + "/images/ico_abort.png"
         });
     });

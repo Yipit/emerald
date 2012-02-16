@@ -45,6 +45,7 @@
             }
 
             var mappings = {
+                "BuildInstruction deleted": "instruction_deleted",
                 "Build started": "build_started",
                 "Build running": "build_running",
                 "Build finished": "build_finished",

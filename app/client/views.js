@@ -175,6 +175,7 @@
                 this,
                 'render',
                 'customize',
+                'vanish_and_remove',
                 'expand_box',
                 'update_latest_build',
                 'update_toolbar',
@@ -184,6 +185,8 @@
                 'prepare_progress'
             );
             //this.model.bind('change', this.render);
+            this.model.bind('instruction_deleted', this.vanish_and_remove);
+
             this.model.bind('build_output', this.expand_box);
             this.model.bind('build_running', this.expand_box);
             this.model.bind('build_started', this.expand_box);
@@ -201,6 +204,8 @@
             this.model.bind('fetching_repository', this.show_progress);
             this.model.bind('repository_fetched', this.hide_progress);
             this.model.bind('build_finished', this.hide_progress);
+
+
             this.model.bind('build_finished', function(){
                 setTimeout(function(){
                     window.location = window.location;
@@ -401,6 +406,12 @@
             window.socket.emit('abort Build', {id: id});
             this.$toolbar.fadeOut();
             return e.preventDefault();
+        },
+        vanish_and_remove: function(){
+            var self = this;
+            this.$el.fadeOut(function(){
+                self.$el.remove();
+            });
         }
     });
 
@@ -445,7 +456,8 @@
            this is basically a subview of InstructionManagementView
         */
         events: {
-            'click a.schedule-build': 'run'
+            'click a.schedule-build': 'run',
+            'click a.delete': 'erase'
         },
         template_name: 'single-managed-instruction',
         render: function(){
@@ -457,11 +469,24 @@
             return this;
         },
         customize: function(){
-            _.bindAll(this, 'run');
+            _.bindAll(this, 'run', 'erase', 'vanish_and_remove');
+            this.model.bind('instruction_deleted', this.vanish_and_remove);
         },
         run: function(e){
             window.socket.emit('run BuildInstruction', {id: this.model.get('__id__')});
             return e.preventDefault();
+        },
+        erase: function(e) {
+            if (confirm('Are you sure you want to delete "' + this.model.get('name') + '"')) {
+                window.socket.emit('delete BuildInstruction', {id: this.model.get('__id__')});
+            }
+            return e.preventDefault();
+        },
+        vanish_and_remove: function(){
+            var self = this;
+            this.$el.fadeOut(function(){
+                self.$el.remove();
+            });
         }
     });
 
