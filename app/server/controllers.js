@@ -103,20 +103,25 @@ exports.map = function(app, redis){
     }, function(Model, name){
         /* defining the controller responsible to fetch ONLY one instance */
         app.get('/api/' + name + '/:id.json', function(request, response){
-            Model.fetch_by_id(parseInt(request.param('id'), 10), function(err, instance){
-                var status, raw;
-                var headers = {'Content-Type': 'application/json'};
-                if (err) {
-                    raw = {
-                        message: err.toString(),
-                        stack: err.stack.toString()
-                    };
-                    status = 404;
-                } else {
-                    raw = instance.toBackbone();
-                    status = 200;
-                }
-                response.json(raw, headers, status);
+            Model.get_by_id_or_404(request.param('id'), function(instance, headers, status){
+                return response.json(instance.toString(), headers, status);
+            });
+        });
+        app.put('/api/' + name + '/:id.json', function(request, response){
+            Model.get_by_id_or_404(request.param('id'), function(instance, headers, status){
+                _.each(instance._meta.field.names, function(name){
+                    var value = request.param(name);
+                    if (value) {
+                        instance[name] = value;
+                    }
+                });
+                instance.save(function(err){
+                    if (err) {
+                        return response.json('', headers, 500);
+                    }
+                    return response.json('', headers, 200);
+                });
+
             });
         });
     });

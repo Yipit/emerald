@@ -37,6 +37,7 @@ var STAGES_BY_INDEX = {
     5: 'FAILED',
     6: 'SUCCEEDED'
 };
+
 var STAGES_BY_NAME = {
     BEGINNING: 0,
     FETCHING: 1,
@@ -47,7 +48,27 @@ var STAGES_BY_NAME = {
     SUCCEEDED: 6
 };
 
-var Build = models.declare("Build", function(it, kind) {
+
+var EmeraldModel = models.declare("EmeraldModel", function(it, kind) {
+    it.has.class_method('get_by_id_or_404', function(id, callback) {
+        this.fetch_by_id(parseInt(id, 10), function(err, instance){
+            var status;
+            var headers = {'Content-Type': 'application/json'};
+            if (err) {
+                instance = {
+                    message: err.toString(),
+                    stack: err.stack.toString()
+                };
+                status = 404;
+            } else {
+                status = 200;
+            }
+            return callback(instance, headers, status);
+        });
+    });
+});
+
+var Build = EmeraldModel.subclass("Build", function(it, kind) {
     it.has.field("index", kind.numeric);
     it.has.field("status", kind.string);
     it.has.field("signal", kind.string);
@@ -184,8 +205,7 @@ var Build = models.declare("Build", function(it, kind) {
         ], callback);
     });
     it.has.class_method('fetch_by_id', function(id, callback) {
-        var key = 'clay:Build:id:' + id;
-        return this.fetch_by_key(key, function(err, build){
+        return this.find_by_id(id, function(err, build){
             if (err) {return callback(err);}
 
             var instruction_id = parseInt(build.instruction_id, 10);
@@ -213,6 +233,7 @@ var Build = models.declare("Build", function(it, kind) {
             return callback(err, instance);
         });
     });
+    it.has.method('toString', function() {return this.toBackbone();});
     it.has.method('toBackbone', function() {
         var data = this.__data__;
         data.id = data.__id__;
@@ -255,7 +276,7 @@ var Build = models.declare("Build", function(it, kind) {
     });
 });
 
-var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
+var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, kind) {
     it.has.field("name", kind.string);
     it.has.field("slug", kind.string);
     it.has.field("description", kind.string);
@@ -286,6 +307,7 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
             }
         };
     });
+    it.has.method('toString', function() {return this.toBackbone();});
     it.has.method('toBackbone', function() {
         var self = this;
         var data = this.__data__;
@@ -307,11 +329,10 @@ var BuildInstruction = models.declare("BuildInstruction", function(it, kind) {
 
         async.waterfall([
             function fetch_instruction (callback){
-                logger.debug('fetch_by_id: fetching raw data');
-                return redis.hgetall('clay:BuildInstruction:id:' + id, callback);
+                BuildInstruction.find_by_id(id, callback);
             },
-            function fetch_builds (data, callback){
-                BuildInstruction.with_builds_from_data(data, callback);
+            function fetch_builds (instruction, callback){
+                BuildInstruction.with_builds_from_data(instruction.__data__, callback);
             }
         ], callback);
     });

@@ -5,7 +5,8 @@
             'dashboard': 'dashboard',
             'build/:id': 'build',
             'instructions': 'manage_instructions',
-            'instruction/new': 'new_instruction'
+            'instruction/new': 'new_instruction',
+            'instruction/:id/edit': 'edit_instruction'
         },
         initialize: function(){
             this.$body = $("body");
@@ -16,6 +17,7 @@
                       'build',
                       'manage_instructions',
                       'new_instruction',
+                      'edit_instruction',
                       'connection_lost');
 
             this.consoleView = new ConsoleView({model: main_console});
@@ -62,6 +64,21 @@
         new_instruction: function() {
             var view = new InstructionCRUDView({});
             return this.render(view);
+        },
+        edit_instruction: function(id) {
+            var self = this;
+            var instruction = new BuildInstruction({__id__: id});
+            instruction.fetch({
+                success: function(){
+                    var view = new InstructionCRUDView({model: instruction});
+                    self.render(view);
+                },
+                error: function(build, response){
+                    var error = new UIError(JSON.parse(response.responseText));
+                    var view = new ErrorView({model: error});
+                    self.render(view);
+                }
+            });
         },
         connection_lost: function() {
             var view = new ConnectionLostView();

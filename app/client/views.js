@@ -201,6 +201,11 @@
             this.model.bind('fetching_repository', this.show_progress);
             this.model.bind('repository_fetched', this.hide_progress);
             this.model.bind('build_finished', this.hide_progress);
+            this.model.bind('build_finished', function(){
+                setTimeout(function(){
+                    window.location = window.location;
+                }, 3000);
+            });
 
             this.template = get_template('instruction');
             this.bind('post-render', this.prepare_progress);
@@ -483,7 +488,7 @@
     window.InstructionCRUDView = EmeraldView.extend({
         template_name: 'instruction-crud',
         events: {
-            'click #save': 'create'
+            'click #save': 'create_or_edit'
         },
         form_still_valid: false,
         fields: [
@@ -494,13 +499,11 @@
             {key: 'build_script', required: "alright you gotta be kidding, without a build script how is emerald supposed to actually \"build\" the thing?"}
         ],
         customize: function(){
-            _.bindAll(this, 'create', 'get_field_value');
+            _.bindAll(this, 'create_or_edit', 'get_field_value');
         },
         render: function(){
-            var instruction = new BuildInstruction();
-
             this.$el.html(this.template({
-                instruction: instruction.toJSON()
+                instruction: this.model.toJSON()
             }));
 
             return this;
@@ -536,18 +539,20 @@
                 }
             }
         },
-        create: function(){
+        create_or_edit: function(){
             var self = this;
-            var data = {id: 'new'};
+            var data = {};
             this.form_still_valid = true;
             this.$el.find("#save").button('validating');
             _.each(this.fields, function(item){
                 data[item.key] = self.get_field_value(item.key, item.required);
             });
+            //this.model.set(data);
 
             if (this.form_still_valid) {
-                this.model = new BuildInstruction();
-                this.model.url = '/api/instruction/new';
+                if (!this.model.get('__id__')) {
+                    this.model.url = '/api/instruction/new';
+                }
                 this.$el.find("#save").button('saving');
 
                 this.model.save(data, {

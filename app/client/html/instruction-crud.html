@@ -10,7 +10,7 @@
         <div class="control-group">
           <label for="name" class="control-label">Name</label>
           <div class="controls">
-            <input type="text" value="" id="name" class="input-xlarge focused">
+            <input type="text" value="<%= instruction.name || '' %>" id="name" class="input-xlarge focused">
 	    <span class="help-inline">&#10038;</span>
 	    <p class="help-block">This will be the title of all the builds</p>
           </div>
@@ -18,7 +18,7 @@
         <div class="control-group">
           <label for="description" class="control-label">Description</label>
           <div class="controls">
-            <textarea name="description" id="description" class="input-xlarge focused"></textarea>
+            <textarea name="description" id="description" class="input-xlarge focused"><%= instruction.description || '' %></textarea>
 	    <p class="help-block">a description of this build
 	    instruction, this is just for information purposes so that
 	    if a build fails an inexperienced developer can understand
@@ -28,12 +28,12 @@
         <div class="control-group">
           <label for="repository_address" class="control-label">GIT repository address</label>
           <div class="controls">
-            <input type="text" value="" id="repository_address" class="input-xlarge focused">
+            <input type="text" value="<%= instruction.repository_address || '' %>" id="repository_address" class="input-xlarge focused">
 	    <span class="help-inline">&#10038;</span>
 	    <p class="help-block">any valid git urls, <strong>some examples:</strong>
 	      <ul class="unstyled examples">
 		<li><code>git@github.com:Yipit/emerald.git</code></li>
-		<li><code>git://github.com/gabrielfalcao/sure.git</code></li>
+		<li><code>git://github.com/Yipit/clay.js.git</code></li>
 		<li><code>git://github.com/visionmedia/express.git</code></li>
 	      </ul>
 	    </p>
@@ -44,7 +44,7 @@
           <div class="controls">
 	    <div class="input-prepend">
               <span class="add-on">@</span>
-              <input type="text" size="16" id="branch" class="span2" value="master">
+              <input type="text" size="16" id="branch" class="span2" value="<%= instruction.branch || 'master' %>">
 	      <span class="help-inline">&#10038;</span>
             </div>
 	  </div>
@@ -53,14 +53,14 @@
           <label for="branch" class="control-label">build script</label>
           <div class="controls">
 	    <div class="input-prepend">
-            <textarea name="build_script" id="build_script" class="input-xlarge focused"></textarea>
+            <textarea name="build_script" id="build_script" class="input-xlarge focused"><%= instruction.build_script || '' %></textarea>
 	      <span class="help-inline">&#10038;</span>
             </div>
 	  </div>
 	</div>
 	<span class="help-inline">&#10038; required fields</span>
         <div class="form-actions">
-          <button class="btn btn-success" type="button" id="save" data-saving-text="saving..." data-validating-text="validating..." data-retry-text="retry creating">Create</button>
+          <button class="btn btn-success" type="button" id="save" data-saving-text="saving..." data-validating-text="validating..." data-retry-text="retry creating"><% if (instruction.__id__) { %> Update <% } else { %> Create <% } %></button>
           <button class="btn">Cancel</button>
         </div>
       </fieldset>
