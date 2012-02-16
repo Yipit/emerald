@@ -66,6 +66,7 @@ var EmeraldModel = models.declare("EmeraldModel", function(it, kind) {
             return callback(instance, headers, status);
         });
     });
+    it.has.method('toString', function() {return this.toBackbone();});
 });
 
 var Build = EmeraldModel.subclass("Build", function(it, kind) {
@@ -142,8 +143,6 @@ var Build = EmeraldModel.subclass("Build", function(it, kind) {
             }
         ], callback);
     });
-
-
 
     it.has.method('gravatar_of_size', function(size){
         var hash = crypto.createHash('md5');
@@ -233,7 +232,7 @@ var Build = EmeraldModel.subclass("Build", function(it, kind) {
             return callback(err, instance);
         });
     });
-    it.has.method('toString', function() {return this.toBackbone();});
+
     it.has.method('toBackbone', function() {
         var data = this.__data__;
         data.id = data.__id__;
@@ -307,7 +306,7 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
             }
         };
     });
-    it.has.method('toString', function() {return this.toBackbone();});
+
     it.has.method('toBackbone', function() {
         var self = this;
         var data = this.__data__;
