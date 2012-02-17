@@ -528,7 +528,8 @@
         },
         render: function(){
             this.$el.html(this.template({
-                instruction: this.model.toJSON()
+                instruction: this.model.toJSON(),
+                options: this.options
             }));
 
             return this;
@@ -575,7 +576,7 @@
             //this.model.set(data);
 
             if (this.form_still_valid) {
-                if (!this.model.get('__id__')) {
+                if (!this.model.get('__id__') || this.options.duplicate_mode) {
                     this.model.url = '/api/instruction/new';
                 }
                 this.$el.find("#save").button('saving');

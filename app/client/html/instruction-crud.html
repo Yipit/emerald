@@ -3,7 +3,11 @@
     <form class="form-horizontal">
       <fieldset>
 	<% if (instruction.__id__) { %>
-	<legend>Editting <%= instruction.name %></legend>
+	  <% if (options.duplicate_mode) { %>
+	  <legend>Duplicating <%= instruction.name %></legend>
+	  <% } else { %>
+	  <legend>Editing <%= instruction.name %></legend>
+	  <% } %>
 	<% } else { %>
 	<legend>Create a new build instruction</legend>
 	<% } %>

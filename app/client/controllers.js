@@ -6,7 +6,8 @@
             'build/:id': 'build',
             'instructions': 'manage_instructions',
             'instruction/new': 'new_instruction',
-            'instruction/:id/edit': 'edit_instruction'
+            'instruction/:id/edit': 'edit_instruction',
+            'instruction/:id/duplicate': 'duplicate_instruction'
         },
         initialize: function(){
             this.$body = $("body");
@@ -62,7 +63,7 @@
             return this.render(view);
         },
         new_instruction: function() {
-            var view = new InstructionCRUDView({});
+            var view = new InstructionCRUDView({model: new BuildInstruction()});
             return this.render(view);
         },
         edit_instruction: function(id) {
@@ -80,11 +81,32 @@
                 }
             });
         },
+        duplicate_instruction: function(id) {
+            var self = this;
+            var instruction = new BuildInstruction({__id__: id});
+            instruction.fetch({
+                success: function(){
+                    instruction.set('__id__', null);
+                    var name = instruction.get('name');
+                    instruction.set('name', 'copy of ' + name);
+                    var view = new InstructionCRUDView({
+                        model: instruction,
+                        duplicate_mode: true
+                    });
+                    self.render(view);
+                },
+                error: function(build, response){
+                    var error = new UIError(JSON.parse(response.responseText));
+                    var view = new ErrorView({model: error});
+                    self.render(view);
+                }
+            });
+        },
         connection_lost: function() {
             var view = new ConnectionLostView();
             this.render(view);
 
-            setTimeout(function(){
+            setTimeout(function() {
                 if (!window.socket.socket.connected) {
                     $('#connection-lost-dialog').dialog({
                         resizable: false,
