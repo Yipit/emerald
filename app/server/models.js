@@ -213,7 +213,12 @@ var Build = EmeraldModel.subclass("Build", function(it, kind) {
             }
             BuildInstruction.fetch_by_id(instruction_id, function(err, instruction){
                 if (err) {return callback(err);}
-                build.instruction = instruction;
+
+                Object.defineProperty(build, "instruction", {
+                    get: function(){return instruction;},
+                    enumerable : false,
+                    configurable : false
+                });
                 return callback(err, build);
             });
         });
@@ -246,13 +251,22 @@ var Build = EmeraldModel.subclass("Build", function(it, kind) {
             "300": this.gravatar_of_size(300)
         };
 
-        if (this.succeeded) {
-            data.style_name = 'success';
-        } else if (_.isString(data.message) && data.message.trim().length > 0) {
-            data.style_name = 'failure';
-        } else {
-            data.style_name = this.stage_name.toLowerCase();
+        data.style_name = this.stage_name.toLowerCase();
+        console.log('stage:', STAGES_BY_INDEX[this.stage]);
+        switch (STAGES_BY_INDEX[this.stage]) {
+        case 'SUCCEEDED':
+            data.html_class_name = 'alert-success';
+            break;
+        case 'FAILED':
+        case 'ABORTED':
+            data.html_class_name = 'alert-error';
+            break;
+
+        default:
+            break;
         }
+
+
         data.succeeded = JSON.parse(this.succeeded);
         data.stage_name = this.stage_name;
         data.route = "#build/" + data.__id__;
@@ -281,6 +295,7 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
     it.has.field("description", kind.string);
     it.has.field("repository_address", kind.string);
     it.has.field("branch", kind.string);
+    it.has.field("timeout_in_seconds", kind.numeric);
     it.has.field("build_script", kind.string);
 
     it.has.index("slug");
@@ -316,8 +331,22 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
             if (!self[attribute]) {return;}
             data[attribute] = self[attribute].map(function(b){ return b.toBackbone(); });
         });
+
         data.is_building = self.is_building || false;
         data.current_build = self.current_build || null;
+        data.github_hook_url = [settings.EMERALD_DOMAIN, 'hooks/github', this.__id__].join('/');
+        Object.defineProperty(data, "last_build", {
+            get: function(){return self.last_build; },
+            enumerable : true,
+            configurable : true
+        });
+        if (data.all_builds.length === 0) {
+            data.total_builds = 'never built';
+        } else  if (data.all_builds.length === 1){
+            data.total_builds = 'built once';
+        } else {
+            data.total_builds = 'built ' + data.all_builds.length + ' times';
+        }
 
         return data;
     });

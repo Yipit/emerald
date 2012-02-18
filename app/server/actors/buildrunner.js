@@ -294,19 +294,23 @@ BuildRunner.prototype.start = function(){
         if (err) {
             logger.fail(err.toString());
             logger.fail(err.stack.toString());
+            if (build.stage !== entity.STAGES_BY_NAME.ABORTED) {
+                build.stage = entity.STAGES_BY_NAME.FAILED;
+            }
         } else {
             logger.success('the instruction "'+instruction.name+'" has finished running its build #' + build.index);
+            build.stage = entity.STAGES_BY_NAME.SUCCEEDED;
         }
+        build.save(function(){
+            redis.publish("Build finished", JSON.stringify({
+                build: build.toBackbone(),
+                instruction: instruction.toBackbone()
+            }));
 
-        redis.publish("Build finished", JSON.stringify({
-            build: build.toBackbone(),
-            instruction: instruction.toBackbone()
-        }));
-
-        self.lock.release(function(){
-            logger.success(['the build lock was released', err && 'due an error'.red || 'successfully'.green.bold]);
+            self.lock.release(function(){
+                logger.success(['the build lock was released', err && 'due an error'.red || 'successfully'.green.bold]);
+            });
         });
-
     });
 };
 exports.BuildRunner = BuildRunner;
