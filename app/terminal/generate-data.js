@@ -16,7 +16,11 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***************************************************************************/
-require("colors");
+var colors = require('colors');
+if (!process.stdout.isTTY) {
+    colors.mode = 'none';
+}
+
 
 var entity = require('../server/models');
 GLOBAL.settings = require('../../settings');
