@@ -342,10 +342,13 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
         });
         if (data.all_builds.length === 0) {
             data.total_builds = 'never built';
-        } else  if (data.all_builds.length === 1){
-            data.total_builds = 'built once';
         } else {
-            data.total_builds = 'built ' + data.all_builds.length + ' times';
+            data.html_class_name = data.last_build.html_class_name;
+            if (data.all_builds.length === 1){
+                data.total_builds = 'built once';
+            } else {
+                data.total_builds = 'built ' + data.all_builds.length + ' times';
+            }
         }
 
         return data;

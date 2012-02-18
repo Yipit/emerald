@@ -1,5 +1,4 @@
-<% var class_names = instruction.last_build ? instruction.last_build.html_class_name : ""; %>
-<div class="row alert <%= class_names %> managed-instruction">
+<div class="row alert <%= instruction.html_class_name %> managed-instruction">
   <div class="span12">
     <form class="form-horizontal">
       <fieldset>
@@ -23,31 +22,14 @@
       </fieldset>
     </form>
   </div>
-
   <div class="btn-group actions">
-    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-      <i class="icon-list-alt"></i>
-      Actions
-      <span class="caret"></span>
-    </a>
+    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-list-alt"></i>Actions<span class="caret"></span></a>
     <ul class="dropdown-menu">
       <li>
-	<a href="#instruction/<%= instruction.__id__ %>/edit">
-	  <i class="icon-pencil"></i>
-	  Edit
-	</a>
-	<a class="delete" href="#">
-	  <i class="icon-remove"></i>
-	  Delete
-	</a>
-	<a class="duplicate" href="#instruction/<%= instruction.__id__ %>/duplicate">
-	  <i class="icon-tags"></i>
-	  Duplicate
-	</a>
-	<a class="schedule-build" href="">
-	  <i class="icon-time"></i>
-	  Schedule a build
-	</a>
+	<a href="#instruction/<%= instruction.__id__ %>/edit"><i class="icon-pencil"></i>Edit</a>
+	<a href="#instruction/<%= instruction.__id__ %>/delete" class="delete"><i class="icon-remove"></i>Delete</a>
+	<a href="#instruction/<%= instruction.__id__ %>/duplicate" class="duplicate"><i class="icon-tags"></i>Duplicate</a>
+	<a href="#instruction/<%= instruction.__id__ %>/schedule" class="schedule-build"><i class="icon-time"></i>Schedule a build</a>
       </li>
     </ul>
   </div>
