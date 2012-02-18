@@ -1,7 +1,29 @@
-<div class="row alert managed-instruction">
+<% var class_names = instruction.last_build ? instruction.last_build.html_class_name : ""; %>
+<div class="row alert <%= class_names %> managed-instruction">
   <div class="span12">
-    <h2><%= instruction.name %></h2>
+    <form class="form-horizontal">
+      <fieldset>
+	  <legend><%= instruction.name %>@<%= instruction.branch %> (<%= instruction.total_builds %>)</legend>
+          <div class="control-group">
+            <label for="build_script" class="control-label">build script</label>
+            <div class="controls">
+	      <pre id="build_script" class="prettyprint"><%= instruction.build_script.split("\n").join("<br />") %></pre>
+	      <p class="help-block">This will be the title of all the builds</p>
+            </div>
+          </div>
+          <div class="control-group">
+            <label for="github_hook" class="control-label">GitHub post-receive hook URL</label>
+            <div class="controls">
+	      <% var char_length = instruction.github_hook_url.length; %>
+	      <input type="text" readonly="true" name="github-url" value="<%= instruction.github_hook_url %>" width="<%= char_length %>" style="font-family: monospace;width: <%= char_length * 8 %>px;"/>
+	      <p class="help-block">Add this URL as one of your <a href="http://help.github.com/post-receive-hooks/">github post-receive</a> URLs, so that whenever someone pushes, the build will be triggered</p>
+            </div>
+          </div>
+
+      </fieldset>
+    </form>
   </div>
+
   <div class="btn-group actions">
     <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
       <i class="icon-list-alt"></i>
@@ -29,7 +51,4 @@
       </li>
     </ul>
   </div>
-</div>
-<div class="row">
-  <br />
 </div>
