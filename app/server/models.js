@@ -252,7 +252,7 @@ var Build = EmeraldModel.subclass("Build", function(it, kind) {
         };
 
         data.style_name = this.stage_name.toLowerCase();
-        console.log('stage:', STAGES_BY_INDEX[this.stage]);
+
         switch (STAGES_BY_INDEX[this.stage]) {
         case 'SUCCEEDED':
             data.html_class_name = 'alert-success';
