@@ -59,17 +59,23 @@ QueueConsumer.prototype.start = function(){
             }
         ], function(err, handle, instruction){
             if (err) {
-                logger.handleException(err);
-                if (!handle){
-                    return;
+                var build_not_found = new RegExp('.*BuildInstruction.*id undefined');
+
+                if (build_not_found.test(err.message)) {
+                    return; /* ignore errors for instruction not found*/
                 }
-                return handle.release(function(err){
-                    if (err) {
-                        logger.warning("could not release the lock !");
-                        logger.handleException(err);
-                    }
-                });
+
+                logger.handleException(err, "queue consumer loop");
+                if (handle){
+                    return handle.release(function(err){
+                        if (err) {
+                            logger.warning("could not release the lock !");
+                            logger.handleException(err);
+                        }
+                    });
+                }
             }
+
             self.redis.save(function(){
                 logger.info("asking redis to dump its in-memory data to the disk");
                 instruction.run(handle);
