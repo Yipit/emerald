@@ -43,7 +43,7 @@ function Lock(key, redis){
 Lock.prototype.acquire = function(acquired_callback){
     var self = this;
     self.redis.get(this.key, function(err, current_build_id){
-        logger.handleException("redis.get", err);
+        logger.handleException(err, 'Lock.acquire() -->> redis.get(' + self.key + ')');
         logger.debug(["redis.get('"+self.key+"')", arguments]);
 
         /* if not building, let's quit and wait for the next interval */
@@ -57,7 +57,7 @@ Lock.prototype.acquire = function(acquired_callback){
 Lock.prototype.release = function(callback){
     var self = this;
     this.redis.del(this.key, function(err, num){
-        logger.handleException("redis.del(" + self.key + ")", err);
+        logger.handleException(err, 'Lock.release() -->> redis.del(' + self.key + ')');
         if (err || (parseInt(num, 10) < 1)) {return;}
         return callback && callback(new Date());
     });
