@@ -67,7 +67,7 @@ function Logger (prefix) {
         if (self.level < 1) return;
         this.log("WARNING:".red.bold, parts);
     };
-    this.handleException = function(where, exc){
+    this.handleException = function(exc, where){
         if (exc) {
             this.fail(["@", where, exc, '\n', exc.stack + ""]);
         }

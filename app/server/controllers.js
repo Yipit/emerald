@@ -83,11 +83,12 @@ exports.map = function(app, redis){
         logger.info(['GitHub just sent a payload that hooks up to the instruction with slug:', slug]);
         return entity.BuildInstruction.find_by_slug(slug, function(err, found){
             if (err) {
-                return response.send(JSON.stringify({error: err.toString()}), headers, 404);
+                logger.handleException(err, "/hooks/github/" + slug);
+                return response.send(headers, 404);
             }
             var instruction = found[0];
             instruction.run();
-            return response.send(JSON.stringify(instruction.toBackbone()), { 'Content-Type': 'application/json' }, 201);
+            return response.send(headers, 201);
         });
     });
 
