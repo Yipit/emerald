@@ -79,8 +79,8 @@ exports.map = function(app, redis){
         var headers = {
             'Content-Type': 'application/json'
         };
-
         var slug = request.param('project_slug');
+        logger.info(['GitHub just sent a payload that hooks up to the instruction with slug:', slug]);
         return entity.BuildInstruction.find_by_slug(slug, function(err, found){
             if (err) {
                 return response.send(JSON.stringify({error: err.toString()}), headers, 404);
@@ -134,7 +134,7 @@ exports.map = function(app, redis){
         entity.BuildInstruction.create(data, function(err, key, instruction){
             var data = instruction.toBackbone();
             redis.publish('BuildInstruction created', JSON.stringify(data));
-            response.json(data, 201);
+           response.json(data, 201);
         });
     });
 };
