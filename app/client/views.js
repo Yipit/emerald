@@ -518,7 +518,7 @@
         form_still_valid: false,
         fields: [
             {key: 'name', required: 'you need to provide a name so that emerald will use it to identify the different instructions'},
-            {key: 'decription', required: null},
+            {key: 'description', required: null},
             {key: 'repository_address', required: "c'mon if you don't provide the repository address, how's emerald supposed to check that out for you?"},
             {key: 'branch', required: "really? if please tell me which branch you wanna build, if you don't know what to do, just put \"master\""},
             {key: 'build_script', required: "alright you gotta be kidding, without a build script how is emerald supposed to actually \"build\" the thing?"}
