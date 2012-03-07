@@ -213,6 +213,7 @@ if you want to hack on emerald's code, then you're gonna need [vows](http://vows
 
 ![diagram](https://github.com/Yipit/emerald/raw/master/resources/design/emerald.png)
 
+<a name="architecture" />
 ## a little more detailed description:
 
 ### Server actors
