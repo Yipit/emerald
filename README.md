@@ -213,6 +213,81 @@ if you want to hack on emerald's code, then you're gonna need [vows](http://vows
 
 ![diagram](https://github.com/Yipit/emerald/raw/master/resources/design/emerald.png)
 
+## a little more detailed description:
+
+### Server actors
+
+As you can notice Emerald's compound has not only a HTTP server but
+also a few workers that runs in parallel to it:
+
+#### Orchestrator
+
+This guy subscribes to a set of meaningful signals sent to the redis
+pub/sub, deserializes it into JSON objects and broadcasts to all the
+socket.io connected clients.
+
+In other words it captures all the server-side events and send to the
+connected clients so that the UI can be updated in real time.
+
+#### Queue consumer
+
+It's basically a structured callback passed to `setInterval` with the
+`settings.GIT_POLL_INTERVAL` as the interval param.  So it sits there
+checking if there is a build already running, if not it gets the next
+instruction id to be build from the queue (if any instructions there)
+and spawns a Build Runner for that given instruction
+
+The build queue is to a redis
+[`SortedSet`](http://redis.io/commands#sorted_set) in which the key is
+`emerald:build-queue` by default, but can be configured through
+settings.js
+
+The Build Runner also sets a lock in Redis so that it doesn't run
+parallel builds, avoiding builds to violate each other's environment.
+After a build is finished it unsets the lock (key `emerald:current-build`)
+
+If the queue is locked, then it just yields by doing nothing :D
+
+#### Build Runner
+
+Is an object that is instantiated with a models.Build() object as parameter, the it actually do build-related stuff:
+
+1. git clone/pull
+2. run the build script
+3. send the appropriate events to the redis pub/sub (i.e: `BuildInstruction enqueued`, `BuildInstruction created`, `Repository being fetched`, [so on...](https://github.com/Yipit/emerald/blob/master/app/server/actors/orchestrator.js#L6))
+
+At this point you are probably asking yourself how can the Build Runner possibly take a build as instance since the runner is supposed to create it itself. [Just take a look here](https://github.com/Yipit/emerald/blob/master/app/server/models.js#L458) and you will see that `server.models.BuildInstruction` instances have a `run` method that [gets called by the queue consumer](https://github.com/Yipit/emerald/blob/master/app/server/actors/queueconsumer.js#L81)
+
+### Server-side events are sent to the clients
+
+Since emerald was built with "real-time UI" in mind, its architecture
+is all event-based.
+
+In other words the server actors publish events to the redis pub/sub,
+those events have JSON metadata serialized into it, so that the
+orchestrator sends those events to the socket.io clients which
+[translates the events into Backbone model instances events](https://github.com/Yipit/emerald/blob/master/app/client/models.js#L47).
+
+This is basically how emerald's user interface looks like it's alive :D
+
+Those are the current events that are [handled by socket.io](https://github.com/Yipit/emerald/blob/master/app/client/websockets.js):
+
+* `BuildInstruction created`
+* `BuildInstruction enqueued`
+* `BuildInstruction deleted`
+* `Repository started fetching`
+* `Repository finished fetching`
+* `Repository being fetched`
+* `Build started`
+* `Build finished`
+* `Build aborted`
+* `Build stdout`
+* `Build stderr`
+* `Build output`
+* `Build running`
+* `General error`
+
+
 # license
 
 Emerald is released under [GNU Affero General Public License version 3](http://www.gnu.org/licenses/agpl.html)
