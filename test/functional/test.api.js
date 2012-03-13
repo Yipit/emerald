@@ -95,4 +95,23 @@ describe('BuildInstruction', function () {
             return done();
         });
     });
+
+
+    it('provides getters for easy access of builds', function (done) {
+        request.get({
+            url: api('instructions/1')
+        }, function (error, response, body) {
+            if (error) { return done(error); }
+            var instance = JSON.parse(body);
+
+            /* This Build Instruction was not built yet, so all getters should
+             * be empty */
+
+            instance.all_builds.length.should.equal(0);
+            instance.succeeded_builds.length.should.equal(0);
+            instance.failed_builds.length.should.equal(0);
+
+            return done();
+        });
+    });
 });
