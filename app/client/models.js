@@ -29,7 +29,7 @@
         return regex.test(str) ? null : 'Invalid repository address';
     }
     window.BuildInstruction = EmeraldModel.extend({
-        __name__: 'instruction',
+        __name__: 'instructions',
         initialize: function(){
             var self = this;
 
