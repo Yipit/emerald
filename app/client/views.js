@@ -577,7 +577,7 @@
 
             if (this.form_still_valid) {
                 if (!this.model.get('__id__') || this.options.duplicate_mode) {
-                    this.model.url = '/api/instruction/new';
+                    this.model.url = '/api/instructions.json';
                 }
                 this.$el.find("#save").button('saving');
 
