@@ -445,7 +445,21 @@
           the view rendered when a user goes to #build/:id
         */
         template_name: 'build',
-        className: 'build'
+        className: 'build',
+        render: function () {
+            var data = this.model.toJSON();
+
+            // Just avoiding to type it twice :)
+            var clean = function (x) {
+                return ansiColors.ansi2html(x.replace('\n', '<br />'));
+            };
+
+            data.stdout = clean(data.stdout);
+            data.stderr = clean(data.stderr);
+
+            this.$el.html(this.template(data));
+            return this;
+        }
     });
 
     window.SingleManagedInstruction = EmeraldView.extend({
