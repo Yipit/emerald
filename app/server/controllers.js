@@ -127,9 +127,10 @@ exports.map = function(app, redis){
         });
     });
 
-    app.put('/api/instruction/new', function(request, response){
+    app.post('/api/instructions', function(request, response){
         var headers = {'Content-Type': 'application/json'};
         var data = request.body;
+
         data.slug = data.name;
         entity.BuildInstruction.create(data, function(err, key, instruction){
             var data = instruction.toBackbone();

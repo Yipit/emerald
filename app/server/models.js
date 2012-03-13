@@ -329,6 +329,8 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
         var self = this;
         var data = this.__data__;
 
+        return data;
+
         data.id = data.__id__;
         ['all_builds', 'succeeded_builds', 'failed_builds'].forEach(function(attribute){
             if (!self[attribute]) {return;}

@@ -28,11 +28,6 @@ function api(sufix) {
     return 'http://localhost:3000/api/' + sufix;
 }
 
-/* Shortcut to stringify javascript objects */
-function json(obj) {
-    return JSON.stringify(obj);
-}
-
 /* First test, let's create a simple build instruction, just like the user API
  * should do it */
 
@@ -40,12 +35,15 @@ describe('BuildInstruction', function () {
 
     it('creates a new build instruction', function (done) {
         var data = {
-            
+            name: 'ratcursor',
+            repository_address: 'git://github.com/clarete/ratcursor.git',
+            branch: 'master',
+            build_script: 'make'
         };
 
         request.post({
             url: api('instructions'),
-            body: json(data)
+            json: data
         }, function (error, response, body) {
             /* Sanity check, we should not continue if something happened */
             if (error) {
@@ -54,6 +52,11 @@ describe('BuildInstruction', function () {
 
             /* First, test the status, and then let's check out the body */
             response.statusCode.should.equal(201, 'response should be "201 Created"');
+            body.name.should.equal(data.name);
+            body.repository_address.should.equal(data.repository_address);
+            body.branch.should.equal(data.branch);
+            body.build_script.should.equal(data.build_script);
+
             return done();
         });
     });
