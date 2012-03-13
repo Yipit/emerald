@@ -92,12 +92,6 @@ exports.map = function(app, redis){
         });
     });
 
-    app.get('/api/instructions.json', function(request, response){
-        entity.BuildInstruction.get_latest_with_builds(function(err, instructions){
-            response.send(JSON.stringify(instructions), {'Content-Type': 'application/json'}, 200);
-        });
-    });
-
     _.each({
         'build': entity.Build,
         'instruction': entity.BuildInstruction
@@ -127,8 +121,7 @@ exports.map = function(app, redis){
         });
     });
 
-    app.post('/api/instructions', function(request, response){
-        var headers = {'Content-Type': 'application/json'};
+    app.post('/api/instructions.json', function(request, response){
         var data = request.body;
 
         data.slug = data.name;
@@ -138,4 +131,11 @@ exports.map = function(app, redis){
             response.json(data, 201);
         });
     });
+
+    app.get('/api/instructions.json', function(request, response){
+        entity.BuildInstruction.get_latest_with_builds(function(err, instructions){
+            response.json(instructions, 200);
+        });
+    });
+
 };

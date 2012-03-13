@@ -24,8 +24,8 @@ var should = require('should');
 var request = require('request');
 
 /* Shortcut to build API urls */
-function api(sufix) {
-    return 'http://localhost:3000/api/' + sufix;
+function api(method) {
+    return 'http://localhost:3000/api/' + method + '.json';
 }
 
 /* First test, let's create a simple build instruction, just like the user API
@@ -46,9 +46,7 @@ describe('BuildInstruction', function () {
             json: data
         }, function (error, response, body) {
             /* Sanity check, we should not continue if something happened */
-            if (error) {
-                return done(error);
-            }
+            if (error) { return done(error); }
 
             /* First, test the status, and then let's check out the body */
             response.statusCode.should.equal(201, 'response should be "201 Created"');
@@ -57,6 +55,26 @@ describe('BuildInstruction', function () {
             body.branch.should.equal(data.branch);
             body.build_script.should.equal(data.build_script);
 
+            return done();
+        });
+    });
+
+
+    it('lists created build instructions', function (done) {
+        request.get({
+            url: api('instructions'),
+            'content-type': 'application/json'
+        }, function (error, response, body) {
+            /* Sanity check, we should not continue if something happened */
+            if (error) { return done(error); }
+
+            /* As usual, testing the response code */
+            response.statusCode.should.equal(200, 'response should be "200 Success"');
+
+            /* Listing the already created builds (currently, just one) */
+            body = JSON.parse(body);
+            body.length.should.equal(1);
+            body[0].name.should.equal('ratcursor');
             return done();
         });
     });
