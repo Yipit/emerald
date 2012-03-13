@@ -92,6 +92,10 @@ exports.map = function(app, redis){
         });
     });
 
+
+    /* -- Our quasi-REST API to manage Builds and BuildInstructions --*/
+
+
     _.each({
         'build': entity.Build,
         'instruction': entity.BuildInstruction
@@ -102,6 +106,8 @@ exports.map = function(app, redis){
                 return response.json(instance.toString(), headers, status);
             });
         });
+
+        /* Controller that replaces (edit) an entry of a Build or a BuildInstruction */
         app.put('/api/' + name + '/:id.json', function(request, response){
             Model.get_by_id_or_404(request.param('id'), function(instance, headers, status){
                 _.each(instance._meta.field.names, function(name){
@@ -121,6 +127,8 @@ exports.map = function(app, redis){
         });
     });
 
+
+    /* Controller that creates a new BuildInstruction */
     app.post('/api/instructions.json', function(request, response){
         var data = request.body;
 
@@ -132,6 +140,8 @@ exports.map = function(app, redis){
         });
     });
 
+
+    /* Controller that lists all BuildInstruction */
     app.get('/api/instructions.json', function(request, response){
         entity.BuildInstruction.get_latest_with_builds(function(err, instructions){
             response.json(instructions, 200);
