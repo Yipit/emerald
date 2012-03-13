@@ -62,8 +62,7 @@ describe('BuildInstruction', function () {
 
     it('lists created build instructions', function (done) {
         request.get({
-            url: api('instructions'),
-            'content-type': 'application/json'
+            url: api('instructions')
         }, function (error, response, body) {
             /* Sanity check, we should not continue if something happened */
             if (error) { return done(error); }
@@ -75,6 +74,24 @@ describe('BuildInstruction', function () {
             body = JSON.parse(body);
             body.length.should.equal(1);
             body[0].name.should.equal('ratcursor');
+            return done();
+        });
+    });
+
+
+    it('gets a single instance of build instructions', function (done) {
+        request.get({
+            url: api('instructions/1')
+        }, function (error, response, body) {
+            /* Sanity check, we should not continue if something happened */
+            if (error) { return done(error); }
+
+            /* As usual, testing the response code */
+            response.statusCode.should.equal(200, 'response should be "200 Success"');
+
+            /* Checking some fields of the instance found */
+            body = JSON.parse(body);
+            body.name.should.equal('ratcursor');
             return done();
         });
     });

@@ -101,7 +101,7 @@ exports.map = function(app, redis){
 
     _.each({
         'build': entity.Build,
-        'instruction': entity.BuildInstruction
+        'instructions': entity.BuildInstruction
     }, function(Model, name){
         /* defining the controller responsible to fetch ONLY one instance */
         app.get('/api/' + name + '/:id.json', function(request, response){
