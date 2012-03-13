@@ -1,7 +1,8 @@
-/***************************************************************************
+/*
 Emerald - Continuous Integration server focused on real-time interactions
-Copyright (C) <2012>  Gabriel Falcão <gabriel@yipit.com>
-Copyright (C) <2012>  Yipit Inc. <coders@yipit.com>
+
+Copyright (C) 2012  Gabriel Falcão <gabriel@yipit.com>
+Copyright (C) 2012  Yipit Inc. <coders@yipit.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -15,7 +16,8 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ***************************************************************************/
+*/
+
 var _ = require('underscore')._;
 var entity = require('./models');
 var async = require('async');
@@ -67,6 +69,7 @@ exports.map = function(app, redis){
             });
         };
     }
+
     app.get('/', controller(function(err, context, request, response){
         return response.render('index', context);
     }));
