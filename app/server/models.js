@@ -1,7 +1,8 @@
-/***************************************************************************
+/*
 Emerald - Continuous Integration server focused on real-time interactions
-Copyright (C) <2012>  Gabriel Falcão <gabriel@yipit.com>
-Copyright (C) <2012>  Yipit Inc. <coders@yipit.com>
+
+Copyright (C) 2012  Gabriel Falcão <gabriel@yipit.com>
+Copyright (C) 2012  Yipit Inc. <coders@yipit.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -15,14 +16,13 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ***************************************************************************/
+*/
 var _ = require('underscore')._;
 var models = require('clay');
 var crypto = require('crypto');
 var moment = require('moment');
 var mkdirp = require('mkdirp');
 var async = require('async');
-var moment = require('moment');
 var path = require('path');
 var fs = require('fs');
 var child_process = require('child_process');
@@ -47,7 +47,6 @@ var STAGES_BY_NAME = {
     FAILED: 5,
     SUCCEEDED: 6
 };
-
 
 var EmeraldModel = models.declare("EmeraldModel", function(it, kind) {
     it.has.class_method('get_by_id_or_404', function(id, callback) {
@@ -205,7 +204,9 @@ var Build = EmeraldModel.subclass("Build", function(it, kind) {
     });
     it.has.class_method('fetch_by_id', function(id, callback) {
         return this.find_by_id(id, function(err, build){
-            if (err) {return callback(err);}
+            if (err) {
+                return callback(err);
+            }
 
             var instruction_id = parseInt(build.instruction_id, 10);
             if (instruction_id < 0) {
@@ -221,6 +222,8 @@ var Build = EmeraldModel.subclass("Build", function(it, kind) {
                 });
                 return callback(err, build);
             });
+
+            return null;
         });
     });
 
@@ -437,7 +440,9 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
             function check_if_has_a_current_build (all_builds, succeeded_builds, failed_builds, callback) {
                 Build.get_current(function(err, current_build){
                     logger.handleException(err);
-                    if (err) {return callback(null, all_builds, succeeded_builds, failed_builds);}
+                    if (err) {
+                        return callback(null, all_builds, succeeded_builds, failed_builds);
+                    }
                     self.current_build = null;
                     self.is_building = false;
 
@@ -445,7 +450,7 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
                         self.is_building = true;
                         self.current_build = current_build;
                     }
-                    callback(null, all_builds, succeeded_builds, failed_builds);
+                    return callback(null, all_builds, succeeded_builds, failed_builds);
                 });
             }
         ], function(err, all_builds, succeeded_builds, failed_builds){
