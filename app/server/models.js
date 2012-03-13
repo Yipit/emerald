@@ -199,7 +199,12 @@ var Build = EmeraldModel.subclass("Build", function(it, kind) {
                 self._meta.storage.connection.get(settings.REDIS_KEYS.current_build, callback);
             },
             function try_to_fetch_it(id, callback) {
-                Build.fetch_by_key('clay:Build:id:' + id, callback);
+                /* No ID to query, no instance to return */
+                if (id === null) { return callback(null, null); }
+
+                /* Here, it does make sense to try to fetch an instance by a
+                 * real id */
+                return Build.fetch_by_key('clay:Build:id:' + id, callback);
             }
         ], callback);
     });
@@ -231,6 +236,7 @@ var Build = EmeraldModel.subclass("Build", function(it, kind) {
     it.has.class_method('fetch_by_key', function(key, callback) {
         var self = this;
         var redis = this._meta.storage.connection;
+
         redis.hgetall(key, function(err, data){
             var instance = data;
             err = err || (_.isEmpty(data) && new Error('no build was found for the key ' + key));
@@ -365,11 +371,13 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
 
         return data;
     });
+
+
+    /* This method does more than a simple fetch_by_id(). It fills the
+     * build list of the found instance, by calling the method
+     * `BuildInstruction.with_builds_from_data()' against the query
+     * result. */
     it.has.class_method('fetch_by_id', function(id, callback) {
-        var self = this;
-
-        var redis = self._meta.storage.connection;
-
         async.waterfall([
             function fetch_instruction (callback){
                 BuildInstruction.find_by_id(id, callback);
@@ -380,9 +388,11 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
         ], callback);
     });
 
+
+    /* Lists all builds associated with this BuildInstruction, in all of
+     * the possible types of keys: successful, failed etc. */
     it.has.class_method('get_latest_with_builds', function(callback) {
         var self = this;
-
         var redis = self._meta.storage.connection;
 
         async.waterfall([
@@ -410,6 +420,14 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
             }
         ], callback);
     });
+
+
+    /* Finds all Build instances associated with the BuildInstruction
+     * represented by the `data' parameter. The return is divided in
+     * `all_builds', 'succeeded_builds' and 'failed_builds'.
+     *
+     * Another important thing is that this function also decides if
+     * this instruction is running or not in the current time. */
     it.has.class_method('with_builds_from_data', function(data, callback) {
         var self = new this(data);
         var redis = this._meta.storage.connection;
@@ -418,6 +436,7 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
             return _.filter(builds, function(b){
                 return !_.isNull(b) && !_.isUndefined(b); });
         }
+
         async.waterfall([
             function get_all_builds(callback) {
                 redis.zrevrange(self.keys.all_builds, 0, -1, function(err, builds){
@@ -448,16 +467,21 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
             },
             function check_if_has_a_current_build (all_builds, succeeded_builds, failed_builds, callback) {
                 Build.get_current(function(err, current_build){
-                    logger.handleException(err);
                     if (err) {
+                        logger.handleException(err);
                         return callback(null, all_builds, succeeded_builds, failed_builds);
                     }
-                    self.current_build = null;
-                    self.is_building = false;
 
-                    if (parseInt(current_build.instruction_id, 10) === self.__id__) {
+                    /* It's possible to get a null value from the .fetch_by_key()
+                     * method, used by the Build.get_current() method. This way,
+                     * we must be sure that we'll not fail if no current build
+                     * exists. */
+                    if (current_build && parseInt(current_build.instruction_id, 10) === self.__id__) {
                         self.is_building = true;
                         self.current_build = current_build;
+                    } else {
+                        self.current_build = null;
+                        self.is_building = false;
                     }
                     return callback(null, all_builds, succeeded_builds, failed_builds);
                 });
@@ -466,7 +490,7 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
             self.all_builds = all_builds;
             self.succeeded_builds = succeeded_builds;
             self.failed_builds = failed_builds;
-            callback(err, self);
+            return callback(err, self);
         });
     });
     it.has.method('run', function() {
