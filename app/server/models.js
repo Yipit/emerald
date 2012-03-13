@@ -330,12 +330,18 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
         var self = this;
         var data = this.__data__;
 
-        return data;
-
         data.id = data.__id__;
         ['all_builds', 'succeeded_builds', 'failed_builds'].forEach(function(attribute){
-            if (!self[attribute]) {return;}
-            data[attribute] = self[attribute].map(function(b){ return b.toBackbone(); });
+            /* Setters and getters that uses these attributes do not check
+             * if these attributes exists or not. So this ensures that no
+             * "access to undefined attribute" error will happen. */
+            if (!self[attribute]) {
+                data[attribute] = [];
+            } else {
+                data[attribute] = self[attribute].map(function(b) {
+                    return b.toBackbone();
+                });
+            }
         });
 
         data.is_building = self.is_building || false;
