@@ -70,4 +70,15 @@
     window.socket.on('Repository finished fetching', function(data){
         $("title").text("Emerald - Continuous Integration");
     });
+
+
+    window.socket.on('Build stdout', function (data) {
+        $('#live-code').append($(ansiColors.ansi2html(data.appended)));
+    });
+
+    window.socket.on('Build stderr', function (data) {
+        $('#live-code').append($(ansiColors.ansi2html(data.appended)));
+    });
+
+
 })(jQuery);
