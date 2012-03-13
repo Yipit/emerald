@@ -311,13 +311,15 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
     it.has.index("slug");
 
     it.has.getter('last_build', function() {
-        return this.all_builds[0];
+        return this.all_builds.length > 0 ? this.all_builds[0] : null;
     });
+
     it.has.getter('last_success', function() {
-        return this.succeeded_builds[0];
+        return this.succeeded_builds.length > 0 ? this.succeeded_builds[0] : null;
     });
+
     it.has.getter('last_failure', function() {
-        return this.failed_builds[0];
+        return this.failed_builds.length > 0 ? this.failed_builds[0] : null;
     });
 
     it.has.getter('keys', function() {
@@ -342,6 +344,7 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
              * if these attributes exists or not. So this ensures that no
              * "access to undefined attribute" error will happen. */
             if (!self[attribute]) {
+                self[attribute] = [];
                 data[attribute] = [];
             } else {
                 data[attribute] = self[attribute].map(function(b) {
