@@ -34,7 +34,6 @@ entity.clear_keys(["emerald*","clay*","sess*"], function(err, keys){
         process.exit((err && 1) || 0);
         return;
     }
-    process.exit((err && 1) || 0);
     var entities = [
         new entity.BuildInstruction({
             name: "This passes",
