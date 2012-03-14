@@ -63,10 +63,11 @@ var ansiColors = (function () {
                 if (!(iter))
                     break;
 
-                iter[1].split(';').forEach(function (item) {
-                    flags |= AnsiColors.ANSI_PATTERNS[parseInt(item)];
-                });
-                s = s.replace('\x1b\[' + iter[1] + 'm', replacement(flags));
+                var elements = iter[1].split(';');
+                for (i = 0; i < elements.length; i++) {
+                    flags |= AnsiColors.ANSI_PATTERNS[parseInt(elements[i], 10)];
+                }
+                s = s.replace('\x1b[' + iter[1] + 'm', replacement(flags));
             }
             return s;
         },
@@ -100,25 +101,25 @@ var ansiColors = (function () {
                 css['text-decoration'] = 'underline';
 
             if (flags & AnsiColors.ANSI_PATTERNS[30]) // black
-                css['color'] = 'black';
+                css.color = 'black';
 
             if (flags & AnsiColors.ANSI_PATTERNS[31]) // red
-                css['color'] = 'red';
+                css.color = 'red';
 
             if (flags & AnsiColors.ANSI_PATTERNS[32]) // green
-                css['color'] = 'green';
+                css.color = 'green';
 
             if (flags & AnsiColors.ANSI_PATTERNS[34]) // blue
-                css['color'] = 'blue';
+                css.color = 'blue';
 
             if (flags & AnsiColors.ANSI_PATTERNS[35]) // magenta
-                css['color'] = 'magenta';
+                css.color = 'magenta';
 
             if (flags & AnsiColors.ANSI_PATTERNS[36]) // cyan
-                css['color'] = 'lightblue';
+                css.color = 'lightblue';
 
             if (flags & AnsiColors.ANSI_PATTERNS[37]) // white
-                css['color'] = 'white';
+                css.color = 'white';
 
             var style = ' style="';
             for (var i in css) {
