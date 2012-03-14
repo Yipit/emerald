@@ -92,7 +92,6 @@ BuildRunner.prototype.start = function(){
         },
         function spawn_git(instruction, command_args, command_options, callback){
             logger.info('spawning "git '+command_args.join(' ')+'"');
-            var command = child_process.spawn("git", command_args, command_options);
             var now = new Date();
 
             current_build.fetching_started_at = now;
@@ -103,6 +102,8 @@ BuildRunner.prototype.start = function(){
                     build: build.toBackbone(),
                     instruction: instruction.toBackbone()
                 }));
+
+                var command = child_process.spawn("git", command_args, command_options);
                 callback(err, build, instruction, command, command_args);
             });
         },
