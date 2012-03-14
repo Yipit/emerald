@@ -72,12 +72,9 @@
     });
 
 
-    window.socket.on('Build stdout', function (data) {
-        $('#live-code').append($(ansiColors.ansi2html(data.appended)));
-    });
-
-    window.socket.on('Build stderr', function (data) {
-        $('#live-code').append($(ansiColors.ansi2html(data.appended)));
+    window.socket.on('Build output', function (data) {
+        $('#live-code').append(data.appended + "\n");
+        $('#live-code').scrollTo('max');
     });
 
 
