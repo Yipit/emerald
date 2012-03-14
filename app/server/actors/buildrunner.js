@@ -209,10 +209,10 @@ BuildRunner.prototype.start = function(){
         function spawn_build_script(build, instruction, callback){
             logger.info('spawning build script');
             var args = [script_path];
-            var command = child_process.spawn("bash", args, {cwd: repository_full_path});
 
             current_build.build_started_at = new Date();
             current_build.save(function(err){
+                var command = child_process.spawn("bash", args, {cwd: repository_full_path});
                 callback(err, build, instruction, command, args);
             });
         },
