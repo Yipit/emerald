@@ -26,7 +26,7 @@
             this.$body.prepend(consoleElement);
 
             $("#show-main-console").click(function(e){
-                $("#terminal").show();
+                $("#terminal").slideDown('fast');
                 return e.preventDefault();
             });
 

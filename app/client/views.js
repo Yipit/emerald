@@ -58,12 +58,11 @@
             this.model.bind('change', this.render);
         },
         hide_terminal: function(e){
-            $("#terminal").hide();
+            $("#terminal").slideUp('fast');
             return e.preventDefault();
         },
         render: function() {
             this.$el.html(this.template);
-            this.$("#live-code").html(this.model.get('full'));
             return this;
         }
     });
