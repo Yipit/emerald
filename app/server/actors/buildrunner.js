@@ -75,11 +75,16 @@ BuildRunner.prototype.start = function(){
         function assemble_the_command_line (instruction, exists, callback) {
             var args, options = {};
             if (exists) {
-                args = ["pull", "origin", branch_to_build || "master"];
+                args = ["pull", "origin", branch_to_build];
                 options.cwd = repository_full_path;
                 logger.info('found an existing git repo at "'+repository_bare_path+'", gonna use git-pull');
             } else {
-                args = ["clone", "--progress", instruction.repository_address, repository_full_path];
+                args = [
+                    "clone", "--progress",
+                    "--branch", branch_to_build,
+                    instruction.repository_address,
+                    repository_full_path
+                ];
                 logger.info('local copy does not exist, will clone at "'+repository_full_path+'"');
                 options.cwd = settings.SANDBOX_PATH;
             }
