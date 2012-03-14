@@ -390,9 +390,13 @@
         },
         /* user actions */
         show_output: function(e){
+            var url = this.model.attributes.last_build.route + ',stdout';
+            App.navigate(url, { trigger: true });
             return e.preventDefault();
         },
         show_error: function(e){
+            var url = this.model.attributes.last_build.route + ',stderr';
+            App.navigate(url, { trigger: true });
             return e.preventDefault();
         },
         run: function(e){
