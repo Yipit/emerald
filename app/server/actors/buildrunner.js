@@ -5,6 +5,7 @@ var path = require('path');
 var fs = require('fs');
 var child_process = require('child_process');
 var logger = new (require('../logger').Logger)("[ BUILD RUNNER ]".yellow.bold);
+var common = require('./common');
 
 var entity = require('../models');
 var Build = entity.Build;
@@ -49,13 +50,10 @@ BuildRunner.prototype.start = function(){
     var instruction = self.instruction;
 
     var redis = self.redis;
-    /* TODO: extract the repo name and check if already exists e*/
-    var repository_folder_name = [instruction.repository_address, instruction.name].join('-')
-        .replace(/\W+/g, '-')
-        .toLowerCase()
-        .replace(/[\-]?\bgit\b[\-]?/g, '');
 
-    var repository_full_path = path.join(settings.SANDBOX_PATH, repository_folder_name);
+    /* TODO: extract the repo name and check if already exists e*/
+    var repository_folder_name = common.repo_name(instruction);
+    var repository_full_path = common.repo_path(instruction);
     var repository_bare_path = path.join(repository_full_path, '.git');
 
     var script_name = self.generate_script_name();
