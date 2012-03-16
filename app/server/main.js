@@ -30,6 +30,7 @@ express = require('express'),
 /* importing some emerald actors */
 queueconsumer = require('./actors/queueconsumer'),
 orchestrator = require('./actors/orchestrator'),
+gitpoller = require('./actors/gitpoller'),
 websockets = require('./websockets'),
 controllers = require('./controllers');
 
@@ -97,5 +98,6 @@ exports.run = function(){
         orchestrator.make(io);
         websockets.work_on(redis, io);
         controllers.map(app, redis);
+        gitpoller.start();
     });
 };

@@ -28,6 +28,7 @@ var path = require('path');
 var fs = require('fs');
 var child_process = require('child_process');
 var logger = new (require('./logger').Logger)("[ MODELS / RUNNER ]".green.bold);
+var settings = require('../../settings');
 
 var STAGES_BY_INDEX = {
     0: 'BEGINNING',
@@ -307,6 +308,7 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
     it.has.field("branch", kind.string);
     it.has.field("timeout_in_seconds", kind.numeric);
     it.has.field("build_script", kind.string);
+    it.has.field("poll_interval", kind.numeric);
 
     it.has.index("slug");
 
