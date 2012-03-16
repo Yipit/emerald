@@ -29,17 +29,25 @@ var BuildInstruction = require('../models').BuildInstruction;
 
 function GitPoller() {
     this.repos = {};
+    this.redis = BuildInstruction._meta.storage.connection;
 }
 
 
 GitPoller.prototype.single_update = function (instruction) {
     logger.info('preparing to pull the repo from "' + instruction.name + '"');
+    var self = this;
+
     async.waterfall([
         function git_spawn(callback) {
             var branch = instruction.branch || "master";
             var opts = { cwd: common.repo_path(instruction) };
             path.exists(opts.cwd, function (exists) {
                 if (exists) {
+                    self.redis.publish('Repository started updating', JSON.stringify({
+                        at: new Date(),
+                        instruction: instruction
+                    }));
+
                     var child = spawn('git', ['pull', 'origin', branch], opts);
                     callback(null, child);
                 } else {
@@ -53,6 +61,11 @@ GitPoller.prototype.single_update = function (instruction) {
                 if (code === 0) {
                     logger.info('Successfuly finished updating repo "' + instruction.name + '" from git');
                 }
+
+                self.redis.publish('Repository finished updating', JSON.stringify({
+                    at: new Date(),
+                    instruction: instruction
+                }));
             });
             callback(null);
         }

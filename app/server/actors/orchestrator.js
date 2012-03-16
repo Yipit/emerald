@@ -11,6 +11,9 @@ module.exports.make = function(io) {
     subscribe.subscribe("Repository finished fetching");
     subscribe.subscribe("Repository being fetched");
 
+    subscribe.subscribe("Repository started updating");
+    subscribe.subscribe("Repository finished updating");
+
     subscribe.subscribe("Build started");
     subscribe.subscribe("Build finished");
     subscribe.subscribe("Build aborted");
