@@ -262,7 +262,18 @@ BuildRunner.prototype.start = function(){
 
             current_build.build_started_at = new Date();
             current_build.save(function(err){
+                /* We don't call `posix.setsid()' here because we are
+                 * already in a new session, started by the git
+                 * command. If nothing bad has happened with the last
+                 * spawn, we'll be able to still use this session. */
                 var command = child_process.spawn("bash", args, {cwd: repository_full_path});
+
+                self.spawn_timeout = setTimeout(function () {
+                    if (self.spawn_timeout) {
+                        logger.info('The spawned git process was killed, timeout reached');
+                        process.kill(-posix.getpgid(command.pid), 'SIGTERM');
+                    }
+                }, settings.SPAWN_TIMEOUT);
                 callback(err, build, instruction, command, args);
             });
         },
@@ -317,6 +328,13 @@ BuildRunner.prototype.start = function(){
                     build.signal = signal;
                     build.build_finished_at = now;
                     build.stage = build.succeeded ? entity.STAGES_BY_NAME.SUCCEEDED : entity.STAGES_BY_NAME.FAILED;
+
+                    /* We are now safe to say that everything worked in
+                     * time. Let's clear the timeout interval set in the
+                     * `spawn_build_script()' function and save the build
+                     * info. */
+                    clearTimeout(self.spawn_timeout);
+                    self.spawn_timeout = null;
 
                     build.save(function(err, key, build) {
                         callback(null, build, instruction);
