@@ -4,6 +4,7 @@ var async = require('async');
 var path = require('path');
 var fs = require('fs');
 var child_process = require('child_process');
+var posix = require('posix');
 var logger = new (require('../logger').Logger)("[ BUILD RUNNER ]".yellow.bold);
 var common = require('./common');
 
@@ -50,6 +51,10 @@ BuildRunner.prototype.start = function(){
     var instruction = self.instruction;
 
     var redis = self.redis;
+
+    /* Filled every time a process is spawned cleared if the process is
+     * finished before the configured timeout is reached */
+    var spawn_timeout = null;
 
     /* TODO: extract the repo name and check if already exists e*/
     var repository_folder_name = common.repo_name(instruction);
@@ -101,7 +106,28 @@ BuildRunner.prototype.start = function(){
                     instruction: instruction.toBackbone()
                 }));
 
+                /* Nodejs has a very incomplete posix support, the
+                 * `setsid' option present in the child_process
+                 * documentation doesn't work. This way, I'm using the
+                 * call bellow to deatach git process from the `node'
+                 * interpreter, making it possible to kill all
+                 * subprocesses forked by git without shutting emerald
+                 * down. */
+                posix.setsid();
                 var command = child_process.spawn("git", command_args, command_options);
+
+                /* Also starting a timer that will handle the spawn
+                 * timeout if there's any problem with the clone
+                 * process. It will be cleared in the function bellow,
+                 * `handle_the_exit_of_git()' */
+                self.spawn_timeout = setTimeout(function () {
+                    if (self.spawn_timeout) {
+                        logger.info('The spawned git process was killed, timeout reached');
+                        process.kill(-posix.getpgid(command.pid), 'SIGTERM');
+                    }
+                }, settings.SPAWN_TIMEOUT);
+
+                /* Calling the next callback in the waterfall */
                 callback(err, build, instruction, command, command_args);
             });
         },
@@ -121,28 +147,53 @@ BuildRunner.prototype.start = function(){
                     }));
                 }
 
+                /* Git is alive, we're now safe to clear the timeout
+                 * checker */
+                clearTimeout(self.spawn_timeout);
+                self.spawn_timeout = null;
             });
             callback(null, build, instruction, command, args);
         },
         function handle_the_exit_of_git(build, instruction, command, args, callback) {
             logger.debug('emerald will handle the exit of the git command');
             command.on('exit', function (code, signal) {
-                logger.debug(['git has exited |', 'exit code:', code, " SIGNAL:", signal]);
+                logger.info(['git has exited |', 'exit code:', code, " SIGNAL:", signal]);
+
+                /* Git is alive, we're now safe to clear the timeout
+                 * checker */
+                clearTimeout(self.spawn_timeout);
+                self.spawn_timeout = null;
+
                 Build.fetch_by_id(current_build.__id__, function(err, build) {
                     logger.handleException("Build.find_by_id", err);
                     var now = new Date();
 
+                    /* The only fields of a build being updated in this function */
                     build.fetching_finished_at = now;
-                    build.stage = entity.STAGES_BY_NAME.PREPARING_ENVIRONMENT;
+                    build.stage = (code === 0) ?
+                        entity.STAGES_BY_NAME.PREPARING_ENVIRONMENT :
+                        entity.STAGES_BY_NAME.FAILED;
 
-                    redis.publish("Repository finished fetching", JSON.stringify({
-                        at: now,
-                        build:build.toBackbone(),
-                        instruction: instruction.toBackbone()
-                    }));
-                    build.save(function(err, key, build){
+                    build.save(function(err, key, build) {
                         logger.handleException("build(#"+build.__id__+").save", err);
-                        callback(null, build, instruction);
+
+                        /* If something bad happened, let's send the bad news
+                         * and stop working here */
+                        if (code !== 0) {
+                            redis.publish('Build finished', JSON.stringify({
+                                at: now,
+                                instruction: instruction.toBackbone(),
+                                build: build.toBackbone(),
+                                reason: 'timeout'
+                            }));
+                        } else {
+                            redis.publish("Repository finished fetching", JSON.stringify({
+                                at: now,
+                                build:build.toBackbone(),
+                                instruction: instruction.toBackbone()
+                            }));
+                            callback(null, build, instruction);
+                        }
                     });
                 });
             });

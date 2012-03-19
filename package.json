@@ -25,6 +25,7 @@
     , "mkdirp": ">= 0.2.1"
     , "moment": ">= 1.2.0"
     , "daemon": ">= 0.4.1"
+    , "posix": "0.0.7"
   }
   , "devDependencies": {
       "mocha": "0.10.2"
