@@ -123,7 +123,7 @@ BuildRunner.prototype.start = function(){
                 self.spawn_timeout = setTimeout(function () {
                     if (self.spawn_timeout) {
                         logger.info('The spawned git process was killed, timeout reached');
-                        process.kill(-posix.getpgid(command.pid), 'SIGTERM');
+                        process.kill(-posix.getpgid(command.pid), 'SIGKILL');
                     }
                 }, settings.SPAWN_TIMEOUT);
 
