@@ -37,9 +37,11 @@ function GitPoller() {
     var self = this;
     this.pubsub.subscribe('BuildInstruction created');
     this.pubsub.subscribe('BuildInstruction deleted');
+    this.pubsub.subscribe('BuildInstruction edited');
     this.pubsub.on('message', function (channel, message) {
         switch (channel) {
         case 'BuildInstruction created':
+        case 'BuildInstruction edited':
             self.register_instruction(JSON.parse(message));
             break;
         case 'BuildInstruction deleted':

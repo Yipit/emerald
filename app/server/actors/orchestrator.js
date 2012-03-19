@@ -4,6 +4,7 @@ module.exports.make = function(io) {
     var subscribe = require('redis').createClient();
     subscribe.setMaxListeners(1000);
     subscribe.subscribe("BuildInstruction created");
+    subscribe.subscribe("BuildInstruction edited");
     subscribe.subscribe("BuildInstruction enqueued");
     subscribe.subscribe("BuildInstruction deleted");
 

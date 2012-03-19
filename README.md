@@ -274,6 +274,7 @@ This is basically how emerald's user interface looks like it's alive :D
 Those are the current events that are [handled by socket.io](https://github.com/Yipit/emerald/blob/master/app/client/websockets.js):
 
 * `BuildInstruction created`
+* `BuildInstruction edited`
 * `BuildInstruction enqueued`
 * `BuildInstruction deleted`
 * `Repository started fetching`

@@ -123,6 +123,16 @@ exports.map = function(app, redis){
                     if (err) {
                         return response.json('', headers, 500);
                     }
+
+                    /* TODO: It's not actually smart to create an
+                     * exception here, but I don't see any really
+                     * important reason to create a custom `put` method
+                     * for instructions right now  */
+                    if (name === 'instructions') {
+                        var data = instance.toBackbone();
+                        redis.publish('BuildInstruction edited', JSON.stringify(data));
+                    }
+
                     return response.json('', headers, 200);
                 });
 
