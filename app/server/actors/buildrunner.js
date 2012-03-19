@@ -268,12 +268,16 @@ BuildRunner.prototype.start = function(){
                  * spawn, we'll be able to still use this session. */
                 var command = child_process.spawn("bash", args, {cwd: repository_full_path});
 
-                self.spawn_timeout = setTimeout(function () {
-                    if (self.spawn_timeout) {
-                        logger.info('The spawned git process was killed, timeout reached');
-                        process.kill(-posix.getpgid(command.pid), 'SIGTERM');
-                    }
-                }, settings.SPAWN_TIMEOUT);
+                /* We'll not time it out if the user sets the
+                 * instruction field max_build_time to `0` */
+                if (instruction.max_build_time > 0) {
+                    self.spawn_timeout = setTimeout(function () {
+                        if (self.spawn_timeout) {
+                            logger.info('The spawned git process was killed, timeout reached');
+                            process.kill(-posix.getpgid(command.pid), 'SIGTERM');
+                        }
+                    }, instruction.max_build_time);
+                }
                 callback(err, build, instruction, command, args);
             });
         },

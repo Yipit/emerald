@@ -309,6 +309,7 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
     it.has.field("timeout_in_seconds", kind.numeric);
     it.has.field("build_script", kind.string);
     it.has.field("poll_interval", kind.numeric);
+    it.has.field("max_build_time", kind.numeric);
 
     it.has.index("slug");
 
