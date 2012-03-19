@@ -66,7 +66,7 @@
           <label for="branch" class="control-label">poll interval</label>
           <div class="controls">
 	    <div class="input-prepend">
-              <input type="text" name="poll_interval" id="poll_interval" class="input-xlarge focused" value="<%= instruction.poll_interval || '' %>">
+              <input type="text" name="poll_interval" id="poll_interval" class="input-xlarge focused" value="<%= instruction.poll_interval || 0 %>">
             </div>
 	    <p class="help-block">Time in seconds to update the git repo</p>
 	  </div>
