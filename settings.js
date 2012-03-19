@@ -25,8 +25,7 @@ var STDERR_PATH        = '/tmp/emerald.stderr.log'
 module.exports = {
     LOG_LEVEL: 3,
     GIT_POLL_INTERVAL: 3000, /* 60.000 miliseconds = 1 second */
-    GIT_POLL_INTERVAL_2: 6000, /* 60.000 miliseconds = 1 second */
-    SPAWN_TIMEOUT: 10000,
+    SPAWN_TIMEOUT: 10,       /* Value in seconds */
     EMERALD_PORT: EMERALD_PORT,
     EMERALD_HOSTNAME: EMERALD_HOSTNAME,
     EMERALD_DOMAIN: EMERALD_DOMAIN,

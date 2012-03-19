@@ -125,7 +125,7 @@ BuildRunner.prototype.start = function(){
                         logger.info('The spawned git process was killed, timeout reached');
                         process.kill(-posix.getpgid(command.pid), 'SIGKILL');
                     }
-                }, settings.SPAWN_TIMEOUT);
+                }, settings.SPAWN_TIMEOUT * 1000);
 
                 /* Calling the next callback in the waterfall */
                 callback(err, build, instruction, command, command_args);
@@ -276,7 +276,7 @@ BuildRunner.prototype.start = function(){
                             logger.info('The spawned git process was killed, timeout reached');
                             process.kill(-posix.getpgid(command.pid), 'SIGTERM');
                         }
-                    }, instruction.max_build_time);
+                    }, instruction.max_build_time * 1000);
                 }
                 callback(err, build, instruction, command, args);
             });

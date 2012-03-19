@@ -78,10 +78,12 @@ GitPoller.prototype.register_instruction = function (instruction) {
     self.unregister_instruction(instruction);
 
     /* Let's register an interval to pull the repo */
-    var interval = instruction.poll_interval || settings.GIT_POLL_INTERVAL_2;
-    self.repos[instruction.id] = setInterval(function () {
-        self.single_update(instruction);
-    }, interval);
+    var interval = (instruction.poll_interval || 0) * 1000;
+    if (interval > 0) {
+        self.repos[instruction.id] = setInterval(function () {
+            self.single_update(instruction);
+        }, interval);
+    }
 };
 
 
