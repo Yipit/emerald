@@ -30,9 +30,64 @@ var BuildInstruction = require('../models').BuildInstruction;
 function GitPoller() {
     this.repos = {};
     this.redis = BuildInstruction._meta.storage.connection;
+    this.pubsub = require('redis').createClient();
+
+    /* subscribe to the pubsub event fired when a new build instruction
+     * is created  */
+    var self = this;
+    this.pubsub.subscribe('BuildInstruction created');
+    this.pubsub.subscribe('BuildInstruction deleted');
+    this.pubsub.on('message', function (channel, message) {
+        switch (channel) {
+        case 'BuildInstruction created':
+            self.register_instruction(JSON.parse(message));
+            break;
+        case 'BuildInstruction deleted':
+            self.unregister_instruction(JSON.parse(message).instruction);
+            break;
+        }
+    });
 }
 
 
+/**
+ * Unregister a struction from our local cache.
+ */
+GitPoller.prototype.unregister_instruction = function (instruction) {
+    var self = this;
+    if (self.repos[instruction.id] !== undefined) {
+        clearInterval(self.repos[instruction.id]);
+        delete self.repos[instruction.id];
+    }
+};
+
+
+/**
+ * Registers a new (or edited) instruction in our local cache
+ *
+ * This method uses the `instruction.id' as the field. This way, every
+ * editable field can be changed without losing the instruction
+ * reference.
+ */
+GitPoller.prototype.register_instruction = function (instruction) {
+    var self = this;
+
+    /* This line bellow makes this function safe to be called
+     * more than once with the same instruction without registering more
+     * than one poll a single for repo */
+    self.unregister_instruction(instruction);
+
+    /* Let's register an interval to pull the repo */
+    var interval = instruction.poll_interval || settings.GIT_POLL_INTERVAL_2;
+    self.repos[instruction.id] = setInterval(function () {
+        self.single_update(instruction);
+    }, interval);
+};
+
+
+/**
+ * Actually does the update of a repository, if it exists
+ */
 GitPoller.prototype.single_update = function (instruction) {
     logger.info('preparing to pull the repo from "' + instruction.name + '"');
     var self = this;
@@ -73,6 +128,10 @@ GitPoller.prototype.single_update = function (instruction) {
 };
 
 
+/**
+ * Method called to register all available instructions in the boot
+ * time.
+ */
 GitPoller.prototype.start = function () {
     var self = this;
 
@@ -91,18 +150,7 @@ GitPoller.prototype.start = function () {
             if (item.poll_interval < 1)
                 return;
 
-            /* This line bellow makes this function safe to be called
-             * more than once with the same list of repositories */
-            if (self.repos[item.name] !== undefined) {
-                clearInterval(self.repos[item.name]);
-                delete self.repos[item.name];
-            }
-
-            /* Let's poll all repos in an interval */
-            var interval = item.poll_interval || settings.GIT_POLL_INTERVAL_2;
-            self.repos[item.name] = setInterval(function () {
-                self.single_update(item);
-            }, interval);
+            self.register_instruction(item);
         });
         return;
     });
