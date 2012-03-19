@@ -531,7 +531,8 @@
             {key: 'description', required: null},
             {key: 'repository_address', required: "c'mon if you don't provide the repository address, how's emerald supposed to check that out for you?"},
             {key: 'branch', required: "really? if please tell me which branch you wanna build, if you don't know what to do, just put \"master\""},
-            {key: 'build_script', required: "alright you gotta be kidding, without a build script how is emerald supposed to actually \"build\" the thing?"}
+            {key: 'build_script', required: "alright you gotta be kidding, without a build script how is emerald supposed to actually \"build\" the thing?"},
+            {key: 'poll_interval', required: null}
         ],
         customize: function(){
             _.bindAll(this, 'create_or_edit', 'get_field_value');
