@@ -204,13 +204,6 @@
             this.model.bind('repository_fetched', this.hide_progress);
             this.model.bind('build_finished', this.hide_progress);
 
-
-            this.model.bind('build_finished', function(){
-                setTimeout(function(){
-                    window.location = window.location;
-                }, 3000);
-            });
-
             this.template = get_template('instruction');
             this.bind('post-render', this.prepare_progress);
             this.bind('post-render', this.render_builds);
@@ -435,8 +428,6 @@
 
             this.$el.addClass('build-link');
             this.$el.addClass(this.model.get('style_name'));
-            this.$el.attr("id", 'clay:Build:id:' + this.model.get('__id__'));
-
             this.$el.html(rendered);
 
             return this;
