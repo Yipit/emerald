@@ -280,9 +280,11 @@
                     model: build
                 };
 
-                var subview = new InstructionBuildListItemView(params);
-                var rendered = subview.render().$el;
-                self.$buildlog.append(rendered);
+                if (STAGES_BY_INDEX[build.attributes.stage] !== 'FAILED') {
+                    var subview = new InstructionBuildListItemView(params);
+                    var rendered = subview.render().$el;
+                    self.$buildlog.append(rendered);
+                }
             });
         },
         make_abort_button: function(build){
