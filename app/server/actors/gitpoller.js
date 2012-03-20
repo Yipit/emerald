@@ -93,8 +93,14 @@ GitPoller.prototype.register_instruction = function (instruction) {
  * Actually does the update of a repository, if it exists
  */
 GitPoller.prototype.single_update = function (instruction) {
-    logger.info('preparing to pull the repo from "' + instruction.name + '"');
     var self = this;
+
+    if (instruction.is_building) {
+        logger.info('skipping the git pull on "' + instruction.name +
+                    '", that is being currently built');
+    } else {
+        logger.info('preparing to pull the repo from "' + instruction.name + '"');
+    }
 
     async.waterfall([
         function git_spawn(callback) {
