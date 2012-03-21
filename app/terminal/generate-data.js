@@ -22,8 +22,8 @@ if (!process.stdout.isTTY) {
 }
 
 
-var entity = require('../server/models');
 GLOBAL.settings = require('../../settings');
+var entity = require('../server/models');
 
 process.stdout.write("Populating the database... ".white.bold);
 console.time("Finished within");

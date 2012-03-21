@@ -28,7 +28,6 @@ var path = require('path');
 var fs = require('fs');
 var child_process = require('child_process');
 var logger = new (require('./logger').Logger)("[ MODELS / RUNNER ]".green.bold);
-var settings = require('../../settings');
 
 var STAGES_BY_INDEX = {
     0: 'BEGINNING',

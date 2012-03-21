@@ -22,7 +22,6 @@ var spawn = require('child_process').spawn;
 var async = require('async');
 var path = require('path');
 var common = require('./common');
-var settings = require('../../../settings');
 var logger = new (require('../logger').Logger)("[ GITPOLLER ]".yellow.bold);
 var BuildInstruction = require('../models').BuildInstruction;
 

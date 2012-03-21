@@ -20,8 +20,6 @@
 
 var path = require('path');
 
-var settings = require('../../../settings');
-
 
 exports.repo_name = function (instruction) {
     return [instruction.repository_address, instruction.name]
