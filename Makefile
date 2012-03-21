@@ -22,6 +22,12 @@ clean:
 	@for pattern in `cat .gitignore`; do find . -name "$$pattern" -delete; done
 	@echo "OK!"
 
+debug:
+	@rm -rf ~/.emerald
+	@npm install
+	@make data
+	@node --debug ./app/terminal/main.js -s settings-local.js run
+
 data:
 	@node $$PWD/app/terminal/generate-data.js
 
