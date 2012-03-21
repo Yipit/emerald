@@ -180,7 +180,7 @@ BuildRunner.prototype.start = function(){
                         /* If something bad happened, let's send the bad news
                          * and stop working here */
                         if (code !== 0) {
-                            redis.publish('Build finished', JSON.stringify({
+                            redis.publish('Build aborted', JSON.stringify({
                                 at: now,
                                 instruction: instruction.toBackbone(),
                                 build: build.toBackbone(),
