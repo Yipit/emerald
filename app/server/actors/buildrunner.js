@@ -7,10 +7,6 @@ var child_process = require('child_process');
 var posix = require('posix');
 var logger = new (require('../logger').Logger)("[ BUILD RUNNER ]".yellow.bold);
 var common = require('./common');
-
-var entity = require('../models');
-var Build = entity.Build;
-var BuildInstruction = entity.BuildInstruction;
 var Lock = require('../lock').Lock;
 
 function filter_output (text) {
@@ -45,6 +41,12 @@ BuildRunner.prototype.get_script_contents = function(){
 };
 
 BuildRunner.prototype.start = function(){
+    /* TODO: These declarations are here to avoid circular dependency
+     * problems. The code should be refactored to avoid them */
+    var entity = require('../models');
+    var Build = entity.Build;
+    var BuildInstruction = entity.BuildInstruction;
+
     var self = this;
 
     var current_build = self.current_build;
@@ -71,6 +73,14 @@ BuildRunner.prototype.start = function(){
     }));
 
     async.waterfall([
+        function broadcast_the_start(callback) {
+            redis.publish('Build running', JSON.stringify({
+                build: current_build.toBackbone(),
+                instruction: instruction.toBackbone()
+            }));
+
+            callback(null);
+        },
         function decide_whether_pull_or_clone (callback){
             logger.info('preparing to fetch data from "'+instruction.name+'" through "'+instruction.repository_address+'@'+branch_to_build+'" at ' + repository_full_path);
             path.exists(repository_bare_path, function(exists){callback(null, instruction, exists);});
@@ -331,7 +341,16 @@ BuildRunner.prototype.start = function(){
                     build.status = code;
                     build.signal = signal;
                     build.build_finished_at = now;
-                    build.stage = build.succeeded ? entity.STAGES_BY_NAME.SUCCEEDED : entity.STAGES_BY_NAME.FAILED;
+
+                    if (code === null && signal !== null) {
+                        build.stage = entity.STAGES_BY_NAME.ABORTED;
+                    } else if (signal === null && code > 0) {
+                        build.stage = entity.STAGES_BY_NAME.FAILED;
+                    } else if (build.succeeded) {
+                        build.stage = entity.STAGES_BY_NAME.SUCCEEDED;
+                    } else {
+                        build.stage = entity.STAGES_BY_NAME.FAILED;
+                    }
 
                     /* We are now safe to say that everything worked in
                      * time. Let's clear the timeout interval set in the
@@ -379,11 +398,18 @@ BuildRunner.prototype.start = function(){
             build.stage = entity.STAGES_BY_NAME.SUCCEEDED;
         }
         build.save(function(){
-            redis.publish("Build finished", JSON.stringify({
-                build: build.toBackbone(),
-                instruction: instruction.toBackbone()
-            }));
-
+            if (build.stage === entity.STAGES_BY_NAME.ABORTED) {
+                redis.publish('Build aborted', JSON.stringify({
+                    build: build.toBackbone(),
+                    instruction: instruction.toBackbone(),
+                    error: err
+                }));
+            } else {
+                redis.publish("Build finished", JSON.stringify({
+                    build: build.toBackbone(),
+                    instruction: instruction.toBackbone()
+                }));
+            }
             self.lock.release(function(){
                 logger.success(['the build lock was released', err && 'due an error'.red || 'successfully'.green.bold]);
             });

@@ -28,6 +28,7 @@ var path = require('path');
 var fs = require('fs');
 var child_process = require('child_process');
 var logger = new (require('./logger').Logger)("[ MODELS / RUNNER ]".green.bold);
+var BuildRunner = require('./actors/buildrunner').BuildRunner;
 
 var STAGES_BY_INDEX = {
     0: 'BEGINNING',
@@ -530,39 +531,25 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
                 logger.handleException(err);
                 return;
             }
-            var runner = child_process.spawn(settings.SCRIPT_PATH, ['build', build.__id__]);
-            runner.stdout.on('data', function(data) {
-                process.stdout.write(data);
-            });
 
-            runner.stderr.on('data', function(data) {
-                process.stderr.write(data);
-            });
-
-            build.pid = runner.pid;
-            build.save(function(err, key, build) {
-                redis.publish('Build running', JSON.stringify({
-                    build: build.toBackbone(),
-                    instruction: self.toBackbone()
-                }));
-            });
-
-            runner.on('exit', function(code, signal) {
-                if ((code !== 0) && signal) {
-                    build.stage = STAGES_BY_NAME.ABORTED;
-                    build.signal = signal;
-                } else if (parseInt(code, 10) !== 0) {
-                    build.stage = STAGES_BY_NAME.FAILED;
+            /* The build struct received in this method is not enough to
+             * start the build runner, so I'll do the same that is being
+             * done in the `server/main` module. */
+            Build.fetch_by_id(build.__id__, function(err, build) {
+                if (err) {
+                    logger.fail('error finding the build to ru');
+                    logger.handleException(err);
+                } else {
+                    /* NOTHING that happens with the runner should crash
+                     * our beloved emerald, so let's just feed the user
+                     * back with the exception if it happens */
+                    try {
+                        var runner = new BuildRunner(build);
+                        runner.start();
+                    } catch (err) {
+                        logger.handleException(err);
+                    }
                 }
-                build.save(function(err, key, build){
-                    Build.fetch_by_id(build.__id__, function(err, build){
-                        redis.publish('Build aborted', JSON.stringify({
-                            build: build.toBackbone(),
-                            instruction: build.instruction.toBackbone(),
-                            error: err
-                        }));
-                    });
-                });
             });
         });
     });
