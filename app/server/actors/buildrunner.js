@@ -406,10 +406,13 @@ BuildRunner.prototype.start = function(){
             if (build.stage !== entity.STAGES_BY_NAME.ABORTED) {
                 build.stage = entity.STAGES_BY_NAME.FAILED;
             }
-        } else {
+        } else if (build.succeeded) {
             logger.success('the instruction "'+instruction.name+'" has finished running its build #' + build.index);
             build.stage = entity.STAGES_BY_NAME.SUCCEEDED;
+        } else {
+            build.stage = entity.STAGES_BY_NAME.FAILED;
         }
+
         build.save(function(){
             redis.publish("Build finished", JSON.stringify({
                 build: build.toBackbone(),
