@@ -31,6 +31,21 @@ var Build = entity.Build;
 var BuildInstruction = entity.BuildInstruction;
 var Lock = require('../lock').Lock;
 
+
+/* Nodejs has a very incomplete posix support and the `setsid' option
+ * present in the child_process.spawn documentation doesn't work. This
+ * way, I'm using the call bellow to deatach this process from the main
+ * `node' interpreter, making it possible to kill all subprocesses
+ * forked by git or the build shell script without shutting emerald
+ * down.
+ *
+ * This call must be done only once in this module. Because it's being
+ * spawn and not actually being used through it's API. If you try to call
+ * it again, you'll receive an EPERM error.
+ */
+posix.setsid();
+
+
 function filter_output (text) {
     return text.replace(/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/g, '');
 }
@@ -124,14 +139,6 @@ BuildRunner.prototype.start = function(){
                     instruction: instruction.toBackbone()
                 }));
 
-                /* Nodejs has a very incomplete posix support, the
-                 * `setsid' option present in the child_process
-                 * documentation doesn't work. This way, I'm using the
-                 * call bellow to deatach git process from the `node'
-                 * interpreter, making it possible to kill all
-                 * subprocesses forked by git without shutting emerald
-                 * down. */
-                posix.setsid();
                 var command = child_process.spawn("git", command_args, command_options);
 
                 /* Also starting a timer that will handle the spawn
@@ -280,10 +287,6 @@ BuildRunner.prototype.start = function(){
 
             current_build.build_started_at = new Date();
             current_build.save(function(err){
-                /* We don't call `posix.setsid()' here because we are
-                 * already in a new session, started by the git
-                 * command. If nothing bad has happened with the last
-                 * spawn, we'll be able to still use this session. */
                 var command = child_process.spawn("bash", args, {cwd: repository_full_path});
 
                 /* We'll not time it out if the user sets the

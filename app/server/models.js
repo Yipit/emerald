@@ -27,6 +27,7 @@ var path = require('path');
 var fs = require('fs');
 var child_process = require('child_process');
 var logger = new (require('./logger').Logger)("[ MODELS / RUNNER ]".green.bold);
+var dispatch = require('./command').dispatch;
 
 var STAGES_BY_INDEX = {
     0: 'BEGINNING',
@@ -529,37 +530,31 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
                 logger.handleException(err);
                 return;
             }
-            var runner = child_process.spawn(settings.SCRIPT_PATH, ['build', build.__id__]);
-            runner.stdout.on('data', function(data) {
-                process.stdout.write(data);
-            });
 
-            runner.stderr.on('data', function(data) {
-                process.stderr.write(data);
-            });
+            dispatch('build', [build.__id__], function (child) {
+                build.pid = child.pid;
+                build.save(function(err, key, build) {
+                    redis.publish('Build running', JSON.stringify({
+                        build: build.toBackbone(),
+                        instruction: self.toBackbone()
+                    }));
+                });
 
-            build.pid = runner.pid;
-            build.save(function(err, key, build) {
-                redis.publish('Build running', JSON.stringify({
-                    build: build.toBackbone(),
-                    instruction: self.toBackbone()
-                }));
-            });
-
-            runner.on('exit', function(code, signal) {
-                if ((code !== 0) && signal) {
-                    build.stage = STAGES_BY_NAME.ABORTED;
-                    build.signal = signal;
-                } else if (parseInt(code, 10) !== 0) {
-                    build.stage = STAGES_BY_NAME.FAILED;
-                }
-                build.save(function(err, key, build){
-                    Build.fetch_by_id(build.__id__, function(err, build){
-                        redis.publish('Build aborted', JSON.stringify({
-                            build: build.toBackbone(),
-                            instruction: build.instruction.toBackbone(),
-                            error: err
-                        }));
+                child.on('exit', function(code, signal) {
+                    if ((code !== 0) && signal) {
+                        build.stage = STAGES_BY_NAME.ABORTED;
+                        build.signal = signal;
+                    } else if (parseInt(code, 10) !== 0) {
+                        build.stage = STAGES_BY_NAME.FAILED;
+                    }
+                    build.save(function(err, key, build){
+                        Build.fetch_by_id(build.__id__, function(err, build){
+                            redis.publish('Build aborted', JSON.stringify({
+                                build: build.toBackbone(),
+                                instruction: build.instruction.toBackbone(),
+                                error: err
+                            }));
+                        });
                     });
                 });
             });

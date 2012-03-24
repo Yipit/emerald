@@ -35,13 +35,24 @@ GLOBAL.settings = require("../../settings");
 program
     .version(meta.version)
     .option('-s, --settings <path>', 'set the path for settings', function(settings_path){
+        /* Taking care of relative paths */
+        settings_path = path.resolve(settings_path);
+
+        /* Nothing will be done with a path that points to nothing */
         if (!path.existsSync(settings_path)){
             console.log('the option', '-s/--settings'.yellow.bold, 'requires an existing path pointing to a valid settings file');
             process.exit(1);
         }
 
-        settings_path = path.resolve(process.cwd(), settings_path).replace(/[.](json|js)/, '');
-        var newsettings = require(settings_path);
+        var module = settings_path.replace(/[.](json|js)/, '');
+        var newsettings = require(module);
+
+        /* Flag that will mark the settings object as a customized version of
+         * our default. This value will be used by the `app.server.dispatch`
+         * function to load the same settings that the main process */
+        newsettings.CUSTOM = settings_path;
+
+        /* Merging the current settings object with the new one */
         GLOBAL.settings = _.extend(settings, newsettings);
     });
 
