@@ -67,6 +67,7 @@ program
             if (err) {
                 console.log(err.toString());
                 console.log(err.stack.toString());
+                process.exit(0);
                 return;
             }
             var runner = new BuildRunner(build);
