@@ -419,6 +419,8 @@ BuildRunner.prototype.start = function(){
             self.lock.release(function(){
                 logger.success(['the build lock was released', err && 'due an error'.red || 'successfully'.green.bold]);
             });
+
+            process.exit(0);
         });
     });
 };
