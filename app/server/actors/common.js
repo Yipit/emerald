@@ -1,6 +1,6 @@
 /* Emerald - Continuous Integration server focused on real-time interactions
  *
- *     Copyright (C) 2012  Yipit Inc. <coders@yipit.com>
+ *   Copyright (C) 2012  Yipit Inc. <coders@yipit.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
