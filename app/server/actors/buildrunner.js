@@ -43,7 +43,14 @@ var Lock = require('../lock').Lock;
  * spawn and not actually being used through it's API. If you try to call
  * it again, you'll receive an EPERM error.
  */
-posix.setsid();
+
+try {
+    posix.setsid();
+} catch (e) {
+    if (e.code !== 'EPERM') {
+        throw e;
+    }
+}
 
 
 function filter_output (text) {
