@@ -190,7 +190,9 @@ BuildRunner.prototype.start = function(){
                 self.spawn_timeout = null;
 
                 Build.fetch_by_id(current_build.__id__, function(err, build) {
-                    logger.handleException("Build.find_by_id", err);
+                    if (err) {
+                        logger.handleException("Build.find_by_id", err);
+                    }
                     var now = new Date();
 
                     /* The only fields of a build being updated in this function */
@@ -200,7 +202,9 @@ BuildRunner.prototype.start = function(){
                         entity.STAGES_BY_NAME.FAILED;
 
                     build.save(function(err, key, build) {
-                        logger.handleException("build(#"+build.__id__+").save", err);
+                        if (err) {
+                            logger.handleException("build(#"+build.__id__+").save", err);
+                        }
 
                         /* If something bad happened, let's send the bad news
                          * and stop working here */
