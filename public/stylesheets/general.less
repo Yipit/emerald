@@ -440,9 +440,6 @@ a, a:hover{
 
 
 }
-.ui-state-success a, .ui-widget-content .ui-state-success a, .ui-widget-header .ui-state-success a { color: @darkest_aluminum; }
-.ui-state-success-text, .ui-widget-content .ui-state-success-text, .ui-widget-header .ui-state-success-text { color: @darkest_aluminum; }
-
 .ui-state-success .ui-icon, .ui-state-success-text .ui-icon {background-image: url(images/ui-icons_f6cf3b_256x240.png); }
 
 #connection-lost-dialog {
@@ -479,31 +476,21 @@ a, a:hover{
     overflow-y:scroll;
   }
 }
-
-.ui-state-error {
-  .title, .last-build, .author {
-    color: @lightest_aluminum;
-  }
-  li, strong {
-    a {
-      color: @lightest_aluminum;
-      strong, .message {
-        color: @scarlet_red;
-      }
-    }
-  }
-}
-.ui-state-success {
+.row.succeeded {
   .title, .last-build, .author {
     color: @darker_aluminum;
   }
-  li, strong {
-    a {
-      color: @darker_aluminum;
-      strong, .message {
-        color: @dark_chameleon;
-      }
-    }
+  strong, a {
+    color: @dark_chameleon;
+  }
+}
+
+.row.failed {
+  .title, .last-build, .author {
+    color: @darker_aluminum;
+  }
+  strong, a {
+    color: @scarlet_red;
   }
 }
 
