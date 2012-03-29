@@ -259,6 +259,7 @@ Is an object that is instantiated with a models.Build() object as parameter, the
 
 At this point you are probably asking yourself how can the Build Runner possibly take a build as instance since the runner is supposed to create it itself. [Just take a look here](https://github.com/Yipit/emerald/blob/master/app/server/models.js#L458) and you will see that `server.models.BuildInstruction` instances have a `run` method that [gets called by the queue consumer](https://github.com/Yipit/emerald/blob/master/app/server/actors/queueconsumer.js#L81)
 
+<a name="events"></a>
 ### Server-side events are sent to the clients
 
 Since emerald was built with "real-time UI" in mind, its architecture
