@@ -303,6 +303,11 @@
             if (data && data.build) {
                 all_builds.unshift(data.build);
             }
+
+            /* Showing only the last two builds, we'll show the rest of
+             * them in the internal build page */
+            all_builds = all_builds.slice(0, 2);
+
             self.$buildlog.empty();
             _.each(all_builds, function(raw_build_data) {
                 var build = new Build(raw_build_data);

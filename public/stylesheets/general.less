@@ -264,32 +264,16 @@ a, a:hover{
   }
 
   .instruction-header {
-    padding: 0 0 10px 0;
+    padding: 10px;
+    height:75px;
+
     .avatar {
-      border: 0;
-      @border-val: solid 3px white;
-      &.picture {
-        .raw-box-shadow(0 5px 5px #666);
-      }
+      padding:0px;
+      display:block;
       float:left;
-      margin: 0 20px 10px 0 ;
-      padding: 0;
-      position:absolute;
-      left:10px;
-      top:10px;
-      height:100px;
-      width:100px;
-      border-radius:3px;
-    }
-    .title {
-      padding:0 0 0 110px;
-      margin: 0;
-      h1 {
-        padding:10px 0 5px 10px;
-      }
-    }
-    .last-build, .author {
-      margin-left: 50px;
+      height:75px;
+      width:75px;
+      margin-right:10px;
     }
   }
 
@@ -297,21 +281,18 @@ a, a:hover{
     .progress {
       position: relative;
       .text {
-        position: absolute;
         color: #EEF;
         font-family: Monaco, Monospace;
-        top: 4px;
-        left: 4px;
         text-shadow: 0 0 2px #000000;
         filter: dropshadow(color=#000000, offx=1, offy=1);
       }
     }
-    .title {
-      margin-top: 20px;
+    a.text {
       color: @dark_aluminum;
       font-weight: normal;
       border: none;
-      letter-spacing: 1px;
+      margin-top:5px;
+      display:block;
     }
     &.hidden {
       min-height: 0;

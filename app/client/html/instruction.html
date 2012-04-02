@@ -1,12 +1,14 @@
 <% var last_build = _.first(all_builds); %>
 <article class="instruction" data-instruction-id="<%= model.__id__ %>">
   <div class="ui-widget <%= last_build ? STAGE_TO_UI[last_build.stage] : 'ui-state-default' %>">
-    <ul class="instruction-header ui-widget ui-corner-all">
-      <li class="avatar ui-widget ui-corner-all ui-state-default <%= last_build ? 'picture': '' %>">
+    <ul class="instruction-header">
+      <li class="avatar <%= last_build ? 'picture': '' %>">
 	<% if (last_build) { %>
-	<img src="<%= last_build.gravatars['100'] %>" width="100" height="100" class="ui-widget ui-corner-all ui-state-default"/>
+	<img src="<%= last_build.gravatars['75'] %>" width="75" height="75"
+             class="ui-widget ui-corner-all ui-state-default"/>
 	<% } else { %>
-	<img src="/images/blank_avatar.jpg" width="100" height="100" class="ui-widget ui-corner-all ui-state-default"/>
+	<img src="/images/blank_avatar.jpg" width="75" height="75"
+             class="ui-widget ui-corner-all ui-state-default"/>
 	<% } %>
       </li>
       <li class="title">
@@ -33,12 +35,15 @@
     </ul>
 
     <div class="instruction-body <%= (last_build) ? '': 'hidden' %>">
-      <h4 class="title">latest builds</h4>
       <div class="progress">
-	<div class="text">text</div>
+        <div class="text">text</div>
       </div>
 
       <ol class="buildlog"></ol>
+
+      <% if (model.all_builds.length > 2) { %>
+      <a class="text" href="<%= model.permalink %>">build history</a>
+      <% } %>
     </div>
 
     <ul class="instruction-footer ui-widget ui-corner-all">
