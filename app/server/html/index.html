@@ -1,73 +1,75 @@
 {% extends "base.html" %}
 {% block body %}
-  <a id="fork_me_on_github" target="_blank" href="https://github.com/Yipit/emerald">
-    <span>Fork me on GitHub!</span>
-  </a><!--github ribbon-->
+<a id="fork_me_on_github" target="_blank" href="https://github.com/Yipit/emerald">
+  <span>Fork me on GitHub!</span>
+</a><!--github ribbon-->
 
-  {% for template in templates %}<script type="text/template" id="template-{{ template.name }}">{{ template.html|raw }}</script>{% endfor %}
+{% for template in templates %}
+<script type="text/template" id="template-{{ template.name }}">
+  {{ template.html|raw }}
+</script>
+{% endfor %}
 
-  <div id="connection-lost-dialog" title="Connection Lost">
-    <h1>Emerald lost the connection with the mothership</h1>
-    <h2>please try refreshing the page or check if the server is up</h2>
-    <p style="font-size:120px;color: #666;padding: 50px;">:(</p>
-  </div>
+<div id="connection-lost-dialog" title="Connection Lost">
+  <h1>Emerald lost the connection with the mothership</h1>
+  <h2>please try refreshing the page or check if the server is up</h2>
+  <p style="font-size:120px;color: #666;padding: 50px;">:(</p>
+</div>
 
-  <header>
-    <div class="navbar">
-      <div class="navbar-inner">
-	<div class="container">
-	  <a class="brand" href="#">
-	    <div id="logo">Emerald</div>
-	  </a>
-	  <ul class="nav">
-	    {# notice that some of the following "a" elements have the
-	    "rel" attribute set to equivalent backbone controllers
-	    defined at "./app/client/controllers.js"
+<header>
+  <div class="navbar">
+    <div class="container">
+      <a class="brand" href="#">
+        <div id="logo">Emerald</div>
+      </a>
+      <ul class="nav">
+        {# notice that some of the following "a" elements have the
+        "rel" attribute set to equivalent backbone controllers
+        defined at "./app/client/controllers.js"
 
-	    this is used internally in the backbone app: there is a
-	    listener to the signal (Backbone.history.bind("route"))
+        this is used internally in the backbone app: there is a
+        listener to the signal (Backbone.history.bind("route"))
 
-	    that takes the name of the controller resposible to render
-	    the new view, search for a link tag with the controller
-	    name in the "rel" attribute, traverse to the closest
-	    ancestor responding to the selector "li.navigation-item"
-	    and change the state of that to active, and its siblings
-	    state to inactive. #}
-	    <li class="navigation-item dashboard">
-              <a href="#dashboard" rel="dashboard">
-		<i class="icon-white icon-th-large"></i>
-                dashboard
+        that takes the name of the controller resposible to render
+        the new view, search for a link tag with the controller
+        name in the "rel" attribute, traverse to the closest
+        ancestor responding to the selector "li.navigation-item"
+        and change the state of that to active, and its siblings
+        state to inactive. #}
+        <li class="navigation-item dashboard">
+          <a href="#dashboard" rel="dashboard">
+            <i class="icon-white icon-th-large"></i>
+            dashboard
+          </a>
+        </li>
+        <li class="navigation-item instructions dropdown">
+          <a href="#instructions" data-toggle="dropdown">
+            <i class="icon-white icon-th-list"></i>
+            instructions
+            <strong class="white caret"></strong>
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a href="#instruction/new" rel="new_instruction">
+                <i class="icon-pencil"></i>
+                Create a new one
+              </a>
+              <a href="#instructions" rel="manage_instructions">
+                <i class="icon-th"></i>
+                Manage them all
               </a>
             </li>
-	    <li class="navigation-item instructions dropdown">
-	      <a href="#instructions" data-toggle="dropdown">
-                <i class="icon-white icon-th-list"></i>
-                instructions
-                <strong class="white caret"></strong>
-	      </a>
-	      <ul class="dropdown-menu">
-		<li>
-		  <a href="#instruction/new" rel="new_instruction">
-		    <i class="icon-pencil"></i>
-		    Create a new one
-		  </a>
-		  <a href="#instructions" rel="manage_instructions">
-		    <i class="icon-th"></i>
-		    Manage them all
-		  </a>
-		</li>
-	      </ul>
-	    </li>
-	    <li id="show-main-console" class="console">
-              <a href="#console">
-		<i class="icon-white icon-resize-full"></i>
-		fullscreen live terminal
-              </a>
-            </li>
-	  </ul>
-	</div>
-      </div>
+          </ul>
+        </li>
+        <li id="show-main-console" class="console">
+          <a href="#console">
+            <i class="icon-white icon-resize-full"></i>
+            fullscreen live terminal
+          </a>
+        </li>
+      </ul>
     </div>
-  </header>
-  <div id="app" class="container"></div>
+  </div>
+</header>
+<div id="app" class="container"></div>
 {% endblock %}
