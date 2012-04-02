@@ -88,7 +88,6 @@ h1 {
 .row {
   margin-bottom:0;
   > h1 {
-    font-size: 64px;
     color: @darkest_aluminum;
     padding: 10px 0 30px 0;
   }
@@ -98,10 +97,12 @@ h1 {
 
 header {
   background:url(../images/bg_header.png) repeat-x #444;
-  height:80px;
+  height:75px;
   .raw-box-shadow(0 0 10px #333);
 
-  .navbar-inner {
+  .navbar {
+    background-color:#2c2c2c;
+    height:40px;
     #logo {
       background:url(../images/emerald.png) no-repeat;
       padding: 2px 0 1px 34px;
@@ -178,9 +179,7 @@ menu.main, menu.contextual {
 
 /* -- dashboard -- */
 
-
 .container > h1 {
-  font-size:36px;
   font-weight: normal;
   margin:20px 0;
   color:#4e9a06;
@@ -303,14 +302,12 @@ a, a:hover{
         font-family: Monaco, Monospace;
         top: 4px;
         left: 4px;
-        font-size: 14px;
         text-shadow: 0 0 2px #000000;
         filter: dropshadow(color=#000000, offx=1, offy=1);
       }
     }
     .title {
       margin-top: 20px;
-      font-size: 24px;
       color: @dark_aluminum;
       font-weight: normal;
       border: none;
@@ -339,7 +336,6 @@ a, a:hover{
         padding: 5px 0;
         letter-spacing: 1px;
 	text-shadow: @dark_aluminum 2px 2px 2px;
-        font-size: 14px;
       }
     }
   }
@@ -367,14 +363,7 @@ a, a:hover{
 }
 
 .build {
-  h1 {
-    font-size: 48px;
-  }
-  .title {
-    font-size: 30px;
-  }
   .message {
-    font-size: 18px;
     color: @dark_aluminum;
     width: 600px;
     padding: 10px;
@@ -387,7 +376,6 @@ a, a:hover{
     .raw-box-shadow(inset 10px 10px 10px @darkest_aluminum);
   }
   pre {
-    font-size: 16px;
     &.terminal {
       min-height: 300px;
       background: @darkest_aluminum;
@@ -406,7 +394,6 @@ a, a:hover{
 @light-green: #a5b556;
 
 .ui-success-success p {
-  font-size: 13px;
   font-weight: normal;
   line-height: 18px;
   margin:7px 15px;
@@ -471,7 +458,6 @@ a, a:hover{
     height: 100%;
     background: @darkest_aluminum;
     .raw-box-shadow(inset 0 4px 200px #000);
-    font-size: 16px;
     color: white;
     overflow-y:scroll;
   }
@@ -495,20 +481,42 @@ a, a:hover{
 }
 
 
-.row.alert.managed-instruction {
-  padding: 10px 0;
+.managed-instruction {
+  padding: 10px;
   margin: 0 0 40px 0;
+  background:#f9f9f9;
+  border:solid 1px #ddd;
+  .rounded-corners;
+
+  h2 {
+    border-bottom:solid 1px #ddd;
+    margin-bottom:15px;
+    padding-bottom:10px;
+  }
+
   .actions {
     float: right;
-    margin: 10px;
   }
-  legend {
-    font-size: 36px;
-    font-weight: bold;
-  }
+
   label {
-    font-size: 14px;
     font-weight: bold;
+    width:auto;
+    display:block;
+    margin-top:10px;
+  }
+
+  .field {
+    input {
+      margin:0;
+    }
+
+    pre {
+      width:70%;
+    }
+
+    .data {
+      margin-left:15px;
+    }
   }
 }
 
