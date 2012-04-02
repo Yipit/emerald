@@ -355,6 +355,7 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
             }
         });
 
+        data.permalink = settings.EMERALD_DOMAIN + "#instruction/" + data.__id__;
         data.is_building = self.is_building || false;
         data.current_build = self.current_build || null;
         data.github_hook_url = [settings.EMERALD_DOMAIN, 'hooks/github', this.__id__].join('/');

@@ -1,0 +1,42 @@
+<% var last_build = _.first(all_builds); %>
+<div class="buildlist">
+
+  <h2><%= model.get('name') %></h2>
+  <div class="description">
+    <%= model.get('description') %>
+  </div>
+
+  <% if (last_build) { %>
+  <div class="lastbuild">
+    <h3>Current build</h3>
+    <ul>
+      <li>
+        <label>Commit</label>
+        <a href="#"><%= last_build.commit %></a>
+      </li>
+      <li>
+        <label>Author</label>
+        <a href="mailto:<%= last_build.author_email %>">
+          <%= last_build.author_name %>
+        </a>
+      </li>
+      <li>
+        <label>Message</label>
+        <%= last_build.message %>
+      </li>
+    </ul>
+  </div>
+  <% } %>
+
+  <h3>Build history</h3>
+  <ul class="list">
+    <% for (var i = 0; i < all_builds.length; i++) {
+           var build = all_builds[i]; %>
+    <li class="<%= build.stage_name %>">
+      <span class="square"></span>
+      <div class="index"><%= build.index %></div>
+      <a href="<%= build.permalink %>"><%= build.message %></a>
+    </li>
+    <% } %>
+  </ul>
+</div>

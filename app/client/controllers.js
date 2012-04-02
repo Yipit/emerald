@@ -7,7 +7,8 @@
             'instructions': 'manage_instructions',
             'instruction/new': 'new_instruction',
             'instruction/:id/edit': 'edit_instruction',
-            'instruction/:id/duplicate': 'duplicate_instruction'
+            'instruction/:id/duplicate': 'duplicate_instruction',
+            'instruction/:id': 'list_builds'
         },
         initialize: function(){
             this.$body = $("body");
@@ -19,6 +20,7 @@
                       'manage_instructions',
                       'new_instruction',
                       'edit_instruction',
+                      'list_builds',
                       'connection_lost');
 
             this.consoleView = new ConsoleView({model: main_console});
@@ -93,6 +95,21 @@
                         model: instruction,
                         duplicate_mode: true
                     });
+                    self.render(view);
+                },
+                error: function(build, response){
+                    var error = new UIError(JSON.parse(response.responseText));
+                    var view = new ErrorView({model: error});
+                    self.render(view);
+                }
+            });
+        },
+        list_builds: function (id) {
+            var self = this;
+            var instruction = new BuildInstruction({__id__: id});
+            instruction.fetch({
+                success: function(){
+                    var view = new window.CompleteBuildListView({model: instruction});
                     self.render(view);
                 },
                 error: function(build, response){

@@ -1,5 +1,5 @@
 <% var last_build = _.first(all_builds); %>
-<article class="instruction" data-instruction-id="<%= __id__ %>">
+<article class="instruction" data-instruction-id="<%= model.__id__ %>">
   <div class="ui-widget <%= last_build ? STAGE_TO_UI[last_build.stage] : 'ui-state-default' %>">
     <ul class="instruction-header ui-widget ui-corner-all">
       <li class="avatar ui-widget ui-corner-all ui-state-default <%= last_build ? 'picture': '' %>">
@@ -10,7 +10,9 @@
 	<% } %>
       </li>
       <li class="title">
-	<h1 class="title"><%= name %></h1>
+	<h1>
+          <a href="<%= model.permalink %>"><%= model.name %></a>
+        </h1>
       </li>
       <li class="last-build">
 	<span>last build:</span>

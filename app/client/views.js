@@ -154,6 +154,20 @@
         }
     });
 
+    window.CompleteBuildListView = EmeraldView.extend({
+        /* This view lists all builds of an instruction */
+        template_name: 'build-list',
+        render: function () {
+            var data = {
+                model: this.model,
+                all_builds: _.uniq(this.model.get('all_builds'))
+            };
+
+            this.$el.html(this.template(data));
+            return this;
+        }
+    });
+
     window.InstructionView = EmeraldView.extend({
         /*
           each instruction rendered on the dashboard is an instance of
@@ -212,6 +226,20 @@
 
             this.refresh_widgets();
         },
+        render: function () {
+            var data = {
+                model: this.model.toJSON(),
+                STAGE_TO_UI: STAGE_TO_UI,
+                truncate: truncate,
+                all_builds: _.uniq(this.model.get('all_builds'))
+            };
+
+            this.trigger('pre-render', {redefine:data});
+            this.$el.html(this.template(data));
+            this.trigger('post-render', this);
+            return this;
+        },
+
         /* utility functions */
         make_toolbar_button: function(title, classes, extra, icon){
             extra = extra || '';
