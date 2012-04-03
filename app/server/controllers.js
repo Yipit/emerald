@@ -100,7 +100,8 @@ exports.map = function(app, redis){
 
     _.each({
         'build': entity.Build,
-        'instructions': entity.BuildInstruction
+        'instructions': entity.BuildInstruction,
+        'pipeline': entity.Pipeline
     }, function(Model, name){
         /* defining the controller responsible to fetch ONLY one instance */
         app.get('/api/' + name + '/:id.json', function(request, response){
@@ -160,4 +161,18 @@ exports.map = function(app, redis){
         });
     });
 
+
+    /* Controller that creates a new Pipeline */
+    app.post('/api/pipeline.json', function (request, response) {
+        var data = request.body;
+        entity.Pipeline.create(data, function (err, key, pipeline) {
+            response.json(pipeline.toBackbone(), 201);
+        });
+    });
+
+    app.get('/api/pipeline.json', function (request, response) {
+        entity.Pipeline.fetch_all(function (err, pipelines) {
+            response.json(pipelines, 200);
+        });
+    });
 };

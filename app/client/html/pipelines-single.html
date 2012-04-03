@@ -1,0 +1,22 @@
+<div class="single-pipeline managed-instruction">
+  <h2><%= model.name %></h2>
+
+  <div class="field">
+    <label for="name" class="control-label">Name</label>
+    <div class="data">
+      <input
+         type="text" readonly="readonly" name="name"
+         value="<%= model.name %>">
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="description" class="control-label">Description</label>
+    <div class="data">
+      <input
+         type="text" readonly="readonly" name="description"
+         value="<%= model.description %>">
+    </div>
+  </div>
+
+</div>

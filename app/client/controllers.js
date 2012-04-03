@@ -8,7 +8,9 @@
             'instruction/new': 'new_instruction',
             'instruction/:id/edit': 'edit_instruction',
             'instruction/:id/duplicate': 'duplicate_instruction',
-            'instruction/:id': 'list_builds'
+            'instruction/:id': 'list_builds',
+            'pipelines': 'pipelines_list',
+            'pipelines/new': 'pipelines_new'
         },
         initialize: function(){
             this.$body = $("body");
@@ -21,7 +23,9 @@
                       'new_instruction',
                       'edit_instruction',
                       'list_builds',
-                      'connection_lost');
+                      'connection_lost',
+                      'pipelines_list',
+                      'pipelines_new');
 
             this.consoleView = new ConsoleView({model: main_console});
             var consoleElement = this.consoleView.render().el;
@@ -132,6 +136,28 @@
                     });
                 }
             }, 1000);
+        },
+
+        /* -- pipeline routes -- */
+
+        pipelines_list: function() {
+            var self = this;
+            window.pipelines.fetch({
+                success: function() {
+                    var view = new window.Views.Pipelines.List({ collection: pipelines });
+                    self.render(view);
+                },
+                error: function () {
+                    console.debug('not good');
+                }
+            });
+        },
+
+        pipelines_new: function() {
+            var model = new window.Pipeline();
+            var view  = new window.Views.Pipelines.New({ model: model });
+            this.render(view);
         }
+
     });
 });})(jQuery);

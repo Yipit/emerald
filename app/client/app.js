@@ -1,6 +1,7 @@
 (function($){
     $(function(){
         window.instructions = new window.BuildInstructions();
+        window.pipelines = new window.Pipelines();
         window.main_console = new window.ConsoleSource();
 
         window.App = new window.EmeraldRouter();

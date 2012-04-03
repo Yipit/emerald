@@ -1,0 +1,41 @@
+<div id="pipeline-new" class="row">
+  <div class="span8">
+    <form class="form-horizontal">
+      <fieldset>
+        <legend>Create a new pipeline</legend>
+
+        <div class="control-group">
+          <label for="name" class="control-label">Name</label>
+          <div class="controls">
+            <input type="text" name="name" id="name">
+            <p class="help-block">
+              Just a human readable string to identify the pipeline
+            </p>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label for="description" class="control-label">Description</label>
+          <div class="controls">
+            <input type="text" description="description" id="description">
+            <p class="help-block">
+              To describe a pipeline, use the name of instructions you
+              want to concatenate separated by the pipe ("|")
+              signal. Like this:
+              <br><br>
+            </p>
+
+            <p>
+              <code>yipit-unit-tests | yipit-functional-tests</code>
+            </p>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <input type="button" class="btn btn-success" id="save" value="Create">
+          <input type="button" class="btn" id="cancel" value="Cancel">
+        </div>
+      </fieldset>
+    </form>
+  </div>
+</div>

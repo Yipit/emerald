@@ -12,16 +12,25 @@
 
     window.EmeraldModel = Backbone.Model.extend({
         url: function(){
-            return [
-                '/api',
-                this.__name__,
-                this.get('__id__')
-            ].join('/') + '.json';
+            var url = [];
+            var id = this.get('__id__');
+
+            url.push('/api');
+            url.push(this.__name__);
+            if (id) {
+                url.push(id);
+            }
+
+            return url.join('/') + '.json';
         }
     });
 
     window.Build = EmeraldModel.extend({
         __name__: "build"
+    });
+
+    window.Pipeline = EmeraldModel.extend({
+        __name__: 'pipeline'
     });
 
     function validateRepositoryAddress(str) {
@@ -65,4 +74,11 @@
         model: BuildInstruction,
         url: '/api/instructions.json'
     });
+
+
+    window.Pipelines = Backbone.Collection.extend({
+        model: window.Pipeline,
+        url: '/api/pipeline.json'
+    });
+
 })(jQuery);

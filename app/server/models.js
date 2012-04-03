@@ -563,11 +563,42 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
     });
 });
 
+var Pipeline = EmeraldModel.subclass('Pipeline', function (it, kind) {
+    it.has.field("name", kind.string);
+    it.has.field("description", kind.string);
+
+    it.has.method('toBackbone', function () {
+        var data = this.__data__;
+        return data;
+    });
+
+    it.has.class_method('fetch_all', function (callback) {
+        var redis = this._meta.storage.connection;
+
+        async.waterfall([
+            function get_keys(callback) {
+                redis.keys('clay:Pipeline:id:*', callback);
+            },
+
+            function get_items(keys, callback) {
+                async.map(keys, function (key, callback) {
+                    return redis.hgetall(key, callback);
+                }, callback);
+            },
+
+            function return_items(items, callback) {
+                callback(null, items);
+            }
+        ], callback);
+    });
+});
+
 var default_storage = Build._meta.storage;
 
 module.exports = {
     BuildInstruction: BuildInstruction,
     Build: Build,
+    Pipeline: Pipeline,
     connection: default_storage.connection,
     storage: default_storage,
     clear_keys: function(pattern, callback) {

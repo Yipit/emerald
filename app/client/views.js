@@ -40,6 +40,9 @@
         return _.template(raw);
     }
 
+    window.Views = {};
+
+
     window.ConsoleView = Backbone.View.extend({
         /*
           this is the fullscreen terminal that shows live output from
@@ -70,9 +73,11 @@
         /*
           base class for all the views, be careful with this thing
          */
+        form_still_valid: true,
+        fields: [],
         className: 'row',
         initialize: function(){
-            _.bindAll(this, 'render', 'customize');
+            _.bindAll(this, 'render', 'customize', 'get_field_value');
             if (this.model) {
                 this.model.bind('change', this.render);
             }
@@ -101,7 +106,40 @@
         customize: function(){
             /* empty function to be overwritten by the child views in
              * order to take custom actions in the very beginning */
+        },
+
+        get_field_value: function(name, is_required){
+            var $field = this.$el.find("#" + name);
+            var $control_group = $field.closest(".control-group");
+            var value = $field.val();
+            var error_message = is_required;
+            $field.tooltip({
+                trigger: 'manual',
+                placement: 'right',
+                title: error_message
+            });
+
+            if (!is_required) {
+                return value || "";
+            } else {
+                if (/^\s*$/.test(value)) {
+                    if (this.form_still_valid) {
+                        $control_group.addClass("error");
+                        $field.tooltip('show');
+                        setTimeout(function(){
+                            $field.tooltip('hide');
+                        }, 10000);
+                    }
+                    this.form_still_valid = false;
+                    return null;
+                } else {
+                    $field.tooltip('hide');
+                    $control_group.removeClass("error");
+                    return value;
+                }
+            }
         }
+
     });
 
     window.ErrorView = EmeraldView.extend({
@@ -560,7 +598,7 @@
         events: {
             'click #save': 'create_or_edit'
         },
-        form_still_valid: false,
+        form_still_valid: true,
         fields: [
             {key: 'name', required: 'you need to provide a name so that emerald will use it to identify the different instructions'},
             {key: 'description', required: null},
@@ -571,7 +609,7 @@
             {key: 'max_build_time', required: null}
         ],
         customize: function(){
-            _.bindAll(this, 'create_or_edit', 'get_field_value');
+            _.bindAll(this, 'create_or_edit');
         },
         render: function(){
             this.$el.html(this.template({
@@ -581,49 +619,16 @@
 
             return this;
         },
-        get_field_value: function(name, is_required){
-            var $field = this.$el.find("#" + name);
-            var $control_group = $field.closest(".control-group");
-            var value = $field.val();
-            var error_message = is_required;
-            $field.tooltip({
-                trigger: 'manual',
-                placement: 'right',
-                title: error_message
-            });
-
-            if (!is_required) {
-                return value || "";
-            } else {
-                if (/^\s*$/.test(value)) {
-                    if (this.form_still_valid) {
-                        $control_group.addClass("error");
-                        $field.tooltip('show');
-                        setTimeout(function(){
-                            $field.tooltip('hide');
-                        }, 10000);
-                    }
-                    this.form_still_valid = false;
-                    return null;
-                } else {
-                    $field.tooltip('hide');
-                    $control_group.removeClass("error");
-                    return value;
-                }
-            }
-        },
         create_or_edit: function(){
             var self = this;
             var data = {};
-            this.form_still_valid = true;
             this.$el.find("#save").button('validating');
             _.each(this.fields, function(item){
                 data[item.key] = self.get_field_value(item.key, item.required);
             });
-            //this.model.set(data);
 
             if (this.form_still_valid) {
-                if (!this.model.get('__id__') || this.options.duplicate_mode) {
+                if (this.options.duplicate_mode) {
                     this.model.url = '/api/instructions.json';
                 }
                 this.$el.find("#save").button('saving');
@@ -640,7 +645,81 @@
 
             } else {
                 self.$el.find("#save").button('retry');
+                this.form_still_valid = true;
             }
+        }
+    });
+
+    /* -- Pipelines -- */
+
+    window.Views.Pipelines = {};
+
+    window.Views.Pipelines.New = EmeraldView.extend({
+        template_name: 'pipelines-new',
+        events: {
+            'click #save': 'create',
+            'click #cancel': 'cancel'
+        },
+        fields: [
+            { key: 'name',
+              required: 'you need to provide a name' },
+            { key: 'description',
+              required: 'This is why you came to do here, do not leave it blank!'}
+        ],
+        customize: function() {
+            _.bindAll(this, 'create', 'cancel');
+        },
+        create: function() {
+            var data = {};
+            var self = this;
+
+            this.fields.forEach(function(item) {
+                data[item.key] = self.get_field_value(item.key, item.required);
+            });
+
+            if (this.form_still_valid) {
+                this.model.save(data, {
+                    success: function (model, data) {
+                        App.navigate('/pipelines');
+                    },
+                    error: function () {
+                        console.log(arguments);
+                    }
+                });
+            } else {
+                /* Resetting the validation flag */
+                this.form_still_valid = true;
+            }
+        },
+        cancel: function () {
+            App.navigate('/pipelines');
+        }
+    });
+
+    window.Views.Pipelines.Single = EmeraldView.extend({
+        template_name: 'pipelines-single',
+        tagName: 'li',
+        render: function () {
+            this.$el.html(this.template({ model: this.model.toJSON() }));
+            return this;
+        }
+    });
+
+    window.Views.Pipelines.List = EmeraldView.extend({
+        template_name: 'pipelines',
+        render: function() {
+            var collection = this.collection;
+
+            this.$el.html(this.template({}));
+            var $list = this.$("#pipelines ul");
+            collection.each(function(pipeline) {
+                var view = new window.Views.Pipelines.Single({
+                    model: pipeline,
+                    collection: collection
+                });
+                $list.append(view.render().el);
+            });
+            return this;
         }
     });
 
