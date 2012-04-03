@@ -669,7 +669,7 @@
         customize: function() {
             _.bindAll(this, 'create', 'cancel');
         },
-        create: function() {
+        create: function(event) {
             var data = {};
             var self = this;
 
@@ -680,7 +680,8 @@
             if (this.form_still_valid) {
                 this.model.save(data, {
                     success: function (model, data) {
-                        App.navigate('/pipelines');
+                        App.navigate('/pipelines', { trigger: true });
+                        return event.preventDefault();
                     },
                     error: function () {
                         console.log(arguments);
@@ -691,8 +692,9 @@
                 this.form_still_valid = true;
             }
         },
-        cancel: function () {
-            App.navigate('/pipelines');
+        cancel: function (e) {
+            App.navigate('/pipelines', { trigger: true });
+            return e.preventDefault();
         }
     });
 
