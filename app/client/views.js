@@ -596,7 +596,8 @@
     window.InstructionCRUDView = EmeraldView.extend({
         template_name: 'instruction-crud',
         events: {
-            'click #save': 'create_or_edit'
+            'click #save': 'create_or_edit',
+            'click #cancel': 'cancel'
         },
         form_still_valid: true,
         fields: [
@@ -647,6 +648,10 @@
                 self.$el.find("#save").button('retry');
                 this.form_still_valid = true;
             }
+        },
+        cancel: function(e) {
+            App.navigate('/instructions', { trigger: true });
+            return e.preventDefault();
         }
     });
 
