@@ -166,7 +166,9 @@ exports.map = function(app, redis){
     app.post('/api/pipeline.json', function (request, response) {
         var data = request.body;
         entity.Pipeline.create(data, function (err, key, pipeline) {
-            response.json(pipeline.toBackbone(), 201);
+            var data = pipeline.toBackbone();
+            redis.publish('Pipeline created', JSON.stringify(data));
+            response.json(data, 201);
         });
     });
 

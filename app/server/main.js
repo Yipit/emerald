@@ -32,6 +32,7 @@ express = require('express'),
 queueconsumer = require('./actors/queueconsumer'),
 orchestrator = require('./actors/orchestrator'),
 gitpoller = require('./actors/gitpoller'),
+pipelinewatcher = require('./actors/pipelinewatcher'),
 websockets = require('./websockets'),
 controllers = require('./controllers');
 
@@ -100,5 +101,6 @@ exports.run = function(){
         websockets.work_on(redis, io);
         controllers.map(app, redis);
         gitpoller.start();
+        pipelinewatcher.start();
     });
 };

@@ -41,6 +41,10 @@ module.exports.make = function(io) {
     subscribe.subscribe("Build output");
     subscribe.subscribe("Build running");
 
+    subscribe.subscribe("Pipeline created");
+    subscribe.subscribe("Pipeline edited");
+    subscribe.subscribe("Pipeline deleted");
+
     subscribe.subscribe("General error");
 
     io.sockets.on("connection", function(socket) {
