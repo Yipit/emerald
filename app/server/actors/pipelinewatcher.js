@@ -18,6 +18,7 @@
 
 
 var async = require('async');
+var dispatch = require('../command').dispatch;
 var BuildInstruction = require('../models').BuildInstruction;
 var Pipeline = require('../models').Pipeline;
 
@@ -83,6 +84,18 @@ PipelineWatcher.prototype.update_pipelines = function() {
                 }
             });
         });
+    });
+};
+
+
+PipelineWatcher.prototype.build_next = function (message) {
+    var id = this.pipelines[message.build.instruction_id];
+    if (id === undefined || !message.build.succeeded) {
+        return;
+    }
+
+    BuildInstruction.find_by_id(id, function (err, instruction) {
+        instruction.run();
     });
 };
 

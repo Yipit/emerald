@@ -61,6 +61,11 @@ entity.clear_keys(["emerald*","clay*","sess*"], function(err, keys){
             repository_address: "git@github.com:Yipit/yipit.git",
             branch: "master",
             build_script: './run-build-for unit'
+        }),
+
+        new entity.Pipeline({
+            name: "default",
+            description: "This passes | Fails miserably"
         })
     ];
     entity.storage.persist(entities, function(err, items){
