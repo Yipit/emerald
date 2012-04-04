@@ -1,4 +1,24 @@
 <div class="single-pipeline managed-instruction">
+  <div class="btn-group actions">
+    <a class="btn btn-large dropdown-toggle" data-toggle="dropdown" href="#">
+      <span class="icon-list-alt"></span>
+      Actions
+      <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+      <li>
+        <a href="#pipelines/<%= model.__id__ %>/edit">
+          <span class="icon-pencil"></span>
+          Edit
+        </a>
+        <a href="#pipelines/<%= model.__id__ %>/remove">
+          <span class="icon-remove"></span>
+          Delete
+        </a>
+      </li>
+    </ul>
+  </div>
+
   <h2><%= model.name %></h2>
 
   <div class="field">
