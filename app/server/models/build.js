@@ -245,11 +245,15 @@ exports.Build = EmeraldModel.subclass("Build", function(it, kind) {
         data.finished_at = this.finished_at;
         data.is_building = parseInt(this.stage, 10) < STAGES_BY_NAME.ABORTED;
 
+        var convert = function (s) {
+            return moment(new Date(s)).fromNow();
+        };
+
         data.humanized = {
-            "build_started": moment(this.build_started_at).fromNow(),
-            "build_finished": moment(this.build_finished_at).fromNow(),
-            "fetching_started": moment(this.fetching_started_at).fromNow(),
-            "fetching_finished": moment(this.fetching_finished_at).fromNow()
+            "build_started": convert(this.build_started_at),
+            "build_finished": convert(this.build_finished_at),
+            "fetching_started": convert(this.fetching_started_at),
+            "fetching_finished": convert(this.fetching_finished_at)
         };
         if (_.isObject(this.instruction) && _.isFunction(this.instruction.toBackbone)) {
             data.instruction = this.instruction.toBackbone();
