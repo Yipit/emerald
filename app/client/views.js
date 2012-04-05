@@ -334,6 +334,8 @@
         },
         render_builds: function(data) {
             var self = this;
+            var max_builds = 2;
+
             self.refresh_widgets();
 
             var all_builds = _.uniq(this.model.get('all_builds'));
@@ -342,9 +344,11 @@
                 all_builds.unshift(data.build);
             }
 
-            /* Showing only the last two builds, we'll show the rest of
-             * them in the internal build page */
-            all_builds = all_builds.slice(0, 2);
+            var show_build_history_link = all_builds.length > max_builds;
+
+            /* Showing only the last `max_builds' builds, we'll show the
+             * rest of them in the internal build page */
+            all_builds = all_builds.slice(0, max_builds);
 
             self.$buildlog.empty();
             _.each(all_builds, function(raw_build_data) {
@@ -357,6 +361,16 @@
                 var rendered = subview.render().$el;
                 self.$buildlog.append(rendered);
             });
+
+            /* This is not shown until the instruction is built more than
+             * `max_builds' */
+            if (show_build_history_link) {
+                self.$body.find('.history')
+                    .html($('<a>')
+                          .attr({ href: this.model.get('permalink') })
+                          .addClass('text')
+                          .html('build history'));
+            }
         },
         make_abort_button: function(build){
             return this.make_toolbar_button('Abort', 'btn-danger do-abort', 'rel="' + build.__id__ + '"', 'icon-off');
