@@ -1,5 +1,18 @@
 (function($){
-    window.socket = io.connect();
+
+    /* Socket io client is funny. You can't pass options parameter
+     * if you don't inform the uri one. So, it's the code that realizes
+     * from where we are being called */
+    var port = window.location.port;
+    var uri = window.location.protocol + '//' +
+            window.document.domain + (port ? ':' + port : '');
+
+    window.socket = io.connect(uri, {
+        'reconnect': true,
+        'reconnection delay': 500,
+        'max reconnection attempts': 10
+    });
+
     window.socket.on('BuildInstruction created', function(data){
         $.gritter.add({
             title: 'A new build instruction was added to emerald',

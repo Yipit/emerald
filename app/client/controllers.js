@@ -124,18 +124,13 @@
             });
         },
         connection_lost: function() {
-            var view = new ConnectionLostView();
-            this.render(view);
-
-            setTimeout(function() {
+            window.setTimeout(function() {
+                /* After 5 seconds, socket.io was not able to reconnect us, it's
+                 * time to force a reload */
                 if (!window.socket.socket.connected) {
-                    $('#connection-lost-dialog').dialog({
-                        resizable: false,
-                        modal: true,
-                        width: 500
-                    });
+                    window.location.reload();
                 }
-            }, 1000);
+            }, 5000);
         },
 
         /* -- pipeline routes -- */
