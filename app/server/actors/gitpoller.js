@@ -19,6 +19,7 @@
 var _ = require('underscore')._;
 var colors = require('colors');
 var spawn = require('child_process').spawn;
+var exec = require('child_process').exec;
 var async = require('async');
 var path = require('path');
 var common = require('./common');
@@ -93,15 +94,27 @@ GitPoller.prototype.register_instruction = function (instruction) {
  */
 GitPoller.prototype.single_update = function (instruction) {
     var self = this;
-
-    if (instruction.is_building) {
-        logger.info('skipping the git pull on "' + instruction.name +
-                    '", that is being currently built');
-    } else {
-        logger.info('preparing to pull the repo from "' + instruction.name + '"');
-    }
+    var last_hash = null;
 
     async.waterfall([
+        function start_getting_last_builds(callback) {
+            BuildInstruction.with_builds_from_data(instruction, callback);
+        },
+        function get_last_commit(result, callback) {
+            var last_build = result.last_build;
+            last_hash = last_build ? last_build.__data__.commit : null;
+
+            if (instruction.is_building == 1) {
+                logger.info('skipping the git pull on "' + instruction.name +
+                            '", that is being currently built');
+                return;
+            } else {
+                logger.info('preparing to pull the repo from "' + instruction.name + '"');
+            }
+
+            logger.info("last commit built: " + last_hash);
+            callback(null);
+        },
         function git_spawn(callback) {
             var branch = instruction.branch || "master";
             var opts = { cwd: common.repo_path(instruction) };
@@ -130,6 +143,22 @@ GitPoller.prototype.single_update = function (instruction) {
                     at: new Date(),
                     instruction: instruction
                 }));
+
+                var opts = { cwd: common.repo_path(instruction) };
+                exec('git log HEAD^..HEAD | grep commit', opts, function (err, stdout, stderr) {
+                    if (err) {
+                        callback(err);
+                        return;
+                    }
+
+                    /* Let's see if we should build this instruction after the git pull */
+                    var new_hash = stdout.split(' ')[1].trim();
+                    if (new_hash != last_hash) {
+                        BuildInstruction.find_by_id(instruction.id, function (err, instance) {
+                            instance.run();
+                        });
+                    }
+                });
             });
             callback(null);
         }

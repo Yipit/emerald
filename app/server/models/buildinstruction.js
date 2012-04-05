@@ -37,6 +37,7 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
     it.has.field("build_script", kind.string);
     it.has.field("poll_interval", kind.numeric);
     it.has.field("max_build_time", kind.numeric);
+    it.has.field("is_building", kind.numeric);
 
     it.has.index("slug");
 
@@ -84,7 +85,7 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
         });
 
         data.permalink = settings.EMERALD_DOMAIN + "#instruction/" + data.__id__;
-        data.is_building = self.is_building || false;
+        data.is_building = self.is_building || 0;
         data.current_build = self.current_build || null;
         data.github_hook_url = [settings.EMERALD_DOMAIN, 'hooks/github', this.__id__].join('/');
         Object.defineProperty(data, "last_build", {
@@ -211,11 +212,11 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
                      * we must be sure that we'll not fail if no current build
                      * exists. */
                     if (current_build && parseInt(current_build.instruction_id, 10) === self.__id__) {
-                        self.is_building = true;
+                        self.is_building = 1;
                         self.current_build = current_build;
                     } else {
                         self.current_build = null;
-                        self.is_building = false;
+                        self.is_building = 0;
                     }
                     return callback(null, all_builds, succeeded_builds, failed_builds);
                 });
@@ -233,6 +234,12 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
         var redis = self._meta.storage.connection;
 
         async.waterfall([
+            function change_building_status(callback) {
+                self.is_building = 1;
+                self.save(function (err) {
+                    callback(err);
+                });
+            },
             function get_next_build_index(callback) {
                 redis.zcard(self.keys.all_builds, callback);
             },
@@ -276,6 +283,7 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
                     } else if (parseInt(code, 10) !== 0) {
                         build.stage = STAGES_BY_NAME.FAILED;
                     }
+
                     build.save(function(err, key, build){
                         Build.fetch_by_id(build.__id__, function(err, build){
                             redis.publish('Build aborted', JSON.stringify({
@@ -285,6 +293,11 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
                             }));
                         });
                     });
+
+                    /* Just setting the instruction build status again to
+                     * false. */
+                    self.is_building = 0;
+                    self.save(function (err) {});
                 });
             });
         });
