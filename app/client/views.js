@@ -410,10 +410,8 @@
         avatar_loading: function (data) {
             /* add a loading as placeholder for gravatar */
             this.refresh_widgets();
-            this.$avatar.addClass('picture');
-            if (this.$img.attr("src") !== this.avatar_loading_gif) {
-                this.$img.attr('src', this.avatar_loading_gif);
-            }
+            this.$avatar.removeClass('picture');
+            this.$img.attr('src', this.avatar_loading_gif);
         },
         expand_box: function(data){
             var self = this;
@@ -423,6 +421,9 @@
             self.refresh_widgets();
             /* make the widget look busy */
             self.$widget.addClass('ui-state-default');
+
+            self.avatar_loading();
+            self.update_toolbar(data);
 
             /* only animate when the build stage is either BEGINNING or FETCHING */
             if (_.include([0, 1], build.stage)) {
@@ -439,7 +440,6 @@
 
                     /* refresh the toolbar */
                     self.update_toolbar(data);
-
                     self.render_builds(data);
                 });
             }
