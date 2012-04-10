@@ -23,10 +23,6 @@ exports.Pipeline = EmeraldModel.subclass('Pipeline', function (it, kind) {
     it.has.field("name", kind.string);
     it.has.field("description", kind.string);
 
-    it.has.method('toBackbone', function () {
-        return this.__data__;
-    });
-
     it.has.class_method('fetch_all', function (callback) {
         var redis = this._meta.storage.connection;
 
