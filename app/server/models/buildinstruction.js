@@ -53,6 +53,14 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
         return this.failed_builds.length > 0 ? this.failed_builds[0] : null;
     });
 
+    /* Just setting a shortcut for the redis client, that I'm using all the
+     * time */
+    it.has.method('initialize', function () {
+        this.redis = this._meta.storage.connection;
+    });
+
+    /* Helper to get the key names of the "relations" between this build
+     * instruction and its builds  */
     it.has.getter('keys', function() {
         var prefix = 'emerald-m2i:Instruction:' + this.__id__ + ':';
         return {
@@ -65,10 +73,22 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
         };
     });
 
-    it.has.method('toString', function() {
-        return this.toBackbone();
+    /* Methods that lists all related Builds of this instruction */
+
+    it.has.method('get_all_builds', function (callback) {
+        this.redis.zrevrange(this.keys.all_builds, 0, -1, callback);
     });
 
+    it.has.method('get_succeeded_builds', function (callback) {
+        this.redis.zrevrange(this.keys.succeeded_builds, 0, -1, callback);
+    });
+
+    it.has.method('get_failed_builds', function (callback) {
+        this.redis.zrevrange(this.keys.failed_builds, 0, -1, callback);
+    });
+
+    /* Representation of the build instruction that will be used by the
+     * frontend build with backbone.js */
     it.has.method('toBackbone', function() {
         var self = this;
         var data = this.__data__;
@@ -111,6 +131,9 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
         return data;
     });
 
+    it.has.method('toString', function() {
+        return this.toBackbone();
+    });
 
     /* This method does more than a simple fetch_by_id(). It fills the
      * build list of the found instance, by calling the method
