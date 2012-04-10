@@ -46,58 +46,26 @@ exports.Build = EmeraldModel.subclass("Build", function(it, kind) {
     it.has.field("fetching_finished_at", kind.string);
     it.has.field("instruction_id", kind.numeric);
 
-    it.has.method('set', function(name, value, callback){
-        var self = this;
-
-        var key = "clay:Build:id:" + self.__id__;
-        var redis = self._meta.storage.connection;
-        redis.hset(key, name, value, function(err){
-            logger.debug(['assigning the value', value, 'to Build #'+self.__id__+"'s", name, "field"]);
-            self[name] = value;
-            callback(err, name, value, self);
-        });
-    });
-
-    it.has.method('increment_field', function(name, value, callback){
-        var self = this;
-
-        var key = "clay:Build:id:" + self.__id__;
-        var redis = self._meta.storage.connection;
-
-        async.waterfall([
-            function fetch(callback) {
-                redis.hget(key, name, callback);
-            },
-            function update(current, callback) {
-                var full = current + value + '\n';
-                self.set(name, full, function(err) {
-                    logger.debug(['updating build #'+self.__id__+"'s", name, "with: ", value, "its old value was just: ", current]);
-
-                    callback(err, full, current, value);
-                });
-            }
-        ], callback);
-    });
-
     it.has.method('increment_stdout', function(value, callback){
         var self = this;
         async.waterfall([
             function(callback){
-                self.increment_field("stdout", value, callback);
+                self.concat("stdout", value, callback);
             },
             function(full, current, wrong_value, callback){
-                self.increment_field("output", value, callback);
+                self.concat("output", value, callback);
             }
         ], callback);
     });
+
     it.has.method('increment_stderr', function(value, callback){
         var self = this;
         async.waterfall([
             function(callback){
-                self.increment_field("stderr", value, callback);
+                self.concat("stderr", value, callback);
             },
             function(full, current, wrong_value, callback){
-                self.increment_field("output", value, callback);
+                self.concat("output", value, callback);
             }
         ], callback);
     });
@@ -107,9 +75,11 @@ exports.Build = EmeraldModel.subclass("Build", function(it, kind) {
         hash.update(this.author_email || '');
         return 'http://www.gravatar.com/avatar/' + hash.digest('hex') + '?s=' + size;
     });
+
     it.has.getter('succeeded', function() {
         return ((parseInt(this.status || 0, 10) === 0) && this.signal === 'null');
     });
+
     it.has.getter('stage_name', function() {
         return (STAGES_BY_INDEX[this.stage]).toLowerCase();
     });
@@ -126,6 +96,7 @@ exports.Build = EmeraldModel.subclass("Build", function(it, kind) {
     it.has.getter('finished_at', function() {
         return this.build_finished_at || this.fetching_finished_at;
     });
+
     it.has.method('abort', function() {
         var self = this;
         var signal = 'SIGKILL';
@@ -150,6 +121,7 @@ exports.Build = EmeraldModel.subclass("Build", function(it, kind) {
             logger.success([logging_prefix, 'DONE!']);
         });
     });
+
     it.has.class_method('get_current', function(callback) {
         var self = this;
         async.waterfall([
@@ -166,6 +138,7 @@ exports.Build = EmeraldModel.subclass("Build", function(it, kind) {
             }
         ], callback);
     });
+
     it.has.class_method('fetch_by_id', function(id, callback) {
         return this.find_by_id(id, function(err, build){
             if (err) {

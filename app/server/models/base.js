@@ -19,8 +19,16 @@
 
 /* -- Imports -- */
 
+// Tests were failing because of the lack of these two modules. We don't
+// need to reference them, just load.
+require('colors');
+require('../../terminal/main');
+
+// Imports for the application code below
 var clay = require('clay');
+var async = require('async');
 var LoggerClass = require('../logger').Logger;
+
 
 /* -- Public stuff -- */
 
@@ -57,8 +65,12 @@ exports.default_storage = function () {
 
 
 exports.EmeraldModel = clay.declare("EmeraldModel", function(it, kind) {
+    it.has.method('data', function () {
+        return this.__data__;
+    });
+
     it.has.method('toString', function() {
-        return this.toBackbone();
+        return JSON.stringify(this.data());
     });
 
     it.has.class_method('get_by_id_or_404', function(id, callback) {
@@ -76,5 +88,36 @@ exports.EmeraldModel = clay.declare("EmeraldModel", function(it, kind) {
             }
             return callback(instance, headers, status);
         });
+    });
+
+
+    it.has.method('set', function(name, value, callback) {
+        var key = "clay:" + this.__name__ + ":id:" + this.__id__;
+        var redis = this._meta.storage.connection;
+        var self = this;
+
+        redis.hset(key, name, value, function(err) {
+            self[name] = value;
+            callback(err, name, value, self);
+        });
+    });
+
+
+    it.has.method('concat', function (field, content, callback) {
+        var key = "clay:" + this.__name__ + ":id:" + this.__id__;
+        var redis = this._meta.storage.connection;
+        var self = this;
+
+        async.waterfall([
+            function fetch(callback) {
+                redis.hget(key, field, callback);
+            },
+            function update(current, callback) {
+                var full = (current ? current : '') + content;
+                self.set(field, full, function(err) {
+                    callback(err, full, current, content);
+                });
+            }
+        ], callback);
     });
 });
