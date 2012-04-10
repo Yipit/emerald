@@ -175,6 +175,10 @@ exports.Build = EmeraldModel.subclass("Build", function(it, kind) {
         });
     });
 
+    it.has.method('toString', function() {
+        return this.toBackbone();
+    });
+
     it.has.method('toBackbone', function() {
         var data = this.__data__;
         data.id = data.__id__;

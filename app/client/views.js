@@ -534,7 +534,7 @@
 
             // Just avoiding to type it twice :)
             var clean = function (x) {
-                return ansiColors.ansi2html(x.replace('\n', '<br />'));
+                return ansiColors.ansi2html((x || '').replace('\n', '<br />'));
             };
 
             data.stdout = clean(data.stdout);

@@ -65,6 +65,10 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
         };
     });
 
+    it.has.method('toString', function() {
+        return this.toBackbone();
+    });
+
     it.has.method('toBackbone', function() {
         var self = this;
         var data = this.__data__;
