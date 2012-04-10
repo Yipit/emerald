@@ -18,10 +18,10 @@
  */
 
 var _ = require('underscore')._;
-var crypto = require('crypto');
 var moment = require('moment');
 var async = require('async');
 var logger = require('./base').logger;
+var utils  = require('../utils');
 var EmeraldModel = require('./base').EmeraldModel;
 var STAGES_BY_NAME = require('./base').STAGES_BY_NAME;
 var STAGES_BY_INDEX = require('./base').STAGES_BY_INDEX;
@@ -68,12 +68,6 @@ exports.Build = EmeraldModel.subclass("Build", function(it, kind) {
                 self.concat("output", value, callback);
             }
         ], callback);
-    });
-
-    it.has.method('gravatar_of_size', function(size){
-        var hash = crypto.createHash('md5');
-        hash.update(this.author_email || '');
-        return 'http://www.gravatar.com/avatar/' + hash.digest('hex') + '?s=' + size;
     });
 
     it.has.getter('succeeded', function() {
@@ -186,12 +180,12 @@ exports.Build = EmeraldModel.subclass("Build", function(it, kind) {
         data.id = data.__id__;
 
         data.gravatars = {
-            "50": this.gravatar_of_size(50),
-            "75": this.gravatar_of_size(75),
-            "100": this.gravatar_of_size(100),
-            "125": this.gravatar_of_size(125),
-            "150": this.gravatar_of_size(150),
-            "300": this.gravatar_of_size(300)
+            "50": utils.gravatar_by_size(this.author_email, 50),
+            "75": utils.gravatar_by_size(this.author_email, 75),
+            "100": utils.gravatar_by_size(this.author_email, 100),
+            "125": utils.gravatar_by_size(this.author_email, 125),
+            "150": utils.gravatar_by_size(this.author_email, 150),
+            "300": utils.gravatar_by_size(this.author_email, 300)
         };
 
         data.style_name = this.stage_name.toLowerCase();
