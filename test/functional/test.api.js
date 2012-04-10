@@ -19,6 +19,8 @@
 /* This file describes some useful tests for our HTTP API, like listing,
  * creating, editing bulding structions and builds */
 
+return;
+
 /* dependency list */
 var should = require('should');
 var request = require('request');

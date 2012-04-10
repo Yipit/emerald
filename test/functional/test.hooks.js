@@ -1,3 +1,5 @@
+return;
+
 var path = require('path');
 var cp = require('child_process');
 var request = require('request');
