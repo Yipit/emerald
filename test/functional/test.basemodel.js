@@ -72,10 +72,10 @@ describe('EmeraldModel', function () {
             function (callback) {
                 lincoln.concat('name', ' de', callback);
             },
-            function (callback) {
+            function (full, current, piece, callback) {
                 lincoln.concat('name', ' Sousa', callback);
             }
-        ], function (err, callback) {
+        ], function (err, current, full, callback) {
             lincoln.name.should.equal('Lincoln de Sousa');
             done();
         });
