@@ -18,12 +18,15 @@
 
 var should = require('should');
 var async = require('async');
+var utils = require('./utils');
 
 var clay = require('clay');
 
 var EmeraldModel = require('../../app/server/models/base').EmeraldModel;
 
 describe('EmeraldModel', function () {
+    beforeEach(utils.clear_redis);
+
     var Person = EmeraldModel.subclass('Person', function (it, kind) {
         it.has.field("name", kind.string);
         it.has.field("age", kind.numeric);
