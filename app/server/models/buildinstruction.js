@@ -257,18 +257,14 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
     });
     it.has.method('run', function() {
         var self = this;
-
-        var redis = self._meta.storage.connection;
-
         async.waterfall([
             function change_building_status(callback) {
-                self.is_building = 1;
-                self.save(function (err) {
-                    callback(err);
+                self.set('is_building', 1, function () {
+                    callback(null);
                 });
             },
             function get_next_build_index(callback) {
-                redis.zcard(self.keys.all_builds, callback);
+                self.redis.zcard(self.keys.all_builds, callback);
             },
             function increment_index(total, callback){
                 var index = parseInt(total, 10) + 1;
@@ -297,7 +293,7 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
             dispatch('build', [build.__id__], function (child) {
                 build.pid = child.pid;
                 build.save(function(err, key, build) {
-                    redis.publish('Build running', JSON.stringify({
+                    self.redis.publish('Build running', JSON.stringify({
                         build: build.toBackbone(),
                         instruction: self.toBackbone()
                     }));
@@ -313,7 +309,7 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
 
                     build.save(function(err, key, build){
                         Build.fetch_by_id(build.__id__, function(err, build){
-                            redis.publish('Build aborted', JSON.stringify({
+                            self.redis.publish('Build aborted', JSON.stringify({
                                 build: build.toBackbone(),
                                 instruction: build.instruction.toBackbone(),
                                 error: err
@@ -323,8 +319,7 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
 
                     /* Just setting the instruction build status again to
                      * false. */
-                    self.is_building = 0;
-                    self.save(function (err) {});
+                    self.set('is_building', 0, function (err) {});
                 });
             });
         });
