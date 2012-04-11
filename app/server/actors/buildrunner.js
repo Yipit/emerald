@@ -53,16 +53,13 @@ try {
 }
 
 
-function filter_output (text) {
-    return text.replace(/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/g, '');
-}
-
 function BuildRunner (current_build){
     this.current_build = current_build;
     this.instruction = current_build.instruction;
     this.redis = current_build._meta.storage.connection;
     this.lock = new Lock(settings.REDIS_KEYS.current_build, this.redis);
 }
+
 
 BuildRunner.prototype.generate_script_name = function(){
     var hash = crypto.createHash('md5');
@@ -76,13 +73,15 @@ BuildRunner.prototype.generate_script_name = function(){
     return (hash.digest('hex') + '.sh');
 };
 
+
 BuildRunner.prototype.get_script_contents = function(){
     var parts = ["#!/bin/bash"];
     this.instruction.build_script.split(/[\n\r\t\s]*$/gm).forEach(function(line){
         parts.push(line.trim() + ' || exit $? || printf "\\n\\n\\n";');
     });
-    return parts.join("\n\n###############################################################################\n\n");
+    return parts.join("\n\n###################################################\n\n");
 };
+
 
 BuildRunner.prototype.start = function(){
     var self = this;
@@ -103,8 +102,8 @@ BuildRunner.prototype.start = function(){
 
     var script_name = self.generate_script_name();
     var script_path = path.join(repository_full_path, script_name);
-
     var branch_to_build = instruction.branch || "master";
+
     redis.publish("Build started", JSON.stringify({
         build: current_build.toBackbone(),
         instruction: instruction.toBackbone()
@@ -112,8 +111,16 @@ BuildRunner.prototype.start = function(){
 
     async.waterfall([
         function decide_whether_pull_or_clone (callback){
-            logger.info('preparing to fetch data from "'+instruction.name+'" through "'+instruction.repository_address+'@'+branch_to_build+'" at ' + repository_full_path);
-            path.exists(repository_bare_path, function(exists){callback(null, instruction, exists);});
+            var ctx = _.extend(instruction, {
+                branch_to_build: branch_to_build,
+                repository_full_path: repository_full_path
+            });
+            logger.info(('preparing to fetch data from {name} through ' +
+                         '"{repository_address}@{branch_to_build}" at ' +
+                         '{repository_full_path}').render(ctx));
+            path.exists(repository_bare_path, function(exists){
+                callback(null, instruction, exists);
+            });
         },
         function assemble_the_command_line (instruction, exists, callback) {
             var args, options = {};
