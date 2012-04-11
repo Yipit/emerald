@@ -95,6 +95,15 @@ exports.map = function(app, redis){
     });
 
 
+    /* -- Our static (and very simple) ui for the dashboard -- */
+
+    app.get('/static', function (request, response) {
+        entity.BuildInstruction.get_latest_with_builds(function(err, instructions){
+            return response.render('static', instructions);
+        });
+    });
+
+
     /* -- Our quasi-REST API to manage Builds and BuildInstructions --*/
 
 

@@ -17,6 +17,10 @@
  */
 
 var _ = require('underscore')._;
+var child_process = require('child_process');
+var posix = require('posix');
+var events = require('events');
+var util = require('util');
 
 /* Class responsible for interacting with the git clone command
  *
@@ -42,10 +46,21 @@ var _ = require('underscore')._;
  *
  *   How many time (in seconds) this clone should take to run. If
  *   this value is not informed, no timeout will be added.
+ *
+ * `killfunc`
+ *
+ *   It's the function that kills the git process if the timeout is
+ *   reached. This parameter is most useful when writing tests.
+ *
  */
 function Clone(opts) {
+    events.EventEmitter.call(this);
     this.opts = opts;
+    this.child = null;
+    this.timeout_handler = null;
 }
+
+util.inherits(Clone, events.EventEmitter);
 
 
 Clone.prototype.__defineGetter__('args', function() {
@@ -64,7 +79,34 @@ Clone.prototype.__defineGetter__('cmd', function() {
 
 
 Clone.prototype.start = function() {
-    
+    var self = this;
+    this.opts.spawnargs = { cwd: this.opts.path };
+    this.child = child_process.spawn('git', this.args, this.opts.spawnargs);
+
+    /* Registering a timeout handler if it delays too much to finish */
+    if (this.opts.timeout) {
+        this.timeout_handler = setTimeout(function() {
+            console.log(this.opts.timeout);
+            if (self.timeout_handler) {
+                var killfunc = self.opts.killfunc || process.kill;
+                killfunc(-posix.getpgid(self.child.pid), 'SIGKILL');
+                return;
+            }
+        }, this.opts.timeout * 1000);
+    }
+
+    /* Forwarding the exit signal after interrupting the timeout handler */
+    this.child.on('exit', function (code, signal) {
+        clearTimeout(self.timeout_handler);
+        self.timeout_handler = null;
+        self.emit('exit', code, signal);
+    });
+
+    /* Watching the stderr to find the progress string */
+    this.child.stderr.on('data', function (data) {
+        var pattern = /Receiving objects: (\d+)%/;
+        console.log(data.toString());
+    });
 };
 
 
