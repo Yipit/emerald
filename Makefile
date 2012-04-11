@@ -9,7 +9,7 @@ deps:
 
 unit:
 	@echo "Running unit tests ..."
-	@echo "I'm pretending it has passed :P"
+	@`(echo $$MOCHA_CMD | sed "s,kind,unit,g")`
 
 functional:
 	@echo "Running functional tests ..."

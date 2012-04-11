@@ -16,20 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* This module aggregates useful functions for more than one actor */
+var should = require('should');
 
-var path = require('path');
+var git = require('../../app/server/actors/common').git;
 
-
-exports.repo_name = function (instruction) {
-    return [instruction.repository_address, instruction.name]
-        .join('-')
-        .replace(/\W+/g, '-')
-        .toLowerCase()
-        .replace(/[\-]?\bgit\b[\-]?/g, '');
-};
-
-
-exports.repo_path = function (instruction) {
-    return path.join(settings.SANDBOX_PATH, exports.repo_name(instruction));
-};
+describe('Git interaction', function () {
+    describe('#Clone', function () {
+        it('should create valid clone command lines', function () {
+            var clone = new git.Clone({
+                uri: 'git@github.com/Yipit/emerald.git',
+                path: '/tmp'
+            });
+            clone.cmd.should.equal(
+                'git clone --progress --branch master ' +
+                'git@github.com/Yipit/emerald.git /tmp');
+        });
+    });
+});
