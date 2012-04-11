@@ -30,6 +30,22 @@ describe('Git interaction', function () {
             clone.cmd.should.equal(
                 'git clone --progress --branch master ' +
                 'git@github.com/Yipit/emerald.git /tmp');
+            should.deepEqual(clone.args, [
+                'git', 'clone', '--progress', '--branch', 'master',
+                'git@github.com/Yipit/emerald.git', '/tmp'
+            ]);
+        });
+
+        it('also should be valid to inform a branch in the command line', function () {
+            var clone = new git.Clone({
+                uri: 'git@github.com/Yipit/emerald.git',
+                path: '/tmp',
+                branch: 'dev'
+            });
+            should.deepEqual(clone.args, [
+                'git', 'clone', '--progress', '--branch', 'dev',
+                'git@github.com/Yipit/emerald.git', '/tmp'
+            ]);
         });
     });
 });

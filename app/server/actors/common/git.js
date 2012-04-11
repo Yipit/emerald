@@ -47,17 +47,25 @@ function Clone(opts) {
     this.opts = opts;
 }
 
-Clone.prototype.__defineGetter__('cmd', function() {
+
+Clone.prototype.__defineGetter__('args', function() {
     return [
         'git', 'clone', '--progress', '--branch',
         this.opts.branch || 'master',
         this.opts.uri,
         this.opts.path
-    ].join(' ');
+    ];
 });
+
+
+Clone.prototype.__defineGetter__('cmd', function() {
+    return this.args.join(' ');
+});
+
 
 Clone.prototype.start = function() {
     
 };
+
 
 exports.Clone = Clone;
