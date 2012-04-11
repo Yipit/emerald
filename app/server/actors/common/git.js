@@ -50,7 +50,7 @@ function Clone(opts) {
 
 Clone.prototype.__defineGetter__('args', function() {
     return [
-        'git', 'clone', '--progress', '--branch',
+        'clone', '--progress', '--branch',
         this.opts.branch || 'master',
         this.opts.uri,
         this.opts.path
@@ -59,7 +59,7 @@ Clone.prototype.__defineGetter__('args', function() {
 
 
 Clone.prototype.__defineGetter__('cmd', function() {
-    return this.args.join(' ');
+    return _.union(['git'], this.args).join(' ');
 });
 
 

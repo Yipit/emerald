@@ -31,7 +31,7 @@ describe('Git interaction', function () {
                 'git clone --progress --branch master ' +
                 'git@github.com/Yipit/emerald.git /tmp');
             should.deepEqual(clone.args, [
-                'git', 'clone', '--progress', '--branch', 'master',
+                'clone', '--progress', '--branch', 'master',
                 'git@github.com/Yipit/emerald.git', '/tmp'
             ]);
         });
@@ -43,7 +43,7 @@ describe('Git interaction', function () {
                 branch: 'dev'
             });
             should.deepEqual(clone.args, [
-                'git', 'clone', '--progress', '--branch', 'dev',
+                'clone', '--progress', '--branch', 'dev',
                 'git@github.com/Yipit/emerald.git', '/tmp'
             ]);
         });
