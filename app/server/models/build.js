@@ -179,11 +179,8 @@ exports.Build = EmeraldModel.subclass("Build", function(it, kind) {
         return this.toBackbone();
     });
 
-    it.has.method('toBackbone', function() {
-        var data = this.__data__;
-        data.id = data.__id__;
-
-        data.gravatars = {
+    it.has.getter('gravatars', function() {
+        return {
             "50": utils.gravatar_by_size(this.author_email, 50),
             "75": utils.gravatar_by_size(this.author_email, 75),
             "100": utils.gravatar_by_size(this.author_email, 100),
@@ -191,7 +188,13 @@ exports.Build = EmeraldModel.subclass("Build", function(it, kind) {
             "150": utils.gravatar_by_size(this.author_email, 150),
             "300": utils.gravatar_by_size(this.author_email, 300)
         };
+    });
 
+    it.has.method('toBackbone', function() {
+        var data = this.__data__;
+        data.id = data.__id__;
+
+        data.gravatars = this.gravatars;
         data.style_name = this.stage_name.toLowerCase();
 
         switch (STAGES_BY_INDEX[this.stage]) {
