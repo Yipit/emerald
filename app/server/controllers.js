@@ -94,9 +94,71 @@ exports.map = function(app, redis){
         });
     });
 
+    /* -- A very basic view of emerald dashboard -- */
+
+    app.get('/static', function (request, response) {
+        entity.BuildInstruction.get_latest_with_builds(function(err, instructions){
+            var states =  {
+                0: 'ui-state-default',
+                1: 'ui-state-default',
+                2: 'ui-state-highlight',
+                3: 'ui-state-highlight',
+                4: 'ui-state-error',
+                5: 'ui-state-error',
+                6: 'ui-state-success'
+            };
+
+            var get_ui_state = function(instruction) {
+                if (instruction.last_build) {
+                    return states[instruction.last_build.stage];
+                } else {
+                    return 'ui-state-default';
+                }
+            };
+
+            var get_avatar = function(instruction) {
+                if (instruction.is_building) {
+                    return '/images/loading-avatar.gif';
+                }
+                if (instruction.last_build) {
+                    return instruction.last_build.gravatars['75'];
+                } else {
+                    return '/images/blank_avatar.jpg';
+                }
+            };
+
+            var truncate = function (string, amount){
+                amount = amount || 45;
+                try {
+                    if (string.length > amount) {
+                        return string.substr(0, amount) + ' ...';
+                    } else {
+                        return string;
+                    }
+                } catch (e) {
+                    return string;
+                }
+            };
+
+            return response.render('static', {
+                instructions: instructions,
+                get_ui_state: get_ui_state,
+                get_avatar: get_avatar,
+                truncate: truncate
+            });
+        });
+    });
+
+    app.get('/static/run/:id', function (request, response) {
+        var now = new Date();
+        var id = request.param('id');
+        entity.BuildInstruction.find_by_id(id, function (err, instruction) {
+            instruction.run();
+            response.redirect('/static');
+        });
+    });
 
     /* -- Our quasi-REST API to manage Builds and BuildInstructions --*/
-
 
     _.each({
         'build': entity.Build,

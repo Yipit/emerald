@@ -1,6 +1,7 @@
 .monitor
 node_modules/
 public/stylesheets/style.css
+public/stylesheets/static.css
 test.sh
 .sandbox
 .DS_Store
