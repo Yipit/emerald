@@ -108,8 +108,8 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
             }
         });
 
+        data.is_building = self.is_building;
         data.permalink = settings.EMERALD_DOMAIN + "#instruction/" + data.__id__;
-        data.is_building = self.is_building || 0;
         data.current_build = self.current_build || null;
         data.github_hook_url = [settings.EMERALD_DOMAIN, 'hooks/github', this.__id__].join('/');
         Object.defineProperty(data, "last_build", {
@@ -239,11 +239,9 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
                      * we must be sure that we'll not fail if no current build
                      * exists. */
                     if (current_build && parseInt(current_build.instruction_id, 10) === self.__id__) {
-                        self.is_building = 1;
                         self.current_build = current_build;
                     } else {
                         self.current_build = null;
-                        self.is_building = 0;
                     }
                     return callback(null, all_builds, succeeded_builds, failed_builds);
                 });
@@ -287,6 +285,7 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
             if (err) {
                 logger.fail('an error happened while creating a build for the instruction "'+self.name+'"');
                 logger.handleException(err);
+                self.set('is_building', 0, function (err) {});
                 return;
             }
 
@@ -300,6 +299,11 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
                 });
 
                 child.on('exit', function(code, signal) {
+                    if (code === 0) {
+                        self.set('is_building', 0, function (err) {});
+                        return;
+                    }
+
                     if ((code !== 0) && signal) {
                         build.stage = STAGES_BY_NAME.ABORTED;
                         build.signal = signal;
@@ -309,6 +313,7 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
 
                     build.save(function(err, key, build){
                         Build.fetch_by_id(build.__id__, function(err, build){
+                            self.set('is_building', 0, function (err) {});
                             self.redis.publish('Build aborted', JSON.stringify({
                                 build: build.toBackbone(),
                                 instruction: build.instruction.toBackbone(),
@@ -316,10 +321,6 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
                             }));
                         });
                     });
-
-                    /* Just setting the instruction build status again to
-                     * false. */
-                    self.set('is_building', 0, function (err) {});
                 });
             });
         });

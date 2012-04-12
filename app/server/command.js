@@ -41,4 +41,6 @@ module.exports.dispatch = function (command, args, callback) {
     child.stderr.on('data', function(data) {
         process.stdout.write(data);
     });
+
+    callback(child);
 };
