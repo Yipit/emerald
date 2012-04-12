@@ -111,10 +111,12 @@ BuildRunner.prototype.start = function(){
 
     async.waterfall([
         function decide_whether_pull_or_clone (callback){
-            var ctx = _.extend(instruction, {
+            var ctx = {
+                name: instruction.name,
+                repository_address: instruction.repository_address,
                 branch_to_build: branch_to_build,
                 repository_full_path: repository_full_path
-            });
+            };
             logger.info(('preparing to fetch data from {name} through ' +
                          '"{repository_address}@{branch_to_build}" at ' +
                          '{repository_full_path}').render(ctx));
