@@ -108,6 +108,7 @@ var BuildInstruction = EmeraldModel.subclass("BuildInstruction", function(it, ki
             }
         });
 
+        data.builds_to_show = data.all_builds.slice(0, 2);
         data.is_building = self.is_building;
         data.permalink = settings.EMERALD_DOMAIN + "#instruction/" + data.__id__;
         data.current_build = self.current_build || null;
