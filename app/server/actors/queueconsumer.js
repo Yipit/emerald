@@ -57,7 +57,7 @@ QueueConsumer.prototype.start = function(){
             function consume_build_queue(handle, callback){
                 self.redis.zrange(self.key_for_build_queue, 0, 1, function(err, items) {
                     if (!err && items.length < 1) {
-                        logger.info("the build queue is empty");
+                        logger.debug("the build queue is empty");
                     } else {
                         logger.info("consuming the build queue: found an item to build");
                     }
