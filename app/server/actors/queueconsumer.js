@@ -80,7 +80,7 @@ QueueConsumer.prototype.start = function(){
                 var build_not_found = new RegExp('.*BuildInstruction.*id undefined');
 
                 if (build_not_found.test(err.message)) {
-                    return; /* ignore errors for instruction not found*/
+                    return null; /* ignore errors for instruction not found */
                 }
 
                 logger.handleException(err, "queue consumer loop");
@@ -98,6 +98,7 @@ QueueConsumer.prototype.start = function(){
                 logger.info("asking redis to dump its in-memory data to the disk");
                 instruction.run(handle);
             });
+            return null;
         });
     }, self.interval);
 };
