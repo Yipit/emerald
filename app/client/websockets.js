@@ -9,8 +9,8 @@
 
     window.socket = io.connect(uri, {
         'reconnect': true,
-        'reconnection delay': 500,
-        'max reconnection attempts': 10
+        'reconnection delay': 1000,
+        'max reconnection attempts': 5
     });
 
     window.socket.on('BuildInstruction created', function(data){
