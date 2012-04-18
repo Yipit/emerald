@@ -78,6 +78,8 @@ exports.map = function(app, redis){
     }));
 
     app.post('/hooks/github/:project_slug', function(request, response){
+        if (true) { return null; }
+
         var headers = {
             'Content-Type': 'application/json'
         };
@@ -117,7 +119,7 @@ exports.map = function(app, redis){
             };
 
             var get_avatar = function(instruction) {
-                if (instruction.is_building) {
+                if (instruction.is_building === 1) {
                     return '/images/loading-avatar.gif';
                 }
                 if (instruction.last_build) {
