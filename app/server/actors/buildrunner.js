@@ -381,6 +381,8 @@ BuildRunner.prototype.start = function(){
                     clearTimeout(self.spawn_timeout);
                     self.spawn_timeout = null;
 
+                    instruction.set('is_building', 0, function (err) {});
+
                     build.save(function(err, key, build) {
                         callback(null, build, instruction);
                     });
@@ -421,6 +423,8 @@ BuildRunner.prototype.start = function(){
         } else {
             build.stage = entity.STAGES_BY_NAME.FAILED;
         }
+
+        instruction.set('is_building', 0, function (err) {});
 
         build.save(function(){
             redis.publish("Build finished", JSON.stringify({
