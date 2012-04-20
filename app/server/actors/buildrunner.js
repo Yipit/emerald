@@ -336,8 +336,6 @@ BuildRunner.prototype.start = function(){
                         full: full,
                         appended: appended
                     });
-                    redis.publish("Build stdout", envelope);
-                    redis.publish("Build output", envelope);
                 });
             });
             callback(null, build, instruction, command, args);
@@ -356,8 +354,6 @@ BuildRunner.prototype.start = function(){
                         full: full,
                         appended: appended
                     });
-                    redis.publish("Build stderr", envelope);
-                    redis.publish("Build output", envelope);
                 });
             });
             callback(null, build, instruction, command, args);
