@@ -283,7 +283,6 @@ a, a:hover{
       .text {
         color: #EEF;
         font-family: Monaco, Monospace;
-        text-shadow: 0 0 2px #000000;
         filter: dropshadow(color=#000000, offx=1, offy=1);
       }
     }
@@ -316,7 +315,6 @@ a, a:hover{
         margin: 0;
         padding: 5px 0;
         letter-spacing: 1px;
-	text-shadow: @dark_aluminum 2px 2px 2px;
       }
     }
   }
@@ -402,13 +400,13 @@ a, a:hover{
   background-image: -o-linear-gradient(top, @dark-green, @light-green);
   background-image: linear-gradient(top, @dark-green, @light-green);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='@dark-green', endColorstr='@light-green', GradientType=0);
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
   border-color: @light-green @light-green @dark-green;
   border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
 
 
 }
 .ui-state-success .ui-icon, .ui-state-success-text .ui-icon {background-image: url(images/ui-icons_f6cf3b_256x240.png); }
+.ui-state-error, .ui-widget-content .ui-state-error, .ui-widget-header .ui-state-error { text-shadow:none; }
 
 #connection-lost-dialog {
   display: none;
